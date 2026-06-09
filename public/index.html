@@ -3,30 +3,355 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Career Tracker</title>
+    <title>Career Tracker - Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-</head>npx
+</head>
 <body>
-    <div class="container">
-        <h1>💼 Career & Job Application Tracker</h1>
-        
-        <form id="jobForm">
-            <input type="text" id="company" placeholder="Company Name" required>
-            <input type="text" id="role" placeholder="Job Role (e.g. SDE)" required>
-            <select id="status">
-                <option value="Applied">Applied</option>
-                <option value="Interviewing">Interviewing</option>
-                <option value="Offered">Offered</option>
-                <option value="Rejected">Rejected</option>
-            </select>
-            <button type="submit">Add Application</button>
-        </form>
-
-        <h2>Application Dashboard</h2>
-        <div id="jobList" class="job-list">
+    <div id="app">
+        <!-- Auth View (Shown if not logged in) -->
+        <div id="authView" class="auth-container hidden">
+            <div class="auth-card">
+                <h2>💼 Career Tracker</h2>
+                <p>Log in to access your personal dashboard</p>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" value="bhoomi@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" value="bhoomi123" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Log In</button>
+                </form>
+                <div class="auth-footer">
+                    <p>Testing credentials: <code>bhoomi@example.com</code> / <code>bhoomi123</code></p>
+                </div>
             </div>
+        </div>
+
+        <!-- Dashboard View (Shown if logged in) -->
+        <div id="dashboardView" class="dashboard-container hidden">
+            <!-- Sidebar Navigation -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h3>🚀 Career Tracker</h3>
+                    <div id="userBadge" class="user-role-badge">Student</div>
+                </div>
+                <nav class="nav-menu">
+                    <a href="#" class="nav-item active" data-tab="overview">📊 Overview</a>
+                    <a href="#" class="nav-item" data-tab="profile">👤 Profile & Education</a>
+                    <a href="#" class="nav-item" data-tab="roadmaps">🛣️ Career Roadmaps</a>
+                    <a href="#" class="nav-item" data-tab="skills">🛠️ Skills Tracker</a>
+                    <a href="#" class="nav-item" data-tab="goals">🎯 Goals Board</a>
+                    <a href="#" class="nav-item" data-tab="jobs">💼 Jobs & Internships</a>
+                    <a href="#" class="nav-item" data-tab="notifications">🔔 Alerts <span id="alertCount" class="badge">0</span></a>
+                    <a href="#" class="nav-item" data-tab="ai">🤖 AI Assistant</a>
+                </nav>
+                <div class="sidebar-footer">
+                    <span id="userName">Bhoomi Singh</span>
+                    <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                <!-- Overview Tab -->
+                <section id="tab-overview" class="tab-content">
+                    <div class="tab-header">
+                        <h2>Analytics Overview</h2>
+                        <p>Track your career readiness, goals, and learning progress.</p>
+                    </div>
+                    
+                    <!-- Analytics Cards Grid -->
+                    <div class="analytics-grid">
+                        <div class="card gradient-card">
+                            <h3>Readiness Score</h3>
+                            <div class="readiness-circle">
+                                <span id="readinessScore">0</span><small>/100</small>
+                            </div>
+                            <p>Calculated based on profile completion, intermediate/expert skills, active certs, and goals.</p>
+                        </div>
+                        <div class="card">
+                            <h3>Goal Completion</h3>
+                            <div class="stat-value" id="goalCompletionStat">0/0</div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="goalProgressBar" style="width: 0%"></div>
+                            </div>
+                            <p id="goalRateText">0% completion rate</p>
+                        </div>
+                        <div class="card">
+                            <h3>Registered Skills</h3>
+                            <div class="stat-value" id="skillsStat">0</div>
+                            <p>Average skill progress: <strong id="avgSkillProgress">0%</strong></p>
+                        </div>
+                        <div class="card">
+                            <h3>Active Certifications</h3>
+                            <div class="stat-value" id="certsStat">0</div>
+                            <p>AWS, GCP, Scrum, and professional logs.</p>
+                        </div>
+                    </div>
+
+                    <!-- Pathway Progress -->
+                    <div class="card path-overview-card mt-20">
+                        <h3>🛣️ Active Roadmap Pathway Progress</h3>
+                        <div class="path-details">
+                            <h4 id="activePathTitle">No active path enrolled</h4>
+                            <div class="progress-bar-container large">
+                                <div class="progress-bar" id="pathProgressBar" style="width: 0%"></div>
+                            </div>
+                            <p id="pathProgressText">Enroll in a roadmap to begin tracking milestones.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Profile & Education Tab -->
+                <section id="tab-profile" class="tab-content hidden">
+                    <div class="tab-header">
+                        <h2>My Profile & Education</h2>
+                        <p>Manage your biography, contact details, social links, and educational timeline.</p>
+                    </div>
+                    <div class="profile-layout">
+                        <!-- Profile Details -->
+                        <div class="card">
+                            <h3>👤 Personal Information</h3>
+                            <form id="profileForm">
+                                <div class="form-group">
+                                    <label>Biography</label>
+                                    <textarea id="profileBio" rows="3"></textarea>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Phone Number</label>
+                                        <input type="text" id="profilePhone">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Address</label>
+                                        <input type="text" id="profileAddress">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>GitHub Link</label>
+                                        <input type="text" id="profileGithub">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>LinkedIn Link</label>
+                                        <input type="text" id="profileLinkedin">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Portfolio URL</label>
+                                    <input type="text" id="profilePortfolio">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Profile Info</button>
+                            </form>
+                        </div>
+
+                        <!-- Education Logs -->
+                        <div class="card">
+                            <h3>🎓 Education Details</h3>
+                            <form id="educationForm" class="inline-form">
+                                <input type="text" id="eduInst" placeholder="Institution" required>
+                                <input type="text" id="eduDegree" placeholder="Degree" required>
+                                <input type="text" id="eduField" placeholder="Field of Study">
+                                <input type="date" id="eduStart" required>
+                                <input type="number" id="eduPct" placeholder="Percentage" min="0" max="100" step="0.1">
+                                <button type="submit" class="btn btn-success">Add</button>
+                            </form>
+                            <div id="educationList" class="timeline mt-20">
+                                <!-- Education records load here -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Career Roadmaps Tab -->
+                <section id="tab-roadmaps" class="tab-content hidden">
+                    <div class="tab-header">
+                        <h2>Career Roadmaps</h2>
+                        <p>Explore structured developer roadmaps, enroll, and complete milestones.</p>
+                    </div>
+                    
+                    <div class="roadmap-layout">
+                        <!-- Available Paths -->
+                        <div class="card">
+                            <h3>🛣️ Available Career Paths</h3>
+                            <div id="pathsList" class="paths-list">
+                                <!-- Paths load here -->
+                            </div>
+                        </div>
+
+                        <!-- Pathway Detail & Milestones Progress -->
+                        <div class="card">
+                            <h3>🎯 Active Pathway Milestones</h3>
+                            <div id="activePathDetail">
+                                <p class="text-muted">Select or enroll in a career path to track milestones.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Skills Tracker Tab -->
+                <section id="tab-skills" class="tab-content hidden">
+                    <div class="tab-header">
+                        <h2>Skills Management</h2>
+                        <p>Track your technical capability, proficiency levels, and categories.</p>
+                    </div>
+                    <div class="card">
+                        <h3>🛠️ Add New Skill</h3>
+                        <form id="skillForm" class="horizontal-form">
+                            <input type="text" id="skillName" placeholder="Skill (e.g. Docker, TypeScript)" required>
+                            <select id="skillProf">
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Expert">Expert</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary">Add Skill</button>
+                        </form>
+                    </div>
+                    <div class="card mt-20">
+                        <h3>📋 Skills Inventory</h3>
+                        <div id="skillsContainer" class="skills-grid">
+                            <!-- Skills load here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Goals Board Tab -->
+                <section id="tab-goals" class="tab-content hidden">
+                    <div class="tab-header">
+                        <h2>Goals Board</h2>
+                        <p>Manage your short-term sprint deadlines and long-term milestones.</p>
+                    </div>
+                    <div class="goals-layout">
+                        <!-- Add Goal -->
+                        <div class="card">
+                            <h3>🎯 Set New Goal</h3>
+                            <form id="goalForm">
+                                <div class="form-group">
+                                    <label>Goal Title</label>
+                                    <input type="text" id="goalTitle" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Target Date</label>
+                                    <input type="date" id="goalDate" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Add Goal</button>
+                            </form>
+                        </div>
+
+                        <!-- Goals List -->
+                        <div class="card">
+                            <h3>📋 Active Goals</h3>
+                            <div class="filters">
+                                <button class="btn btn-sm btn-outline active" data-goal-filter="all">All</button>
+                                <button class="btn btn-sm btn-outline" data-goal-filter="Short-term">Short-term</button>
+                                <button class="btn btn-sm btn-outline" data-goal-filter="Long-term">Long-term</button>
+                            </div>
+                            <div id="goalsList" class="goals-list mt-20">
+                                <!-- Goals load here -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Jobs & Internships Tab -->
+                <section id="tab-jobs" class="tab-content hidden">
+                    <div class="tab-header">
+                        <h2>Jobs & Internships Tracker</h2>
+                        <p>Apply to job listings, track manual internship logs, and manage scheduled interview rounds.</p>
+                    </div>
+                    <div class="jobs-layout">
+                        <!-- Job Board -->
+                        <div class="card">
+                            <h3>💼 Available Job Listings</h3>
+                            <div id="jobsList" class="jobs-list-container">
+                                <!-- Jobs load here -->
+                            </div>
+                        </div>
+
+                        <!-- Internship Tracker & Interviews -->
+                        <div class="card">
+                            <h3>📝 Internship Application Log</h3>
+                            <form id="internshipForm" class="inline-form">
+                                <input type="text" id="internCompany" placeholder="Company" required>
+                                <input type="text" id="internRole" placeholder="Role" required>
+                                <input type="number" id="internStipend" placeholder="Stipend">
+                                <button type="submit" class="btn btn-primary">Track</button>
+                            </form>
+                            <div id="internshipsList" class="internships-list mt-20">
+                                <!-- Internships load here -->
+                            </div>
+
+                            <h3 class="mt-20">📅 Scheduled Interviews</h3>
+                            <div id="interviewsList" class="interviews-list">
+                                <!-- Interviews load here -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Alerts & Notifications Tab -->
+                <section id="tab-notifications" class="tab-content hidden">
+                    <div class="tab-header">
+                        <h2>Alerts & Notifications</h2>
+                        <p>Receive notifications about upcoming interviews, certification expirations, and goal deadlines.</p>
+                    </div>
+                    <div class="card">
+                        <div class="flex-row-between">
+                            <h3>🔔 Active Alert Feeds</h3>
+                            <button id="scanAlertsBtn" class="btn btn-warning">🔄 Scan For Warnings</button>
+                        </div>
+                        <div id="notificationsList" class="notifications-list mt-20">
+                            <!-- Notifications load here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- AI Assistant Tab -->
+                <section id="tab-ai" class="tab-content hidden">
+                    <div class="tab-header">
+                        <h2>🤖 AI Career Assistant</h2>
+                        <p>Analyze resume metrics, find skill gaps, and get personalized career paths.</p>
+                    </div>
+                    <div class="ai-layout">
+                        <!-- Resume Analysis -->
+                        <div class="card">
+                            <h3>📄 AI Resume Analysis</h3>
+                            <div class="form-group">
+                                <label>Upload/Select Resume</label>
+                                <select id="aiResumeSelect" class="form-control">
+                                    <option value="">Select a registered resume...</option>
+                                    <!-- Options populated dynamically -->
+                                </select>
+                            </div>
+                            <button id="analyzeResumeBtn" class="btn btn-primary mt-10">Run Analysis</button>
+                            <div id="resumeAnalysisResult" class="analysis-result mt-20">
+                                <!-- Results load here -->
+                            </div>
+                        </div>
+
+                        <!-- Career & Learning Recommendations -->
+                        <div class="card">
+                            <h3>💡 AI Recommendations</h3>
+                            <div class="button-group">
+                                <button id="aiCareerRecBtn" class="btn btn-success">Get Career Recommendations</button>
+                                <button id="aiLearningBtn" class="btn btn-info">Get Learning Bridge Path</button>
+                            </div>
+                            <div id="aiRecResult" class="rec-result mt-20">
+                                <!-- Recommendations load here -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
     </div>
 
+    <!-- Script -->
     <script src="script.js"></script>
 </body>
 </html>

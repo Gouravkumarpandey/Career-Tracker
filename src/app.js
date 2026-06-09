@@ -92,11 +92,18 @@ app.post('/api/auth/login', async (req, res) => {
       user: {
         id: result.user.id,
         name: result.user.name,
-        email: result.user.email
+        email: result.user.email,
+        role: result.user.role
       },
       data: {
         accessToken: result.accessToken,
-        refreshToken: result.refreshToken
+        refreshToken: result.refreshToken,
+        user: {
+          id: result.user.id,
+          name: result.user.name,
+          email: result.user.email,
+          role: result.user.role
+        }
       }
     });
 
@@ -111,6 +118,9 @@ app.post('/api/auth/login', async (req, res) => {
 
 const routes = require('./routes');
 const errorMiddleware = require('./middlewares/error.middleware');
+
+// Serve static files from public folder
+app.use(express.static('public'));
 
 // Mount modular routes
 app.use('/api', routes);
