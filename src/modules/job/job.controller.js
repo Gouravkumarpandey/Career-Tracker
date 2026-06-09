@@ -1,0 +1,134 @@
+const jobService = require('./job.service');
+const ApiResponse = require('../../utils/ApiResponse');
+
+const getJobs = async (req, res, next) => {
+  try {
+    const result = await jobService.getJobs(req.query);
+    res.status(200).json(new ApiResponse(200, result, 'Job listings retrieved successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getJobById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await jobService.getJobById(parseInt(id));
+    res.status(200).json(new ApiResponse(200, result, 'Job details retrieved successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const createJob = async (req, res, next) => {
+  try {
+    const result = await jobService.createJob(req.body);
+    res.status(201).json(new ApiResponse(201, result, 'Job listing created successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const saveJob = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await jobService.saveJob(req.user.id, parseInt(id));
+    res.status(200).json(new ApiResponse(200, result, result.message));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getSavedJobs = async (req, res, next) => {
+  try {
+    const result = await jobService.getSavedJobs(req.user.id);
+    res.status(200).json(new ApiResponse(200, result, 'Saved jobs retrieved successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const applyToJob = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await jobService.applyToJob(req.user.id, parseInt(id), req.body);
+    res.status(201).json(new ApiResponse(201, result, 'Job application submitted successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getApplications = async (req, res, next) => {
+  try {
+    const result = await jobService.getApplications(req.user.id);
+    res.status(200).json(new ApiResponse(200, result, 'Job applications retrieved successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getApplicationById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await jobService.getApplicationById(req.user.id, parseInt(id));
+    res.status(200).json(new ApiResponse(200, result, 'Application details retrieved successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateApplicationStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const result = await jobService.updateApplicationStatus(req.user.id, parseInt(id), status);
+    res.status(200).json(new ApiResponse(200, result, 'Application status updated successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const scheduleInterview = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await jobService.scheduleInterview(req.user.id, parseInt(id), req.body);
+    res.status(201).json(new ApiResponse(201, result, 'Interview scheduled successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateInterview = async (req, res, next) => {
+  try {
+    const { interviewId } = req.params;
+    const result = await jobService.updateInterview(req.user.id, parseInt(interviewId), req.body);
+    res.status(200).json(new ApiResponse(200, result, 'Interview details updated successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteInterview = async (req, res, next) => {
+  try {
+    const { interviewId } = req.params;
+    const result = await jobService.deleteInterview(req.user.id, parseInt(interviewId));
+    res.status(200).json(new ApiResponse(200, result, 'Interview round cancelled successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  getJobs,
+  getJobById,
+  createJob,
+  saveJob,
+  getSavedJobs,
+  applyToJob,
+  getApplications,
+  getApplicationById,
+  updateApplicationStatus,
+  scheduleInterview,
+  updateInterview,
+  deleteInterview
+};

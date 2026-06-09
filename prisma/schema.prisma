@@ -1,0 +1,760 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                    Int                     @id @default(autoincrement())
+  name                  String
+  email                 String                  @unique
+  password              String
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  careers               Career[]
+  skills                Skill[]
+  education             Education[]
+  application           JobApplication[]
+  profile               Profile?
+  projects              Project[]
+  certifications        Certification[]
+  experiences           Experience[]
+  assessments           Assessment[]
+  aiRecommendations     AIRecommendation[]
+  goals                 Goal[]
+  savedJobs             SavedJob[]
+  jobAlerts             JobAlert[]
+  sessions              Session[]
+  posts                 Post[]
+  comments              Comment[]
+  notifications         Notification[]
+  searchHistories       SearchHistory[]
+  eventLogs             EventLog[]
+  internship            InternshipEcosystem?
+  portfolioTheme        PortfolioTheme?
+  endorsementsGiven     SkillEndorsement[]      @relation("UserEndorseur")
+  contestRegistrations  ContestRegistration[]
+  webinarRegistrations  WebinarRegistration[]
+  peerGroupMemberships  PeerGroupMember[]
+  gigProposals          GigProposal[]
+  feedbacksSubmitted    UserFeedbackSystem[]
+  referralPayouts       ReferralBonusPayout[]
+  ownedProfileViews     ProfileVisitorLog[]     @relation("ProfileOwner")
+  profileVisitsDone     ProfileVisitorLog[]     @relation("ProfileVisitor")
+  placementDrives       PlacementRegistration[]
+  expensesLogged        StudentExpenseTracker[]
+  grammarChecks         AiGrammarCorrection[]
+  sharedExperiences     InterviewExperience[]
+  collaborations        ProjectCollaborator[]
+  resumes               Resume[]
+
+  @@map("users")
+}
+
+model Career {
+  id          Int      @id @default(autoincrement())
+  company     String   
+  role        String   
+  status      String   @default("Applied") 
+  salary      String?  
+  location    String?  
+  notes       String?  
+  dateApplied DateTime @default(now()) 
+  
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills      Skill[]  
+
+  @@map("careers")
+}
+
+model Skill {
+  id          Int                @id @default(autoincrement())
+  name        String
+  proficiency String?  
+
+  userId      Int
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  careers     Career[] 
+  createdAt   DateTime           @default(now())
+  endorsements SkillEndorsement[]
+
+  @@map("skills")
+}
+
+model Job {
+  id           Int              @id @default(autoincrement())
+  title        String
+  company      String
+  location     String
+  description  String
+  salary       String?       
+  jobType      String        
+  requirements String?       
+  link         String?       
+  
+  applications JobApplication[]
+  savedByUsers SavedJob[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@map("jobs")
+}
+
+model JobApplication {
+  id              Int       @id @default(autoincrement())
+  status          String    @default("Applied") 
+  appliedAt       DateTime  @default(now())
+  notes           String?   
+  
+  userId          Int
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId           Int
+  job             Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  interviews      Interview[]
+
+  @@map("job_applications")
+}
+
+model Education {
+  id           Int       @id @default(autoincrement())
+  institution  String    
+  degree       String    
+  fieldOfStudy String?   
+  startDate    DateTime
+  endDate      DateTime? 
+  percentage   Float?    
+  
+  userId       Int
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("education")
+}
+
+model Profile {
+  id             Int      @id @default(autoincrement())
+  bio            String?
+  avatarUrl      String?  
+  githubUrl      String?
+  linkedinUrl    String?
+  portfolioUrl   String?
+  resumeFileUrl  String?  
+  phoneNumber    String?
+  currentAddress String?
+  
+  userId         Int      @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Project {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String
+  techStack   String    
+  liveLink    String?
+  githubLink  String?
+  startDate   DateTime?
+  endDate     DateTime?
+  
+  userId      Int
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collaborations  ProjectCollaborator[]
+
+  @@map("projects")
+}
+
+model Certification {
+  id             Int       @id @default(autoincrement())
+  name           String    
+  issuingOrg     String    
+  issueDate      DateTime
+  expiryDate     DateTime?
+  credentialId   String?
+  credentialUrl  String?
+  
+  userId         Int
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("certifications")
+}
+
+model Experience {
+  id           Int       @id @default(autoincrement())
+  company      String
+  role         String    
+  location     String?
+  jobType      String    
+  startDate    DateTime
+  endDate      DateTime? 
+  description  String?   
+  
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("experiences")
+}
+
+model Assessment {
+  id          Int      @id @default(autoincrement())
+  title       String   
+  category    String   
+  score       Float    
+  totalMarks  Float
+  passed      Boolean
+  takenAt     DateTime @default(now())
+  
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("assessments")
+}
+
+model AIRecommendation {
+  id              Int      @id @default(autoincrement())
+  suggestedCareer String   
+  reasoning       String   
+  confidenceScore Float    
+  generatedAt     DateTime @default(now())
+  
+  userId          Int
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ai_recommendations")
+}
+
+model Goal {
+  id          Int       @id @default(autoincrement())
+  title       String    
+  description String?
+  targetDate  DateTime
+  status      String    
+  
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("goals")
+}
+
+model Company {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  website     String?
+  logoUrl     String?
+  industry    String?  
+  description String?
+
+  @@map("companies")
+}
+
+model SavedJob {
+  id        Int      @id @default(autoincrement())
+  savedAt   DateTime @default(now())
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId     Int
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@map("saved_jobs")
+}
+
+model JobAlert {
+  id        Int      @id @default(autoincrement())
+  keyword   String   
+  frequency String   
+  isActive  Boolean  @default(true)
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("job_alerts")
+}
+
+model Interview {
+  id            Int      @id @default(autoincrement())
+  roundName     String   
+  interviewDate DateTime
+  locationLink  String?  
+  interviewer   String?  
+  
+  applicationId Int
+  application   JobApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("interviews")
+}
+
+model Resource {
+  id          Int      @id @default(autoincrement())
+  title       String   
+  type        String   
+  url         String
+  category    String   
+  isPremium   Boolean  @default(false)
+
+  @@map("resources")
+}
+
+model Mentor {
+  id          Int      @id @default(autoincrement())
+  name        String
+  expertise   String   
+  company     String?
+  linkedin    String?
+  availablity String?  
+  
+  sessions    Session[]
+
+  @@map("mentors")
+}
+
+model Session {
+  id          Int      @id @default(autoincrement())
+  bookingDate DateTime
+  status      String   
+  
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mentorId    Int
+  mentor      Mentor   @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+
+  @@map("posts")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  message   String   
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model SearchHistory {
+  id         Int      @id @default(autoincrement())
+  query      String   
+  searchedAt DateTime @default(now())
+  
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("search_histories")
+}
+
+model EventLog {
+  id        Int      @id @default(autoincrement())
+  action    String   
+  timestamp DateTime @default(now())
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("event_logs")
+}
+
+model AppConfig {
+  id         Int    @id @default(autoincrement())
+  key        String @unique 
+  value      String        
+
+  @@map("app_configs")
+}
+
+model InternshipEcosystem {
+  id              Int       @id @default(autoincrement())
+  stipendAmount   Float?
+  durationMonths  Int
+  projectDomain   String
+  mentorAssigned  String?
+  onboardingStatus String   @default("PENDING")
+  completionCertificate String?
+
+  userId          Int       @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("internship_ecosystems")
+}
+
+model PortfolioTheme {
+  id              Int       @id @default(autoincrement())
+  themeName       String    @default("dark_mode")
+  customCss       String?
+  fontStyle       String    @default("Inter")
+  isPremiumTheme  Boolean   @default(false)
+
+  userId          Int       @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("portfolio_themes")
+}
+
+model InterviewCheatSheet {
+  id              Int       @id @default(autoincrement())
+  topicName       String
+  importantNotes  String
+  frequentQuestions String
+  difficultyLevel String
+
+  @@map("interview_cheatsheets")
+}
+
+model SkillEndorsement {
+  id              Int       @id @default(autoincrement())
+  endorsedAt      DateTime  @default(now())
+
+  skillId         Int
+  skill           Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  endorserId      Int
+  endorser        User      @relation("UserEndorseur", fields: [endorserId], references: [id], onDelete: Cascade)
+
+  @@map("skill_endorsements")
+}
+
+model Resume {
+  id              Int       @id @default(autoincrement())
+  title           String
+  createdAt       DateTime  @default(now())
+  userId          Int
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  metricsAnalysis ResumeMetricsAnalysis?
+
+  @@map("resumes")
+}
+
+model ResumeMetricsAnalysis {
+  id              Int       @id @default(autoincrement())
+  grammarScore    Float
+  actionVerbsCount Int
+  quantifiableMetricsCount Int
+  readabilityIndex Float
+
+  resumeId        Int       @unique
+  resume          Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@map("resume_metrics_analyses")
+}
+
+model CodingContest {
+  id              Int       @id @default(autoincrement())
+  title           String
+  startTime       DateTime
+  endTime         DateTime
+  prizePool       String?
+
+  registrations   ContestRegistration[]
+
+  @@map("coding_contests")
+}
+
+model ContestRegistration {
+  id              Int       @id @default(autoincrement())
+  registeredAt    DateTime  @default(now())
+  globalRank      Int?
+  totalScore      Float     @default(0.0)
+
+  contestId       Int
+  contest         CodingContest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  userId          Int
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("contest_registrations")
+}
+
+model ExpertWebinar {
+  id              Int       @id @default(autoincrement())
+  topic           String
+  speakerName     String
+  speakerCompany  String?
+  scheduledAt     DateTime
+  meetingLink     String
+
+  registrations   WebinarRegistration[]
+
+  @@map("expert_webinars")
+}
+
+model WebinarRegistration {
+  id              Int       @id @default(autoincrement())
+  attended        Boolean   @default(false)
+
+  webinarId       Int
+  webinar         ExpertWebinar @relation(fields: [webinarId], references: [id], onDelete: Cascade)
+  userId          Int
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("webinar_registrations")
+}
+
+model AffiliateBook {
+  id              Int       @id @default(autoincrement())
+  title           String
+  author          String
+  purchaseLink    String
+  coverImageUrl   String?
+  category        String
+
+  @@map("affiliate_books")
+}
+
+model PeerReviewGroup {
+  id              Int       @id @default(autoincrement())
+  groupName       String
+  domainFocus     String
+  createdAt       DateTime  @default(now())
+
+  members         PeerGroupMember[]
+
+  @@map("peer_review_groups")
+}
+
+model PeerGroupMember {
+  id              Int       @id @default(autoincrement())
+  roleInGroup     String    @default("MEMBER")
+
+  groupId         Int
+  group           PeerReviewGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId          Int
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("peer_group_members")
+}
+
+model FreelanceGig {
+  id              Int       @id @default(autoincrement())
+  title           String
+  budgetAmount    Float
+  deadlineDays    Int
+  skillsRequired  String
+
+  proposals       GigProposal[]
+
+  @@map("freelance_gigs")
+}
+
+model GigProposal {
+  id              Int       @id @default(autoincrement())
+  proposalText    String
+  bidAmount       Float
+  status          String    @default("PENDING")
+
+  gigId           Int
+  gig             FreelanceGig @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  userId          Int
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("gig_proposals")
+}
+
+model ScholarshipTracker {
+  id              Int       @id @default(autoincrement())
+  name            String
+  provider        String
+  amountOffered   Float
+  deadlineDate    DateTime
+  applicationLink String
+
+  @@map("scholarship_trackers")
+}
+
+model ExternalCourseCoupon {
+  id              Int       @id @default(autoincrement())
+  platformName    String    
+  courseTitle     String
+  couponCode      String
+  discountPct     Float
+  expiryDate      DateTime
+
+  @@map("external_course_coupons")
+}
+
+model UserFeedbackSystem {
+  id              Int       @id @default(autoincrement())
+  ratingStars     Int
+  feedbackText    String
+  category        String    
+  submittedAt     DateTime  @default(now())
+
+  userId          Int
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_feedbacks")
+}
+
+model ReferralBonusPayout {
+  id              Int       @id @default(autoincrement())
+  payoutAmount    Float     @default(0.0)
+  payoutStatus    String    @default("PENDING")
+  processedAt     DateTime?
+
+  userId          Int
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("referral_bonus_payouts")
+}
+
+model ProfileVisitorLog {
+  id              Int       @id @default(autoincrement())
+  visitedAt       DateTime  @default(now())
+
+  profileOwnerId  Int
+  profileOwner    User      @relation("ProfileOwner", fields: [profileOwnerId], references: [id], onDelete: Cascade)
+  visitorId       Int
+  visitor         User      @relation("ProfileVisitor", fields: [visitorId], references: [id], onDelete: Cascade)
+
+  @@map("profile_visitor_logs")
+}
+
+model CollegePlacementDrive {
+  id              Int       @id @default(autoincrement())
+  companyName     String
+  driveDate       DateTime
+  eligibilityCgpa Float     @default(0.0)
+  jobRoleOffer    String
+
+  registrations   PlacementRegistration[]
+
+  @@map("college_placement_drives")
+}
+
+model PlacementRegistration {
+  id              Int       @id @default(autoincrement())
+  isShortlisted   Boolean   @default(false)
+
+  driveId         Int
+  drive           CollegePlacementDrive @relation(fields: [driveId], references: [id], onDelete: Cascade)
+  userId          Int
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("placement_registrations")
+}
+
+model FlashcardDeck {
+  id              Int       @id @default(autoincrement())
+  deckName        String
+  subjectCategory String
+
+  flashcards      FlashcardItem[]
+
+  @@map("flashcard_decks")
+}
+
+model FlashcardItem {
+  id              Int       @id @default(autoincrement())
+  questionText    String
+  answerText      String
+
+  deckId          Int
+  deck            FlashcardDeck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+
+  @@map("flashcard_items")
+}
+
+model StudentExpenseTracker {
+  id              Int       @id @default(autoincrement())
+  expenseTitle    String
+  amountSpent     Float
+  category        String
+  expenseDate     DateTime  @default(now())
+
+  userId          Int
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("student_expense_trackers")
+}
+
+model AiGrammarCorrection {
+  id              Int       @id @default(autoincrement())
+  originalText    String
+  correctedText   String
+  suggestionsJson String?
+
+  userId          Int
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ai_grammar_corrections")
+}
+
+model CareerRoadmapNode {
+  id              Int       @id @default(autoincrement())
+  nodeTitle       String
+  nodeDescription String
+  estimatedDays   Int
+
+  @@map("career_roadmap_nodes")
+}
+
+model InterviewExperience {
+  id              Int       @id @default(autoincrement())
+  companyName     String
+  roleApplied     String
+  experienceShare String
+  verdictStatus   String
+
+  userId          Int
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("interview_experiences")
+}
+
+model ProjectCollaborator {
+  id              Int       @id @default(autoincrement())
+  isApproved      Boolean   @default(false)
+
+  projectId       Int
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId          Int
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("project_collaborators")
+}
+
+model NewsletterSubscriber {
+  id              Int       @id @default(autoincrement())
+  emailAddress    String    @unique
+  subscribedAt    DateTime  @default(now())
+
+  @@map("newsletter_subscribers")
+}
+
+model BlockedIpLog {
+  id              Int       @id @default(autoincrement())
+  ipAddress       String    @unique
+  blockedReason   String
+  blockedAt       DateTime  @default(now())
+
+  @@map("blocked_ip_logs")
+}
