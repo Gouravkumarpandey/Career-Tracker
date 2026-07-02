@@ -14,7 +14,7 @@ async function startServer() {
       console.log(`🚀 Server running in ${env.NODE_ENV} mode at http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error('❌ Failed to connect to database & start server:', error);
+    console.error('❌ Failed to start server:', error);
     process.exit(1);
   }
 }
