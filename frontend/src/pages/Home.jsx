@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Footer from '../components/Footer';
 import { 
   FaCheck, 
   FaRegTimesCircle, 
@@ -410,6 +411,7 @@ const Home = () => {
       <button className="scroll-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
         ↑
       </button>
+      <Footer />
     </div>
   );
 };

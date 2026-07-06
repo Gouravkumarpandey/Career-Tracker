@@ -1092,3 +1092,452 @@ button {
   background-color: white;
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
 }
+
+/* ============================================================
+   PORTAL PAGE  (Login / Sign Up redesign)
+   ============================================================ */
+.portal-page {
+  height: 100vh;
+  background-color: #edf3fc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 16px;
+}
+
+/* Back to home button */
+.portal-back-btn {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  background: #ffffff;
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+  transition: color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  text-decoration: none;
+}
+.portal-back-btn:hover {
+  color: #3b7ef6;
+  border-color: #3b7ef6;
+  box-shadow: 0 2px 12px rgba(59,126,246,0.15);
+}
+
+
+/* Decorative blobs */
+.blob-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.blob {
+
+  position: absolute;
+  border-radius: 50%;
+  background-color: #3b7ef6;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.blob-top-right {
+  width: 240px;
+  height: 240px;
+  top: -60px;
+  right: -60px;
+}
+.blob-bottom-left {
+  width: 220px;
+  height: 220px;
+  bottom: -60px;
+  left: -60px;
+}
+
+/* Wrapper */
+.portal-wrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 480px;
+}
+
+/* Logo */
+.portal-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.portal-logo-icon {
+  width: 36px;
+  height: 36px;
+  background-color: #3b7ef6;
+  color: white;
+  font-size: 18px;
+  font-weight: 800;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.portal-logo-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+/* Title */
+.portal-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a2e;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* Card */
+.portal-card {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 28px 24px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+}
+
+/* Tabs */
+.portal-tabs {
+  display: flex;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 16px;
+}
+.portal-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+}
+.portal-tab.active {
+  color: #3b7ef6;
+}
+.portal-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #3b7ef6;
+  border-radius: 2px 2px 0 0;
+}
+.portal-tab:hover:not(.active) {
+  color: #475569;
+}
+
+/* Social buttons */
+.portal-socials {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.portal-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a2e;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+.portal-social-btn:hover {
+  background: #f8fafc;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Divider */
+.portal-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.portal-divider::before,
+.portal-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+.portal-divider span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+}
+
+/* Form */
+.portal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.portal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.portal-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+.portal-field label .required {
+  color: #e53e3e;
+  margin-left: 2px;
+}
+.portal-field input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  color: #1a1a2e;
+  background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+}
+.portal-field input::placeholder {
+  color: #b0bec5;
+}
+.portal-field input:focus {
+  border-color: #3b7ef6;
+  box-shadow: 0 0 0 3px rgba(59, 126, 246, 0.12);
+}
+
+/* Password input wrapper */
+.portal-input-wrapper {
+  position: relative;
+}
+.portal-input-wrapper input {
+  padding-right: 40px;
+}
+.portal-eye-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  transition: color 0.2s;
+}
+.portal-eye-btn:hover {
+  color: #475569;
+}
+
+/* Forgot password */
+.portal-forgot {
+  margin-top: 4px;
+}
+.portal-forgot a {
+  font-size: 13px;
+  color: #3b7ef6;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+.portal-forgot a:hover {
+  opacity: 0.75;
+}
+
+/* Submit button */
+.portal-submit-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #3b7ef6;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.01em;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  margin-top: 2px;
+}
+.portal-submit-btn:hover {
+  background-color: #2b6de0;
+}
+.portal-submit-btn:active {
+  transform: scale(0.99);
+}
+
+/* Terms checkbox */
+.portal-terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  margin-top: 0;
+}
+.portal-terms input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  accent-color: #3b7ef6;
+  cursor: pointer;
+}
+.portal-terms span {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.5;
+}
+.portal-terms span a {
+  color: #3b7ef6;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.portal-terms span a:hover {
+  opacity: 0.75;
+}
+
+/* Switch page link (e.g. "Already have an account?") */
+.portal-switch-text {
+  text-align: center;
+  font-size: 12px;
+  color: #475569;
+  margin-top: 2px;
+}
+.portal-switch-text a {
+  color: #3b7ef6;
+  font-weight: 600;
+}
+.portal-switch-text a:hover {
+  opacity: 0.75;
+}
+
+/* ==========================================
+   Responsive Design (Mobile & Tablet)
+   ========================================== */
+
+@media (max-width: 992px) {
+  /* Tablet / Smaller Desktop */
+  .hero h1 {
+    font-size: 3.5rem;
+  }
+  .hero-checklist {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Mobile */
+  .container {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  
+  /* Navbar */
+  .navbar .container {
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+  }
+  .nav-links {
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Home Page */
+  .hero {
+    padding: 60px 0;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+  .hero-checklist {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  /* Portal Pages (Login/Signup) */
+  .portal-page {
+    padding: 12px;
+    height: auto;
+    min-height: 100vh;
+  }
+  .portal-wrapper {
+    max-width: 100%;
+    margin-top: 60px; /* Leave space for back button */
+  }
+  .portal-card {
+    padding: 24px 16px;
+  }
+  .portal-title {
+    font-size: 1.5rem;
+  }
+  .portal-back-btn {
+    top: 10px;
+    left: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Small Mobile */
+  .hero h1 {
+    font-size: 2rem;
+  }
+  .hero-cta {
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-cta .btn {
+    width: 100%;
+    text-align: center;
+  }
+  .portal-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+}
