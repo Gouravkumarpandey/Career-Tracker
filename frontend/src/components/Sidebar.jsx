@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { 
   FiHome, FiUser, FiBookOpen, FiCpu, 
   FiBriefcase, FiAward, FiTarget, FiCalendar, 
-  FiActivity, FiPieChart, FiBell, FiSettings 
+  FiFileText, FiPieChart, FiBell, FiSettings 
 } from 'react-icons/fi';
 import './Sidebar.css';
 
@@ -76,11 +76,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         </div>
 
         <div className="sidebar-section">
-          <div className="sidebar-title">Insights</div>
+          <div className="sidebar-title">Insights & Creation</div>
           <nav className="sidebar-nav">
-            <NavLink to="/dashboard/gamification" className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}>
-              <span className="sidebar-icon"><FiActivity /></span>
-              Gamification
+            <NavLink to="/dashboard/resume-builder" className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}>
+              <span className="sidebar-icon"><FiFileText /></span>
+              Resume Builder
             </NavLink>
             <NavLink to="/dashboard/analytics" className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}>
               <span className="sidebar-icon"><FiPieChart /></span>

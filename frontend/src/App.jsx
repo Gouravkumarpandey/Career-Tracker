@@ -12,6 +12,7 @@ import Settings from './pages/Settings';
 import AIFeatures from './pages/AIFeatures';
 import Planner from './pages/Planner';
 import Certifications from './pages/Certifications';
+import ResumeBuilder from './pages/ResumeBuilder';
 
 function App() {
   return (
@@ -33,7 +34,7 @@ function App() {
         <Route path="ai" element={<AIFeatures />} />
         <Route path="goals" element={<PlaceholderPage title="Goal Management" description="Set and track your daily to long-term goals." />} />
         <Route path="planner" element={<Planner />} />
-        <Route path="gamification" element={<PlaceholderPage title="Gamification" description="View your XP, levels, and achievements." />} />
+        <Route path="resume-builder" element={<ResumeBuilder />} />
         <Route path="analytics" element={<PlaceholderPage title="Analytics" description="Visualize your career data and learning statistics." />} />
         <Route path="notifications" element={<PlaceholderPage title="Notifications" description="Manage your alerts and reminders." />} />
         <Route path="settings" element={<Settings />} />

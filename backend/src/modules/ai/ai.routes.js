@@ -14,6 +14,7 @@ router.use(auth); // Protect all routes below this middleware
 router.post('/resume/analyze', aiController.analyzeResume);
 router.post('/resume/analyze-text', aiController.analyzeResumeText);
 router.post('/resume/upload-analyze', upload.single('resume'), aiController.uploadAnalyzeResume);
+router.post('/resume/generate', aiController.generateResume);
 router.get('/skill-gap', aiController.getSkillGap);
 router.get('/recommendations/career', aiController.getCareerRecommendations);
 router.get('/recommendations/learning', aiController.getLearningRecommendations);

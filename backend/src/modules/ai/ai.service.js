@@ -93,6 +93,29 @@ const analyzeResumeTextDirect = async (userId, resumeText) => {
   }
 };
 
+const generateResume = async (userId, data) => {
+  const { targetRole, experience, skills, education } = data;
+  const systemPrompt = `You are an expert resume writer and ATS optimizer.
+Your task is to generate a highly professional, ATS-friendly resume in Markdown format based on the user's provided details.
+Do NOT use tables, columns, or complex formatting. Use standard headings (e.g., # Experience, ## Job Title, etc.) and bullet points.
+Include the following sections if information is provided: Professional Summary, Core Competencies (Skills), Professional Experience, and Education.
+Write compelling, action-oriented bullet points that highlight impact and results. If metrics are missing, use placeholders like [Metric] or [Percentage].
+Return ONLY the raw Markdown text of the resume. Do not include any conversational filler.`;
+
+  const userPrompt = `Generate an ATS-friendly resume for the target role: ${targetRole}
+
+Experience:
+${experience}
+
+Skills:
+${skills}
+
+Education:
+${education}`;
+
+  return await _callGrokAPI(systemPrompt, userPrompt);
+};
+
 const getSkillGapAnalysis = async (userId, targetType, targetId) => {
   const userSkills = await prisma.skill.findMany({
     where: { userId },

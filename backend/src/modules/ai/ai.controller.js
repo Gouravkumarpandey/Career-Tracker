@@ -56,6 +56,19 @@ const uploadAnalyzeResume = async (req, res, next) => {
   }
 };
 
+const generateResume = async (req, res, next) => {
+  try {
+    const { targetRole, experience, skills, education } = req.body;
+    if (!targetRole || !experience) {
+      return res.status(400).json({ success: false, message: 'Target role and experience are required.' });
+    }
+    const result = await aiService.generateResume(req.user.id, { targetRole, experience, skills, education });
+    res.status(200).json(new ApiResponse(200, { resumeText: result }, 'Resume generated successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getSkillGap = async (req, res, next) => {
   try {
     const { targetType, targetId } = req.query;
@@ -104,6 +117,7 @@ module.exports = {
   analyzeResume,
   analyzeResumeText,
   uploadAnalyzeResume,
+  generateResume,
   getSkillGap,
   getCareerRecommendations,
   getLearningRecommendations,
