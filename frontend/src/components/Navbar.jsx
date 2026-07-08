@@ -29,7 +29,7 @@ const Navbar = () => {
             <Link to="/" onClick={() => setIsOpen(false)}>Human Data <FaExternalLinkAlt size={10} /></Link>
           </div>
           <div className="nav-actions">
-            <Link to="/login" className="btn btn-outline" onClick={() => setIsOpen(false)}>LOG IN</Link>
+            <Link to="/login" className="btn btn-primary" onClick={() => setIsOpen(false)}>LOG IN</Link>
             <Link to="/signup" className="btn btn-primary" onClick={() => setIsOpen(false)}>SIGN UP</Link>
           </div>
         </div>

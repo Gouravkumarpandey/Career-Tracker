@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 import { 
@@ -15,79 +15,89 @@ import {
 } from 'react-icons/fa';
 
 const Home = () => {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('reveal-visible');
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-stagger').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div>
-      <section className="hero">
-        <div className="container">
-          <span className="hero-subtitle">Trusted by over 1.2 million job seekers!</span>
-          <h1>
-            Land your <span className="highlight">dream job.</span><br/>
-            Without the stress.
-          </h1>
+      <section className="hero" style={{ background: '#f8fafc', padding: '30px 0 100px', minHeight: 'auto' }}>
+        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '60px', textAlign: 'left', maxWidth: '1280px' }}>
           
-          <div className="hero-checklist">
-            <div className="check-item">
-              <span className="check-icon"><FaCheck size={12} /></span>
-              AI Resume Builder
-            </div>
-            <div className="check-item">
-              <span className="check-icon"><FaCheck size={12} /></span>
-              Automated Job Tracking
-            </div>
-            <div className="check-item">
-              <span className="check-icon"><FaCheck size={12} /></span>
-              Optimize your LinkedIn Profile
-            </div>
-            <div className="check-item">
-              <span className="check-icon"><FaCheck size={12} /></span>
-              And Much More...
-            </div>
-          </div>
-
-          <div className="hero-cta">
-            <Link to="/signup" className="btn btn-primary">SIGN UP FOR FREE</Link>
-          </div>
-
-          <div className="testimonial-section">
-            <div className="avatars">
-              <img className="avatar" src="https://i.pravatar.cc/100?img=11" alt="User 1" />
-              <img className="avatar" src="https://i.pravatar.cc/100?img=12" alt="User 2" />
-              <img className="avatar" src="https://i.pravatar.cc/100?img=13" alt="User 3" />
-              <img className="avatar" src="https://i.pravatar.cc/100?img=14" alt="User 4" />
-              <img className="avatar" src="https://i.pravatar.cc/100?img=15" alt="User 5" style={{ position: 'relative' }} />
-            </div>
-            <p className="testimonial-text">
-              "I got recruiters from Amazon, Wise, and other companies reaching out to me already!!"
+          <div className="hero-content" style={{ flex: 1, maxWidth: '600px' }}>
+            <span style={{ color: 'var(--primary-color)', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '24px', display: 'block' }}>
+              Your all-in-one career tracker
+            </span>
+            <h1 style={{ fontSize: '56px', fontWeight: '800', color: 'var(--secondary-color)', lineHeight: '1.1', marginBottom: '24px' }}>
+              Navigate your <span style={{ color: 'var(--primary-color)' }}>career path</span><br/>
+              with confidence.
+            </h1>
+            
+            <p style={{ fontSize: '18px', color: '#64748b', lineHeight: '1.6', marginBottom: '32px' }}>
+              We're more than just a job board. Get personalized job recommendations based on your unique skills, access top-tier interview preparation resources, and seamlessly track all your applications in one place.
             </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '40px' }}>
+              <div className="check-item" style={{ justifyContent: 'flex-start' }}>
+                <span className="check-icon"><FaCheck size={12} /></span>
+                Skill-Based Job Recommendations
+              </div>
+              <div className="check-item" style={{ justifyContent: 'flex-start' }}>
+                <span className="check-icon"><FaCheck size={12} /></span>
+                Centralized Application Tracking
+              </div>
+              <div className="check-item" style={{ justifyContent: 'flex-start' }}>
+                <span className="check-icon"><FaCheck size={12} /></span>
+                Interview Preparation Platform
+              </div>
+              <div className="check-item" style={{ justifyContent: 'flex-start' }}>
+                <span className="check-icon"><FaCheck size={12} /></span>
+                And Much More...
+              </div>
+            </div>
+
+            <div className="hero-cta" style={{ marginBottom: '32px', display: 'flex', justifyContent: 'flex-start' }}>
+              <Link to="/signup" className="btn btn-primary" style={{ padding: '16px 32px', borderRadius: '8px' }}>SIGN UP FOR FREE</Link>
+            </div>
           </div>
+
+          <div className="hero-image" style={{ flex: 1.5, display: 'flex', justifyContent: 'flex-end' }}>
+            <img 
+              src="https://imagedelivery.net/Y5A9xjWICSgIFJs9qxiQrg/5f2a3b01-d209-46d4-0979-e39180f2f500/w=1400" 
+              alt="AI Resume Builder UI" 
+              style={{ width: '100%', maxWidth: '800px', borderRadius: '12px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', objectFit: 'cover' }} 
+            />
+          </div>
+
         </div>
       </section>
 
-      <section className="job-tracker-standalone" style={{ padding: '0 0 80px', backgroundColor: 'var(--bg-color)' }}>
-        <div className="container">
-          <div className="feature-row">
-            <div className="feature-content">
-              <div className="feature-eyebrow">
-                JOB TRACKER
-              </div>
-              <h3>
-                <span className="highlight">Track, Organize, and<br/>Optimize</span> Your Job Search
-              </h3>
-              <p>
-                Forget spreadsheets and endless bookmarks. Save, apply, track, and revisit job applications - all from 1 streamlined dashboard.
-              </p>
-              
-              <div className="feature-checklist">
-                <div className="check-item"><FaRegCheckCircle color="var(--primary-color)"/> Centralized Job Tracking</div>
-                <div className="check-item"><FaRegCheckCircle color="var(--primary-color)"/> Job Insights</div>
-                <div className="check-item"><FaRegCheckCircle color="var(--primary-color)"/> Track Key Contacts</div>
-              </div>
-
-              <Link to="/signup" className="btn btn-primary" style={{ borderRadius: '8px', padding: '12px 24px' }}>START TRACKING</Link>
-            </div>
-            <div className="feature-image tracker-image-container">
-              <img src="https://cdn.prod.website-files.com/635c591378332f38be25d45f/678f676c8dfda6c3df305d3f_job%20tracke-new-hero-p-800.webp" alt="Job Tracker" />
-            </div>
+      <section className="job-tracker-standalone">
+        <div className="tracker-inner">
+          <div className="tracker-content">
+            <span className="tracker-eyebrow">Job Application Tracker</span>
+            <h2 className="tracker-heading">Keep track of all<br/>your job<br/>applications</h2>
+            <p className="tracker-desc">
+              No more messy spreadsheets. Track and manage all your job applications in one place.
+              Instantly save job descriptions, contacts, salaries, documents, and more.
+            </p>
+          </div>
+          <div className="tracker-screenshot">
+            <img 
+              src="https://imagedelivery.net/Y5A9xjWICSgIFJs9qxiQrg/a203c54b-c0dc-41fe-c803-312c4f1d0100/w=1796,format=auto" 
+              alt="Job Tracker App" 
+            />
           </div>
         </div>
       </section>
@@ -95,15 +105,30 @@ const Home = () => {
       {/* Trusted Companies Section */}
       <section className="trusted-companies">
         <div className="container">
-          <h2>Trusted by job seekers who've landed at top companies</h2>
-          <p className="subtitle">Our users have secured positions at industry-leading companies such as</p>
-          <div className="logos-grid">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bloomberg_logo.svg" alt="Bloomberg" className="company-logo" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" alt="Microsoft" className="company-logo" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/b/bb/Adobe_Systems_logo_and_wordmark.svg" alt="Adobe" className="company-logo" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" className="company-logo" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg" alt="Meta" className="company-logo" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Netflix" className="company-logo" />
+          <h2 className="reveal">Trusted by job seekers who've landed at top companies</h2>
+          <p className="subtitle reveal">Our users have secured positions at industry-leading companies such as</p>
+          <div className="logos-container">
+            <div className="logos-grid">
+              {/* Original Logos */}
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bloomberg_logo.svg/512px-Bloomberg_logo.svg.png" alt="Bloomberg" className="company-logo" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" alt="Microsoft" className="company-logo" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Adobe_Systems_logo_and_wordmark.svg/512px-Adobe_Systems_logo_and_wordmark.svg.png" alt="Adobe" className="company-logo" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" className="company-logo" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg" alt="Meta" className="company-logo" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Netflix" className="company-logo" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" className="company-logo" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" className="company-logo" />
+              
+              {/* Duplicated for seamless marquee effect */}
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bloomberg_logo.svg/512px-Bloomberg_logo.svg.png" alt="Bloomberg" className="company-logo" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" alt="Microsoft" className="company-logo" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Adobe_Systems_logo_and_wordmark.svg/512px-Adobe_Systems_logo_and_wordmark.svg.png" alt="Adobe" className="company-logo" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" className="company-logo" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg" alt="Meta" className="company-logo" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Netflix" className="company-logo" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" className="company-logo" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" className="company-logo" />
+            </div>
           </div>
         </div>
       </section>
@@ -111,14 +136,14 @@ const Home = () => {
       {/* Frustration Section */}
       <section className="frustration-section">
         <div className="container">
-          <h2>
+          <h2 className="reveal">
             Say goodbye to job <span className="highlight">search<br/>frustration</span>
           </h2>
-          <p className="subtitle" style={{ marginBottom: '60px' }}>
+          <p className="subtitle reveal" style={{ marginBottom: '60px' }}>
             From constant rejections to landing your dream job, discover<br/>the difference Careerflow can make
           </p>
 
-          <div className="comparison-container">
+          <div className="comparison-container reveal-stagger reveal">
             {/* Before Column */}
             <div className="comparison-col">
               <div className="comparison-header before-header">
@@ -194,12 +219,12 @@ const Home = () => {
       {/* Simplify Section */}
       <section className="simplify-section">
         <div className="container">
-          <h2 className="section-title text-center">
+          <h2 className="section-title text-center reveal">
             <span className="highlight">Simplify Every Step</span> of Your<br/>Job Search with Careerflow
           </h2>
 
-          <div className="feature-row">
-            <div className="feature-content">
+          <div className="feature-row reveal">
+            <div className="feature-content reveal-left">
               <div className="feature-eyebrow">
                 <FaRegFileAlt /> AI RESUME BUILDER
               </div>
@@ -212,13 +237,13 @@ const Home = () => {
               </p>
               <Link to="/signup" className="btn btn-outline" style={{ borderRadius: '8px' }}>CREATE MY RESUME</Link>
             </div>
-            <div className="feature-image">
+            <div className="feature-image reveal-right">
               <img src="https://cdn.prod.website-files.com/635c591378332f38be25d45f/672a117701b7c53c355ad99e_Frame%2067-p-1080.webp" alt="AI Resume Builder" />
             </div>
           </div>
 
-          <div className="feature-row reverse">
-            <div className="feature-content">
+          <div className="feature-row reverse reveal">
+            <div className="feature-content reveal-right">
               <div className="feature-eyebrow pink">
                 <FaRegLightbulb /> JOB FIT ANALYZER
               </div>
@@ -230,8 +255,32 @@ const Home = () => {
               </p>
               <Link to="/signup" className="btn btn-outline-pink" style={{ borderRadius: '8px' }}>ANALYZE JOB FIT</Link>
             </div>
-            <div className="feature-image">
+            <div className="feature-image reveal-left">
               <img src="https://cdn.prod.website-files.com/635c591378332f38be25d45f/672a11abf4f3948f579d9b6a_Frame%2069-p-1080.webp" alt="Job Fit Analyzer" />
+            </div>
+          </div>
+
+          {/* AI Resume Tailor Row */}
+          <div className="feature-row reveal">
+            <div className="feature-content reveal-left">
+              <div className="feature-eyebrow">
+                <FaRegLightbulb /> AI RESUME TAILOR
+              </div>
+              <h3>
+                Tailor Your Resume to Any<br/>
+                <span className="highlight">Job Description with AI</span>
+              </h3>
+              <p>
+                Paste any job description. Our AI Resume Tailor rewrites your bullet points, maps your skills to the right keywords, and scores your match in real time. <strong>Tailored resumes get 2× more interviews.</strong>
+              </p>
+              <Link to="/signup" className="btn btn-outline" style={{ borderRadius: '8px' }}>TAILOR MY RESUME</Link>
+            </div>
+            <div className="feature-image reveal-right">
+              <img 
+                src="https://imagedelivery.net/Y5A9xjWICSgIFJs9qxiQrg/ecadc7c9-857d-44e4-00d2-cd6fcfb6f200/w=2200,format=auto" 
+                alt="AI Resume Tailor" 
+                style={{ borderRadius: '12px', boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}
+              />
             </div>
           </div>
 
@@ -241,9 +290,9 @@ const Home = () => {
       {/* Community Section */}
       <section className="community-section" style={{ backgroundColor: '#f0f7ff', padding: '80px 0', overflow: 'hidden' }}>
         <div className="container text-center">
-          <h2 className="section-title" style={{ marginBottom: '16px' }}>Hear From Our <span className="highlight">Community</span></h2>
-          <p className="subtitle" style={{ marginBottom: '40px' }}>Trusted and loved by over 1M+ users worldwide.</p>
-          <div className="testimonials-grid">
+          <h2 className="section-title reveal" style={{ marginBottom: '16px' }}>Hear From Our <span className="highlight">Community</span></h2>
+          <p className="subtitle reveal" style={{ marginBottom: '40px' }}>Trusted and loved by over 1M+ users worldwide.</p>
+          <div className="testimonials-grid reveal-stagger reveal">
             <div className="testimonial-card">
               <div className="stars">⭐⭐⭐⭐⭐</div>
               <p>“Careerflow gave me confidence in my CV and Cover Letter with its skill match checker and generator, enabling multiple submissions to numerous companies”</p>
@@ -306,26 +355,55 @@ const Home = () => {
           </div>
 
           <div className="pricing-cards">
-            <div className="pricing-card basic">
-              <div className="plan-name">Basic</div>
-              <div className="price">Free</div>
-              <button className="btn btn-outline" style={{width: '100%', marginTop: 'auto'}}>START NOW</button>
+            {/* Standard Card */}
+            <div className="pricing-card basic reveal">
+              <div className="plan-name">Standard</div>
+              <p className="plan-desc">For individuals and<br/>early job seekers</p>
+              <div className="features-title">Features</div>
+              <ul className="plan-features">
+                <li><FaCheck size={10}/> Skill-based job recommendations</li>
+                <li><FaCheck size={10}/> Application tracker (up to 20)</li>
+                <li className="disabled"><FaCheck size={10}/> Interview prep resources</li>
+                <li className="disabled"><FaCheck size={10}/> Priority AI suggestions</li>
+              </ul>
+              <div className="price-box">
+                <div className="price">₹499<span className="period">/Month</span></div>
+                <button className="btn btn-outline-green">Get Started</button>
+              </div>
             </div>
             
-            <div className="pricing-card popular">
-              <div className="popular-badge">MOST POPULAR</div>
-              <div className="plan-name">Premium</div>
-              <div className="price"><span className="strike">₹1499</span> ₹400<span className="period">/month</span></div>
-              <div className="total-price">₹4800 total</div>
-              <button className="btn btn-primary" style={{width: '100%', marginTop: 'auto', backgroundColor: 'white', color: 'var(--primary-color)'}}>START NOW</button>
+            {/* Startup Card */}
+            <div className="pricing-card popular reveal">
+              <div className="plan-name">Pro</div>
+              <p className="plan-desc">For serious job seekers who<br/>want maximum results</p>
+              <div className="features-title">Features</div>
+              <ul className="plan-features">
+                <li><FaCheck size={10}/> Skill-based job recommendations</li>
+                <li><FaCheck size={10}/> Unlimited application tracking</li>
+                <li><FaCheck size={10}/> Interview prep resources</li>
+                <li><FaCheck size={10}/> Priority AI suggestions</li>
+              </ul>
+              <div className="price-box">
+                <div className="price">₹999<span className="period">/Month</span></div>
+                <button className="btn btn-white-green">Get Started</button>
+              </div>
             </div>
 
-            <div className="pricing-card best-value">
-              <div className="best-value-badge">BEST VALUE</div>
-              <div className="plan-name">Premium Plus</div>
-              <div className="price"><span className="strike">₹1499</span> ₹833<span className="period">/month</span></div>
-              <div className="total-price">₹9999 total</div>
-              <p className="save-text">Save 35% on yearly plans</p>
+            {/* Enterprise Card */}
+            <div className="pricing-card basic reveal">
+              <div className="plan-name">Enterprise</div>
+              <p className="plan-desc">For teams, colleges &<br/>placement consultants</p>
+              <div className="features-title">Features</div>
+              <ul className="plan-features">
+                <li><FaCheck size={10}/> Everything in Pro</li>
+                <li><FaCheck size={10}/> Team dashboards & analytics</li>
+                <li><FaCheck size={10}/> Dedicated account manager</li>
+                <li><FaCheck size={10}/> Custom integrations</li>
+              </ul>
+              <div className="price-box">
+                <div className="price">₹2,499<span className="period">/Month</span></div>
+                <button className="btn btn-outline-green">Get Started</button>
+              </div>
             </div>
           </div>
         </div>
@@ -401,8 +479,8 @@ const Home = () => {
       {/* Final CTA Section */}
       <section className="final-cta-section">
         <div className="container text-center">
-          <h2 style={{ fontSize: '48px', color: 'white', marginBottom: '24px' }}>Take Control of Your<br/>Job Search Today</h2>
-          <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '18px', maxWidth: '600px', margin: '0 auto 40px', lineHeight: '1.6' }}>Join thousands who've transformed their job search with Careerflow. Access powerful AI tools designed to help you land interviews faster at no cost.</p>
+          <h2 style={{ fontSize: '48px', color: 'var(--secondary-color)', marginBottom: '24px' }}>Take Control of Your<br/>Job Search Today</h2>
+          <p style={{ color: 'var(--secondary-color)', fontSize: '18px', maxWidth: '600px', margin: '0 auto 40px', lineHeight: '1.6' }}>Join thousands who've transformed their job search with Careerflow. Access powerful AI tools designed to help you land interviews faster at no cost.</p>
           <Link to="/signup" className="btn btn-primary" style={{ padding: '16px 32px', fontSize: '16px' }}>SIGN UP FOR FREE</Link>
         </div>
       </section>
