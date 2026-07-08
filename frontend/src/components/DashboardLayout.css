@@ -1,0 +1,98 @@
+:root {
+  /* Dashboard Specific Variables */
+  --dash-bg: #f8fafc;
+  --dash-surface: #ffffff;
+  --dash-sidebar-bg: #0f172a; /* Dark sleek sidebar */
+  --dash-sidebar-text: #94a3b8;
+  --dash-sidebar-hover: #1e293b;
+  --dash-sidebar-active: #2563eb;
+  --dash-sidebar-active-text: #ffffff;
+  
+  --dash-header-bg: #ffffff;
+  --dash-border: #e2e8f0;
+  
+  --dash-text-main: #0f172a;
+  --dash-text-muted: #64748b;
+  
+  --dash-primary: #2563eb;
+  --dash-success: #10b981;
+  --dash-warning: #f59e0b;
+  --dash-danger: #ef4444;
+  --dash-accent: #8b5cf6;
+  
+  --dash-radius: 12px;
+  --dash-radius-sm: 8px;
+  --dash-shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --dash-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+  
+  --dash-sidebar-width: 260px;
+  --dash-header-height: 70px;
+}
+
+/* Dark Mode (optional/future) */
+[data-theme='dark'] {
+  --dash-bg: #0f172a;
+  --dash-surface: #1e293b;
+  --dash-border: #334155;
+  --dash-text-main: #f8fafc;
+  --dash-text-muted: #94a3b8;
+  --dash-header-bg: #1e293b;
+}
+
+.dashboard-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: var(--dash-bg);
+  color: var(--dash-text-main);
+  font-family: 'Inter', sans-serif;
+}
+
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Important for flex children to not overflow */
+}
+
+.dashboard-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background-color: var(--dash-bg);
+}
+
+/* Common Dashboard Components */
+.dash-card {
+  background: var(--dash-surface);
+  border-radius: var(--dash-radius);
+  box-shadow: var(--dash-shadow-sm);
+  border: 1px solid var(--dash-border);
+  padding: 24px;
+  transition: box-shadow 0.2s ease;
+}
+
+.dash-card:hover {
+  box-shadow: var(--dash-shadow);
+}
+
+.dash-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--dash-text-main);
+  margin-bottom: 24px;
+}
+
+.dash-subtitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dash-text-main);
+  margin-bottom: 16px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+}
