@@ -50,10 +50,24 @@ const logout = async (req, res, next) => {
   }
 };
 
+const googleLogin = async (req, res, next) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json(new ApiResponse(400, null, 'idToken is required'));
+    }
+    const result = await authService.googleLogin(idToken);
+    res.status(200).json(new ApiResponse(200, result, 'Google Login successful.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   register,
   login,
   me,
   refresh,
-  logout
+  logout,
+  googleLogin
 };

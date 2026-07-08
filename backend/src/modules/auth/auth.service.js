@@ -3,6 +3,9 @@ const jwt = require('jsonwebtoken');
 const env = require('../../config/env');
 const prisma = require('../../config/prisma');
 const ApiError = require('../../utils/ApiError');
+const { OAuth2Client } = require('google-auth-library');
+
+const client = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
 // In-memory blacklist for refresh tokens on logout
 const blacklistedTokens = new Set();
@@ -134,10 +137,63 @@ const logout = async (token) => {
   return { message: 'Logged out successfully.' };
 };
 
+const googleLogin = async (idToken) => {
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: env.GOOGLE_CLIENT_ID,
+    });
+    
+    const payload = ticket.getPayload();
+    const { email, name } = payload;
+    
+    let user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) {
+      // Create user if not exists
+      const randomPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+      
+      user = await prisma.user.create({
+        data: {
+          name,
+          email,
+          password: hashedPassword
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          createdAt: true
+        }
+      });
+    }
+
+    const userRole = getUserRole(user.email);
+    const accessToken = generateAccessToken(user.id, userRole);
+    const refreshToken = generateRefreshToken(user.id);
+
+    const userResponse = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: userRole,
+      createdAt: user.createdAt
+    };
+
+    return { user: userResponse, accessToken, refreshToken };
+  } catch (error) {
+    throw new ApiError(401, 'Invalid Google Token');
+  }
+};
+
 module.exports = {
   register,
   login,
   refresh,
   logout,
+  googleLogin,
   getUserRole
 };

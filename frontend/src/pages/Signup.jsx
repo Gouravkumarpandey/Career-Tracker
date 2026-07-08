@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
 import { FiEye, FiEyeOff, FiArrowLeft } from 'react-icons/fi';
+import { GoogleLogin } from '@react-oauth/google';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -59,6 +60,29 @@ const Signup = () => {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: credentialResponse.credential }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        if (data.data?.accessToken) {
+          localStorage.setItem('token', data.data.accessToken);
+        }
+        navigate('/dashboard');
+      } else {
+        setError(data.message || 'Google Signup failed');
+      }
+    } catch (err) {
+      console.error('Google Signup error', err);
+      setError('An error occurred during Google signup.');
+    }
+  };
+
   return (
     <div className="portal-page">
       {/* Decorative blobs */}
@@ -91,11 +115,16 @@ const Signup = () => {
           </div>
 
           {/* Google button only */}
-          <div className="portal-socials">
-            <button className="portal-social-btn" id="google-signup-btn">
-              <FcGoogle size={20} />
-              Sign up with Google
-            </button>
+          <div className="portal-socials" style={{ display: 'flex', justifyContent: 'center' }}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError('Google Signup Failed')}
+              useOneTap
+              theme="outline"
+              size="large"
+              shape="rectangular"
+              text="signup_with"
+            />
           </div>
 
           {/* Divider */}

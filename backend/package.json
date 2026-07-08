@@ -13,7 +13,11 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "google-auth-library": "^10.9.0",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
+    "openai": "^6.45.0",
+    "pdf-parse": "^2.4.5",
     "prisma": "^6.19.3"
   },
   "devDependencies": {

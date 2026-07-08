@@ -1,5 +1,6 @@
 const aiService = require('./ai.service');
 const ApiResponse = require('../../utils/ApiResponse');
+const pdfParse = require('pdf-parse');
 
 const analyzeResume = async (req, res, next) => {
   try {
@@ -10,6 +11,47 @@ const analyzeResume = async (req, res, next) => {
     const result = await aiService.analyzeResume(req.user.id, parseInt(resumeId));
     res.status(200).json(new ApiResponse(200, result, 'Resume analysis completed successfully.'));
   } catch (error) {
+    next(error);
+  }
+};
+
+const analyzeResumeText = async (req, res, next) => {
+  try {
+    const { text } = req.body;
+    if (!text) {
+      return res.status(400).json({ success: false, message: 'Resume text is required.' });
+    }
+    const result = await aiService.analyzeResumeTextDirect(req.user.id, text);
+    res.status(200).json(new ApiResponse(200, result, 'Resume ATS analysis completed successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const uploadAnalyzeResume = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No resume file uploaded. Please upload a PDF.' });
+    }
+
+    let extractedText = '';
+    
+    // Parse PDF
+    if (req.file.mimetype === 'application/pdf') {
+      const data = await pdfParse(req.file.buffer);
+      extractedText = data.text;
+    } else {
+      return res.status(400).json({ success: false, message: 'Only PDF files are supported at this time.' });
+    }
+
+    if (!extractedText || extractedText.trim().length === 0) {
+      return res.status(400).json({ success: false, message: 'Could not extract any text from the uploaded file.' });
+    }
+
+    const result = await aiService.analyzeResumeTextDirect(req.user.id, extractedText);
+    res.status(200).json(new ApiResponse(200, result, 'Resume file ATS analysis completed successfully.'));
+  } catch (error) {
+    console.error("File parsing error:", error);
     next(error);
   }
 };
@@ -45,9 +87,25 @@ const getLearningRecommendations = async (req, res, next) => {
   }
 };
 
+const chatAssistant = async (req, res, next) => {
+  try {
+    const { message, context } = req.body;
+    if (!message) {
+      return res.status(400).json({ success: false, message: 'Message is required.' });
+    }
+    const result = await aiService.aiChatAssistant(req.user.id, message, context);
+    res.status(200).json(new ApiResponse(200, result, 'AI response generated successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   analyzeResume,
+  analyzeResumeText,
+  uploadAnalyzeResume,
   getSkillGap,
   getCareerRecommendations,
-  getLearningRecommendations
+  getLearningRecommendations,
+  chatAssistant
 };

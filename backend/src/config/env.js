@@ -6,5 +6,7 @@ module.exports = {
   DIRECT_URL: process.env.DIRECT_URL,
   JWT_SECRET: process.env.JWT_SECRET || 'default-super-secret-key-for-career-tracker-123!',
   JWT_EXPIRE: process.env.JWT_EXPIRE || '30d',
-  NODE_ENV: process.env.NODE_ENV || 'development'
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  GROK_API_KEY: process.env.GROK_API_KEY
 };

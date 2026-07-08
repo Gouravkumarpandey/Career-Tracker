@@ -1,35 +1,13 @@
 const prisma = require('../../config/prisma');
 const ApiError = require('../../utils/ApiError');
 const { CAREER_PATHS } = require('../roadmap/roadmap.service');
+const { OpenAI } = require('openai');
+const env = require('../../config/env');
 
-// Simulated AI text analysis helper for resume parser
-const analyzeResumeText = (title) => {
-  const lowerTitle = title.toLowerCase();
-  
-  let grammarScore = 85.0;
-  let actionVerbsCount = 12;
-  let quantifiableMetricsCount = 5;
-  let readabilityIndex = 75.0;
-
-  if (lowerTitle.includes('senior') || lowerTitle.includes('lead')) {
-    grammarScore = 92.5;
-    actionVerbsCount = 22;
-    quantifiableMetricsCount = 9;
-    readabilityIndex = 68.0;
-  } else if (lowerTitle.includes('junior') || lowerTitle.includes('intern')) {
-    grammarScore = 78.0;
-    actionVerbsCount = 8;
-    quantifiableMetricsCount = 2;
-    readabilityIndex = 82.5;
-  }
-
-  return {
-    grammarScore,
-    actionVerbsCount,
-    quantifiableMetricsCount,
-    readabilityIndex
-  };
-};
+const openai = new OpenAI({
+  apiKey: env.GROK_API_KEY,
+  baseURL: 'https://api.x.ai/v1',
+});
 
 const analyzeResume = async (userId, resumeId) => {
   const resume = await prisma.resume.findFirst({
@@ -40,7 +18,35 @@ const analyzeResume = async (userId, resumeId) => {
     throw new ApiError(404, 'Resume not found.');
   }
 
-  const analysis = analyzeResumeText(resume.title);
+  // Use Grok to analyze resume title/content
+  const completion = await openai.chat.completions.create({
+    model: 'grok-beta',
+    messages: [
+      {
+        role: 'system',
+        content: 'You are an expert ATS and resume analyzer. Return ONLY a valid JSON object with the following keys (all numbers out of 100 except counts): grammarScore, actionVerbsCount, quantifiableMetricsCount, readabilityIndex.'
+      },
+      {
+        role: 'user',
+        content: `Analyze this resume (title/content): ${resume.title}\nProvide the metrics JSON.`
+      }
+    ]
+  });
+
+  let analysisStr = completion.choices[0].message.content.trim();
+  // Strip markdown if present
+  if (analysisStr.startsWith('```json')) {
+    analysisStr = analysisStr.substring(7, analysisStr.length - 3).trim();
+  }
+  
+  let analysis;
+  try {
+    analysis = JSON.parse(analysisStr);
+  } catch (error) {
+    console.error("Grok JSON parse error:", error);
+    // Fallback if Grok fails to format properly
+    analysis = { grammarScore: 80, actionVerbsCount: 10, quantifiableMetricsCount: 3, readabilityIndex: 70 };
+  }
 
   // Upsert analysis
   const metrics = await prisma.resumeMetricsAnalysis.upsert({
@@ -59,150 +65,138 @@ const analyzeResume = async (userId, resumeId) => {
   };
 };
 
+const analyzeResumeTextDirect = async (userId, resumeText) => {
+  const completion = await openai.chat.completions.create({
+    model: 'grok-beta',
+    messages: [
+      {
+        role: 'system',
+        content: 'You are an expert ATS and resume analyzer. Return ONLY a valid JSON object with the following keys (all numbers out of 100 except counts): grammarScore, actionVerbsCount, quantifiableMetricsCount, readabilityIndex. Also include an "overallScore" out of 100, and an array of strings called "feedback" with 3-4 actionable tips.'
+      },
+      {
+        role: 'user',
+        content: `Analyze this resume content for ATS compatibility and quality:\n\n${resumeText}\n\nProvide the metrics JSON.`
+      }
+    ]
+  });
+
+  let analysisStr = completion.choices[0].message.content.trim();
+  if (analysisStr.startsWith('```json')) {
+    analysisStr = analysisStr.substring(7, analysisStr.length - 3).trim();
+  }
+  
+  try {
+    return JSON.parse(analysisStr);
+  } catch (error) {
+    console.error("Grok JSON parse error:", error);
+    throw new ApiError(500, 'Failed to parse ATS analysis from Grok.');
+  }
+};
+
 const getSkillGapAnalysis = async (userId, targetType, targetId) => {
-  // 1. Get user skills
   const userSkills = await prisma.skill.findMany({
     where: { userId },
     select: { name: true }
   });
 
   const userSkillNames = userSkills.map(s => s.name.toLowerCase());
-
-  let requiredSkills = [];
   let targetName = '';
 
   if (targetType === 'job') {
-    const job = await prisma.job.findUnique({
-      where: { id: parseInt(targetId) }
-    });
+    const job = await prisma.job.findUnique({ where: { id: parseInt(targetId) } });
     if (!job) throw new ApiError(404, 'Target job listing not found.');
-    
     targetName = `${job.title} at ${job.company}`;
-    if (job.requirements) {
-      requiredSkills = job.requirements
-        .split(/[,\n]/)
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
-    } else {
-      requiredSkills = ['JavaScript', 'Node.js', 'React'];
-    }
   } else if (targetType === 'path') {
     const path = CAREER_PATHS.find(p => p.id === parseInt(targetId));
     if (!path) throw new ApiError(404, 'Target career path not found.');
-
     targetName = path.title;
-    requiredSkills = path.milestones.map(m => m.title.split(' ')[0]); // Extract first word representing main skill/category
   } else {
     throw new ApiError(400, 'Invalid targetType. Must be "job" or "path".');
   }
 
-  const matchingSkills = [];
-  const missingSkills = [];
+  const prompt = `
+    The user wants to become or qualify for: "${targetName}".
+    The user's current skills are: [${userSkillNames.join(', ')}].
+    Analyze the gap between their current skills and the skills typically required for this target.
+    Return ONLY a valid JSON object with the following keys:
+    - matchingSkills (array of strings)
+    - missingSkills (array of strings)
+    - matchPercentage (number between 0 and 100)
+    - gapPercentage (number between 0 and 100)
+    - recommendation (string, a short personalized recommendation on what to learn)
+  `;
 
-  requiredSkills.forEach(reqSkill => {
-    const isMatching = userSkillNames.some(uSkill => uSkill.includes(reqSkill.toLowerCase()) || reqSkill.toLowerCase().includes(uSkill));
-    if (isMatching) {
-      matchingSkills.push(reqSkill);
-    } else {
-      missingSkills.push(reqSkill);
-    }
+  const completion = await openai.chat.completions.create({
+    model: 'grok-beta',
+    messages: [
+      { role: 'system', content: 'You are an expert technical recruiter and career coach. Always output valid JSON.' },
+      { role: 'user', content: prompt }
+    ]
   });
 
-  const totalRequired = requiredSkills.length;
-  const matchPct = totalRequired > 0 
-    ? parseFloat(((matchingSkills.length / totalRequired) * 100).toFixed(2))
-    : 100.0;
+  let resStr = completion.choices[0].message.content.trim();
+  if (resStr.startsWith('```json')) resStr = resStr.substring(7, resStr.length - 3).trim();
   
-  const gapPct = parseFloat((100.0 - matchPct).toFixed(2));
+  let gapData;
+  try {
+    gapData = JSON.parse(resStr);
+  } catch (error) {
+    throw new ApiError(500, 'Failed to parse AI response for skill gap analysis.');
+  }
 
   return {
     targetType,
     targetId,
     targetName,
-    matchingSkills,
-    missingSkills,
-    matchPercentage: matchPct,
-    gapPercentage: gapPct,
-    recommendation: missingSkills.length > 0 
-      ? `To qualify for "${targetName}", prioritize learning: ${missingSkills.join(', ')}.`
-      : 'You meet all the basic skill requirements for this role!'
+    ...gapData
   };
 };
 
 const getCareerRecommendations = async (userId) => {
-  // Get user skills
   const skills = await prisma.skill.findMany({
     where: { userId },
     select: { name: true }
   });
 
   if (skills.length === 0) {
-    return {
-      recommendations: [],
-      message: 'Please add some skills to get personalized career recommendations.'
-    };
+    return { recommendations: [], message: 'Please add some skills to get personalized career recommendations.' };
   }
 
-  const skillNames = skills.map(s => s.name.toLowerCase());
+  const skillNames = skills.map(s => s.name);
 
-  const suggestionsList = [
-    {
-      career: 'Full Stack Engineer',
-      triggerKeywords: ['react', 'node', 'express', 'javascript', 'html', 'css', 'sql', 'postgresql', 'mongodb'],
-      reason: 'Based on your programming and web development skillsets.',
-      confidenceScore: 0.90
-    },
-    {
-      career: 'Data Analyst / Scientist',
-      triggerKeywords: ['python', 'pandas', 'numpy', 'sql', 'analytics', 'tableau', 'machine learning', 'excel'],
-      reason: 'Your data modeling and scripting skills match analytics paths.',
-      confidenceScore: 0.85
-    },
-    {
-      career: 'Cloud DevOps Engineer',
-      triggerKeywords: ['docker', 'kubernetes', 'aws', 'cloud', 'linux', 'git', 'ci/cd', 'terraform'],
-      reason: 'Your interest in infrastructure automation and cloud tools align with DevOps.',
-      confidenceScore: 0.88
-    }
-  ];
+  const prompt = `
+    A user has the following skills: [${skillNames.join(', ')}].
+    Based on these skills, suggest exactly 3 possible career paths they could pursue.
+    Return ONLY a valid JSON object with a key "recommendations" which is an array of objects.
+    Each object must have:
+    - suggestedCareer (string)
+    - reasoning (string, explaining why based on their specific skills)
+    - confidenceScore (number between 0.0 and 1.0)
+  `;
 
-  const matchedSuggestions = [];
+  const completion = await openai.chat.completions.create({
+    model: 'grok-beta',
+    messages: [
+      { role: 'system', content: 'You are an expert career counselor. Always output valid JSON.' },
+      { role: 'user', content: prompt }
+    ]
+  });
 
-  for (const sug of suggestionsList) {
-    const hits = sug.triggerKeywords.filter(keyword => 
-      skillNames.some(skill => skill.includes(keyword))
-    );
-
-    if (hits.length > 0) {
-      const matchRatio = hits.length / sug.triggerKeywords.length;
-      const score = parseFloat(Math.min(0.99, sug.confidenceScore * (0.5 + 0.5 * matchRatio)).toFixed(2));
-      
-      matchedSuggestions.push({
-        suggestedCareer: sug.career,
-        reasoning: `Matched via skills: [${hits.join(', ')}]. ${sug.reason}`,
-        confidenceScore: score
-      });
-    }
-  }
-
-  if (matchedSuggestions.length === 0) {
-    matchedSuggestions.push({
-      suggestedCareer: 'Software Engineer Generalist',
-      reasoning: 'Explore core algorithms, database principles, and full stack workflows to find your niche.',
-      confidenceScore: 0.70
-    });
+  let resStr = completion.choices[0].message.content.trim();
+  if (resStr.startsWith('```json')) resStr = resStr.substring(7, resStr.length - 3).trim();
+  
+  let recData;
+  try {
+    recData = JSON.parse(resStr);
+  } catch (error) {
+    throw new ApiError(500, 'Failed to parse AI response for career recommendations.');
   }
 
   // Save recommendations to DB
   return prisma.$transaction(async (tx) => {
-    // Delete old recommendations
-    await tx.aIRecommendation.deleteMany({
-      where: { userId }
-    });
-
-    // Save new ones
+    await tx.aIRecommendation.deleteMany({ where: { userId } });
     const createdRecs = [];
-    for (const rec of matchedSuggestions) {
+    for (const rec of recData.recommendations) {
       const dbRec = await tx.aIRecommendation.create({
         data: {
           suggestedCareer: rec.suggestedCareer,
@@ -218,30 +212,28 @@ const getCareerRecommendations = async (userId) => {
 };
 
 const getLearningRecommendations = async (userId) => {
-  // Find skill gaps from enrolled paths in Assessment table
+  // Using the new Grok-powered getSkillGapAnalysis
   const enrollments = await prisma.assessment.findMany({
-    where: {
-      userId,
-      category: 'CareerPathEnrollment'
-    }
+    where: { userId, category: 'CareerPathEnrollment' }
   });
 
   let missingSkills = [];
   if (enrollments.length > 0) {
     for (const en of enrollments) {
-      const pathTitle = en.title.substring(10); // strip "Enrolled: "
+      const pathTitle = en.title.substring(10);
       const path = CAREER_PATHS.find(p => p.title === pathTitle);
       if (path) {
-        const gap = await getSkillGapAnalysis(userId, 'path', path.id);
-        missingSkills.push(...gap.missingSkills);
+        try {
+          const gap = await getSkillGapAnalysis(userId, 'path', path.id);
+          missingSkills.push(...gap.missingSkills);
+        } catch(e) {
+          console.error("Gap analysis failed in learning recommendation:", e);
+        }
       }
     }
   }
 
-  if (missingSkills.length === 0) {
-    missingSkills = ['Data Structures', 'REST APIs', 'SQL'];
-  }
-
+  if (missingSkills.length === 0) missingSkills = ['Data Structures', 'REST APIs', 'SQL'];
   missingSkills = [...new Set(missingSkills)];
 
   const recommendedResources = [];
@@ -275,9 +267,27 @@ const getLearningRecommendations = async (userId) => {
   };
 };
 
+// New Chat Assistant Feature
+const aiChatAssistant = async (userId, message, context = '') => {
+  const completion = await openai.chat.completions.create({
+    model: 'grok-beta',
+    messages: [
+      { role: 'system', content: `You are CareerFlow AI, a helpful and expert career coach. Keep responses concise and practical. User Context: ${context}` },
+      { role: 'user', content: message }
+    ]
+  });
+
+  return {
+    message: completion.choices[0].message.content,
+    timestamp: new Date()
+  };
+};
+
 module.exports = {
   analyzeResume,
+  analyzeResumeTextDirect,
   getSkillGapAnalysis,
   getCareerRecommendations,
-  getLearningRecommendations
+  getLearningRecommendations,
+  aiChatAssistant
 };
