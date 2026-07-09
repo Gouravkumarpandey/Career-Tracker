@@ -2104,7 +2104,8 @@ button {
 
 /* Login Layout Styles */
 .teal-split-layout {
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden; /* Prevent page scrolling */
   background-color: #ffffff;
   display: flex;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -2115,6 +2116,7 @@ button {
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center; /* Center the form vertically without needing margin auto */
 }
 
 .teal-split-right {
@@ -2128,33 +2130,37 @@ button {
   .teal-split-right {
     flex: 1;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #02605f; /* Keeping original fallback if image fails */
+    align-items: stretch;
+    background: none;
     overflow: hidden;
-    border-top-left-radius: 120px;
+    padding-left: 20px; /* Slight gap from the left form */
   }
   .teal-split-right img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; 
+    border-top-left-radius: 60px; /* Curve the image itself */
+    border-bottom-left-radius: 60px;
   }
 }
 
 .teal-login-header {
+  position: absolute;
+  top: 0;
+  left: 0;
   padding: 32px 48px;
 }
 
 /* Purple Form Styles */
 .purple-login-container {
-  max-width: 440px;
+  max-width: 400px;
   width: 100%;
-  margin: auto; /* Centers in remaining vertical space of left column */
-  padding: 40px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 .purple-login-title {
-  font-size: 36px;
+  font-size: 32px;
   font-weight: 700;
   color: #1a0b2e; /* Dark indigo */
   margin-bottom: 8px;

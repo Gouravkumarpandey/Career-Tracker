@@ -85,72 +85,63 @@ const Login = () => {
           </Link>
         </div>
 
-        <div className="purple-login-container">
-          <h2 className="purple-login-title">Log in</h2>
-          <p className="purple-login-subtitle">Log into your account</p>
+        <div className="teal-login-container">
+          <h2 className="teal-login-title">Login</h2>
 
-          <form onSubmit={handleSubmit} className="purple-login-form">
+          <form onSubmit={handleSubmit} className="teal-login-form">
             {error && <div className="teal-error">{error}</div>}
 
-            <div className="purple-field">
-              <label>Email</label>
+            <div className="teal-field">
               <input
                 type="email"
                 name="email"
-                placeholder="Your email"
+                placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
                 required
               />
             </div>
 
-            <div className="purple-field purple-password-field">
-              <label>Password</label>
-              <div className="purple-input-wrapper">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  placeholder="Your password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-                <button
-                  type="button"
-                  className="purple-eye-btn"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
-                </button>
-              </div>
+            <div className="teal-field teal-password-field">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+              <button
+                type="button"
+                className="teal-eye-btn"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+              </button>
             </div>
 
-            <button type="submit" className="purple-submit-btn" disabled={loading}>
-              {loading ? 'Logging In...' : 'Log In'}
+            <button type="submit" className="teal-submit-btn" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
 
-          <div className="purple-divider">
-            <span>or</span>
+          <div className="teal-forgot-password">
+            <Link to="#">Forgot Password?</Link>
           </div>
 
-          <div className="purple-socials">
-            <button type="button" className="purple-social-btn outline-btn">
+          <div className="teal-divider">
+            <span>or sign in with these providers</span>
+          </div>
+
+          <div className="teal-socials">
+            <button type="button" className="teal-social-btn google-btn">
               <span className="social-icon google-icon">G</span>
               Continue with Google
             </button>
           </div>
 
-          <div className="purple-footer-links">
-            <div className="purple-footer-row">
-              <span className="text-muted">Dont have an account?</span> <Link to="/signup" className="text-primary">Sign up</Link>
-            </div>
-            <div className="purple-footer-row">
-              <Link to="#" className="text-muted hover-underline">Forgot your password</Link>
-            </div>
-            <div className="purple-footer-row">
-              <Link to="#" className="text-muted hover-underline">Continue with SAML SSO</Link>
-            </div>
+          <div className="teal-footer-text">
+            Not a member yet? <Link to="/signup">Create an account</Link>
           </div>
         </div>
       </div>
