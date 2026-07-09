@@ -87,12 +87,7 @@ const Footer = () => {
                 <input type="email" placeholder="Enter your email" />
                 <button type="button">Subscribe</button>
               </div>
-              <div className="footer-app-badges">
-                <img
-                  src="https://e7.pngegg.com/pngimages/912/1019/png-clipart-app-store-google-play-apple-apple-text-logo.png"
-                  alt="Download on App Store & Google Play"
-                />
-              </div>
+
             </div>
 
           </div>
@@ -102,7 +97,7 @@ const Footer = () => {
 
           {/* Bottom Bar */}
           <div className="footer-bottom">
-            <p>© {new Date().getFullYear()} CareerTracker AI. All rights reserved. Made with ❤️ in India.</p>
+            <p>© {new Date().getFullYear()} CareerTracker AI. All rights reserved.</p>
             <div className="footer-bottom-links">
               <Link to="/">Privacy</Link>
               <Link to="/">Terms</Link>

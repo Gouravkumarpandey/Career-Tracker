@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FcGoogle } from 'react-icons/fc';
-import { FiEye, FiEyeOff, FiArrowLeft } from 'react-icons/fi';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { GoogleLogin } from '@react-oauth/google';
 
 const Signup = () => {
@@ -45,11 +44,8 @@ const Signup = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Success
-        console.log('Signup successful', data);
         navigate('/login');
       } else {
-        // Error
         setError(data.message || 'Signup failed');
       }
     } catch (err) {
@@ -84,155 +80,127 @@ const Signup = () => {
   };
 
   return (
-    <div className="portal-page">
-      {/* Decorative blobs */}
-      <div className="blob-container">
-        <div className="blob blob-top-right" />
-        <div className="blob blob-bottom-left" />
-      </div>
-
-      {/* Back to Home */}
-      <Link to="/" className="portal-back-btn" id="back-to-home-signup">
-        <FiArrowLeft size={16} />
-        Home
-      </Link>
-
-      <div className="portal-wrapper">
-        {/* Logo */}
-        <div className="portal-logo">
-          <div className="portal-logo-icon">C</div>
-          <span className="portal-logo-text">Careerflow</span>
+    <div className="teal-split-layout">
+      {/* Left Side - Signup Form */}
+      <div className="teal-split-left">
+        {/* Top Left Logo */}
+        <div className="teal-login-header">
+          <Link to="/" className="logo" style={{ textDecoration: 'none' }}>
+            <div className="logo-icon">C</div>
+            <span>Careerflow.ai</span>
+          </Link>
         </div>
 
-        <h1 className="portal-title">Job Seeker Portal</h1>
+        <div className="purple-login-container">
+          <h2 className="purple-login-title">Sign up</h2>
+          <p className="purple-login-subtitle">Create a new account</p>
 
-        {/* Card */}
-        <div className="portal-card">
-          {/* Tabs */}
-          <div className="portal-tabs">
-            <button className="portal-tab" onClick={() => navigate('/login')}>Login</button>
-            <button className="portal-tab active">Sign Up</button>
-          </div>
+          <form onSubmit={handleSubmit} className="purple-login-form">
+            {error && <div className="teal-error">{error}</div>}
 
-          {/* Google button only */}
-          <div className="portal-socials" style={{ display: 'flex', justifyContent: 'center' }}>
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => setError('Google Signup Failed')}
-              useOneTap
-              theme="outline"
-              size="large"
-              shape="rectangular"
-              text="signup_with"
-            />
-          </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <div className="purple-field" style={{ flex: 1 }}>
+                <label>First Name</label>
+                <input
+                  type="text"
+                  name="firstName"
+                  placeholder="Your first name"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-          {/* Divider */}
-          <div className="portal-divider">
-            <span>OR</span>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="portal-form">
-            {error && <div style={{ color: '#e53e3e', fontSize: '14px', marginBottom: '8px', textAlign: 'center', backgroundColor: '#fff5f5', padding: '8px', borderRadius: '4px' }}>{error}</div>}
-
-            <div className="portal-field">
-              <label htmlFor="firstName">
-                First Name <span className="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                placeholder="First Name"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-              />
+              <div className="purple-field" style={{ flex: 1 }}>
+                <label>Last Name</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  placeholder="Your last name"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
 
-            <div className="portal-field">
-              <label htmlFor="lastName">
-                Last Name <span className="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                placeholder="Last Name"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="portal-field">
-              <label htmlFor="email">
-                Email <span className="required">*</span>
-              </label>
+            <div className="purple-field">
+              <label>Email</label>
               <input
                 type="email"
-                id="email"
                 name="email"
-                placeholder="example@email.com"
+                placeholder="Your email"
                 value={formData.email}
                 onChange={handleChange}
                 required
               />
             </div>
 
-            <div className="portal-field">
-              <label htmlFor="password">
-                Password <span className="required">*</span>
-              </label>
-              <div className="portal-input-wrapper">
+            <div className="purple-field purple-password-field">
+              <label>Password</label>
+              <div className="purple-input-wrapper">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  id="password"
                   name="password"
-                  placeholder="Enter a Password"
+                  placeholder="Your password"
                   value={formData.password}
                   onChange={handleChange}
                   required
                 />
                 <button
                   type="button"
-                  className="portal-eye-btn"
+                  className="purple-eye-btn"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label="Toggle password visibility"
                 >
                   {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                 </button>
               </div>
             </div>
 
-            {/* Terms checkbox */}
-            <label className="portal-terms">
+            <label style={{ fontSize: '14px', color: '#6b7280', display: 'flex', gap: '8px', marginBottom: '24px', alignItems: 'center' }}>
               <input
                 type="checkbox"
                 name="agreed"
-                id="terms-checkbox"
                 checked={formData.agreed}
                 onChange={handleChange}
                 required
+                style={{ margin: 0, width: '16px', height: '16px' }}
               />
               <span>
-                By signing up, I agree to the{' '}
-                <Link to="#" id="terms-link">Terms of Service</Link> and{' '}
-                <Link to="#" id="privacy-link">Privacy Policy</Link>
+                I agree to the <Link to="#" className="text-primary hover-underline">Terms</Link> and <Link to="#" className="text-primary hover-underline">Privacy Policy</Link>
               </span>
             </label>
 
-            <button type="submit" id="signup-submit-btn" className="portal-submit-btn" disabled={loading}>
+            <button type="submit" className="purple-submit-btn" disabled={loading}>
               {loading ? 'Signing up...' : 'Sign Up'}
             </button>
-
-            <p className="portal-switch-text">
-              Already have an account?{' '}
-              <Link to="/login" id="switch-to-login-link">Log in</Link>
-            </p>
           </form>
+
+          <div className="purple-divider">
+            <span>or</span>
+          </div>
+
+          <div className="purple-socials">
+            <button type="button" className="purple-social-btn outline-btn">
+              <span className="social-icon google-icon">G</span>
+              Continue with Google
+            </button>
+          </div>
+
+          <div className="purple-footer-links">
+            <div className="purple-footer-row">
+              <span className="text-muted">Already have an account?</span> <Link to="/login" className="text-primary">Log in</Link>
+            </div>
+          </div>
         </div>
+      </div>
+
+      {/* Right Side - Image */}
+      <div className="teal-split-right">
+        <img 
+          src="https://cdn.prod.website-files.com/62775a91cc3db44c787149de/67183eb61f2946ce0cd8415e_AI-Interview-Practice.webp" 
+          alt="AI Interview Practice" 
+        />
       </div>
     </div>
   );

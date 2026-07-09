@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FcGoogle } from 'react-icons/fc';
-import { FiEye, FiEyeOff, FiArrowLeft } from 'react-icons/fi';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
@@ -36,15 +35,11 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Success
-        console.log('Login successful', data);
-        // Save token to localStorage (example)
         if (data.data?.accessToken) {
           localStorage.setItem('token', data.data.accessToken);
         }
         navigate('/dashboard');
       } else {
-        // Error
         setError(data.message || 'Login failed');
       }
     } catch (err) {
@@ -79,109 +74,97 @@ const Login = () => {
   };
 
   return (
-    <div className="portal-page">
-      {/* Decorative blobs */}
-      <div className="blob-container">
-        <div className="blob blob-top-right" />
-        <div className="blob blob-bottom-left" />
-      </div>
-
-      {/* Back to Home */}
-      <Link to="/" className="portal-back-btn" id="back-to-home-login">
-        <FiArrowLeft size={16} />
-        Home
-      </Link>
-
-      <div className="portal-wrapper">
-        {/* Logo */}
-        <div className="portal-logo">
-          <div className="portal-logo-icon">C</div>
-          <span className="portal-logo-text">Careerflow</span>
+    <div className="teal-split-layout">
+      {/* Left Side - Login Form */}
+      <div className="teal-split-left">
+        {/* Top Left Logo */}
+        <div className="teal-login-header">
+          <Link to="/" className="logo" style={{ textDecoration: 'none' }}>
+            <div className="logo-icon">C</div>
+            <span>Careerflow.ai</span>
+          </Link>
         </div>
 
-        <h1 className="portal-title">Job Seeker Portal</h1>
+        <div className="purple-login-container">
+          <h2 className="purple-login-title">Log in</h2>
+          <p className="purple-login-subtitle">Log into your account</p>
 
-        {/* Card */}
-        <div className="portal-card">
-          {/* Tabs */}
-          <div className="portal-tabs">
-            <button className="portal-tab active">Login</button>
-            <button className="portal-tab" onClick={() => navigate('/signup')}>Sign Up</button>
-          </div>
+          <form onSubmit={handleSubmit} className="purple-login-form">
+            {error && <div className="teal-error">{error}</div>}
 
-          {/* Social Buttons */}
-          <div className="portal-socials" style={{ display: 'flex', justifyContent: 'center' }}>
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => setError('Google Login Failed')}
-              useOneTap
-              theme="outline"
-              size="large"
-              shape="rectangular"
-              text="continue_with"
-            />
-          </div>
-
-          {/* Divider */}
-          <div className="portal-divider">
-            <span>OR</span>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="portal-form">
-            {error && <div style={{ color: '#e53e3e', fontSize: '14px', marginBottom: '8px', textAlign: 'center', backgroundColor: '#fff5f5', padding: '8px', borderRadius: '4px' }}>{error}</div>}
-
-            <div className="portal-field">
-              <label htmlFor="email">
-                Email <span className="required">*</span>
-              </label>
+            <div className="purple-field">
+              <label>Email</label>
               <input
                 type="email"
-                id="email"
                 name="email"
-                placeholder="example@email.com"
+                placeholder="Your email"
                 value={formData.email}
                 onChange={handleChange}
                 required
               />
             </div>
 
-            <div className="portal-field">
-              <label htmlFor="password">
-                Password <span className="required">*</span>
-              </label>
-              <div className="portal-input-wrapper">
+            <div className="purple-field purple-password-field">
+              <label>Password</label>
+              <div className="purple-input-wrapper">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  id="password"
                   name="password"
-                  placeholder="Password"
+                  placeholder="Your password"
                   value={formData.password}
                   onChange={handleChange}
                   required
                 />
                 <button
                   type="button"
-                  className="portal-eye-btn"
+                  className="purple-eye-btn"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label="Toggle password visibility"
                 >
                   {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                 </button>
               </div>
-              <div className="portal-forgot">
-                <Link to="#" id="forgot-password-link">Forgot password?</Link>
-              </div>
             </div>
 
-            <button type="submit" id="login-submit-btn" className="portal-submit-btn" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
+            <button type="submit" className="purple-submit-btn" disabled={loading}>
+              {loading ? 'Logging In...' : 'Log In'}
             </button>
           </form>
+
+          <div className="purple-divider">
+            <span>or</span>
+          </div>
+
+          <div className="purple-socials">
+            <button type="button" className="purple-social-btn outline-btn">
+              <span className="social-icon google-icon">G</span>
+              Continue with Google
+            </button>
+          </div>
+
+          <div className="purple-footer-links">
+            <div className="purple-footer-row">
+              <span className="text-muted">Dont have an account?</span> <Link to="/signup" className="text-primary">Sign up</Link>
+            </div>
+            <div className="purple-footer-row">
+              <Link to="#" className="text-muted hover-underline">Forgot your password</Link>
+            </div>
+            <div className="purple-footer-row">
+              <Link to="#" className="text-muted hover-underline">Continue with SAML SSO</Link>
+            </div>
+          </div>
         </div>
+      </div>
+
+      {/* Right Side - Image */}
+      <div className="teal-split-right">
+        <img 
+          src="https://cdn.prod.website-files.com/62775a91cc3db44c787149de/67183eb61f2946ce0cd8415e_AI-Interview-Practice.webp" 
+          alt="AI Interview Practice" 
+        />
       </div>
     </div>
   );
 };
 
 export default Login;
+

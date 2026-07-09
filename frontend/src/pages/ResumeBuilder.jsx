@@ -24,10 +24,10 @@ const ResumeBuilder = () => {
       setError('Target Role and Experience are required fields.');
       return;
     }
-    
+
     setLoading(true);
     setError('');
-    
+
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('/api/ai/resume/generate', {
@@ -38,7 +38,7 @@ const ResumeBuilder = () => {
         },
         body: JSON.stringify(formData)
       });
-      
+
       const data = await response.json();
       if (response.ok) {
         setGeneratedResume(data.data.resumeText);
@@ -73,53 +73,53 @@ const ResumeBuilder = () => {
 
         <div className="rb-form-group">
           <label>Target Role / Job Title *</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             name="targetRole"
             value={formData.targetRole}
             onChange={handleInputChange}
-            className="rb-input" 
-            placeholder="e.g. Senior Frontend Engineer" 
+            className="rb-input"
+            placeholder="e.g. Senior Frontend Engineer"
           />
         </div>
 
         <div className="rb-form-group">
           <label>Professional Experience *</label>
-          <textarea 
+          <textarea
             name="experience"
             value={formData.experience}
             onChange={handleInputChange}
-            className="rb-input rb-textarea" 
-            placeholder="Paste your rough work history here. E.g. Worked at Google for 2 years, built a React dashboard..." 
+            className="rb-input rb-textarea"
+            placeholder="Paste your rough work history here. E.g. Worked at Google for 2 years, built a React dashboard..."
           />
         </div>
 
         <div className="rb-form-group">
           <label>Core Skills (Optional)</label>
-          <textarea 
+          <textarea
             name="skills"
             value={formData.skills}
             onChange={handleInputChange}
-            className="rb-input" 
+            className="rb-input"
             style={{ minHeight: '80px' }}
-            placeholder="JavaScript, React, Node.js, AWS..." 
+            placeholder="JavaScript, React, Node.js, AWS..."
           />
         </div>
 
         <div className="rb-form-group">
           <label>Education (Optional)</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             name="education"
             value={formData.education}
             onChange={handleInputChange}
-            className="rb-input" 
-            placeholder="e.g. B.S. Computer Science, University of Washington" 
+            className="rb-input"
+            placeholder="e.g. B.S. Computer Science, University of Washington"
           />
         </div>
 
-        <button 
-          className="btn-generate-resume" 
+        <button
+          className="btn-generate-resume"
           onClick={handleGenerate}
           disabled={loading || !formData.targetRole || !formData.experience}
         >
@@ -142,13 +142,13 @@ const ResumeBuilder = () => {
             {copied ? <><FiCheck color="#10b981" /> Copied!</> : <><FiCopy /> Copy to Clipboard</>}
           </button>
         </div>
-        
+
         <div className="rb-output-content">
           {generatedResume ? (
             <div className="rb-resume-paper">
-              <textarea 
-                className="rb-resume-text" 
-                value={generatedResume} 
+              <textarea
+                className="rb-resume-text"
+                value={generatedResume}
                 readOnly
               />
             </div>
