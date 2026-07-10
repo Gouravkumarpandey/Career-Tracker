@@ -363,7 +363,7 @@ const performRAGMatch = async (userId, resumeText, jobDescription) => {
         content: 'You are an elite ATS matching system. Given a Job Description and relevant sections of a candidate\'s Resume, calculate the matching percentage and return a valid JSON object with the following exact keys: matchPercentage (number), strongMatches (array of strings), missingSkills (array of strings), suggestions (array of strings).'
       },
       {
-        role: 'role',
+        role: 'user',
         content: `Job Description:\n${jobDescription}\n\nRelevant Resume Context:\n${contextText}`
       }
     ]
