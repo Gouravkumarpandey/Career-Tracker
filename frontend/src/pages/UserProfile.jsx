@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { 
   FiEdit2, FiGithub, FiLinkedin, FiGlobe, FiUploadCloud, 
-  FiBriefcase, FiBook, FiAward, FiPlus, FiX, FiMail, FiPhone, FiMapPin, FiCpu, FiExternalLink
+  FiBriefcase, FiBook, FiAward, FiPlus, FiX, FiMail, FiPhone, FiMapPin, FiCpu, FiExternalLink, FiSend, FiMoreHorizontal
 } from 'react-icons/fi';
 import api from '../config/api';
 import './UserProfile.css';
@@ -24,6 +24,11 @@ const UserProfile = () => {
   const [educationList, setEducationList] = useState([]);
   const [experienceList, setExperienceList] = useState([]);
   const [projectList, setProjectList] = useState([]);
+
+  // Mocking LinkedIn Mockup Specific States
+  const [pronouns, setPronouns] = useState('He/Him');
+  const [connections, setConnections] = useState('500+');
+  const [profileLanguage, setProfileLanguage] = useState('English');
 
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -84,7 +89,7 @@ const UserProfile = () => {
   }, [userProfile]);
 
   const handleEditClick = () => {
-    setEditForm({ ...profile });
+    setEditForm({ ...profile, pronouns, connections });
     setIsEditing(true);
   };
 
@@ -100,6 +105,8 @@ const UserProfile = () => {
       await api.put('/api/users/profile', editForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (editForm.pronouns) setPronouns(editForm.pronouns);
+      if (editForm.connections) setConnections(editForm.connections);
       await refreshProfile();
       setIsEditing(false);
     } catch (err) {
@@ -206,167 +213,277 @@ const UserProfile = () => {
   const avatarChar = profile.name ? profile.name.charAt(0).toUpperCase() : 'U';
 
   return (
-    <div className="profile-container">
-      {/* LinkedIn-style Intro Card */}
-      <div className="li-intro-card">
-        <div className="li-banner"></div>
-        <div className="li-intro-body">
-          <div className="li-avatar-wrapper">
-            <span className="li-avatar-placeholder">{avatarChar}</span>
+    <div className="lk-profile-layout">
+      {/* Main Left Column */}
+      <div className="lk-main-column">
+        
+        {/* Intro Card */}
+        <div className="lk-card lk-intro-card">
+          <div className="lk-banner-wrapper">
+            <div className="lk-banner">
+              {/* Graphic curvy background matches mockup */}
+              <svg viewBox="0 0 800 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="lk-banner-graphic">
+                <path d="M-50 150 C 150 50, 200 250, 450 100 C 600 0, 750 180, 850 50" stroke="rgba(255,255,255,0.2)" strokeWidth="4" />
+                <path d="M-20 180 C 180 80, 220 200, 400 80 C 580 -20, 700 150, 900 80" stroke="rgba(255,255,255,0.15)" strokeWidth="2" />
+              </svg>
+            </div>
+            <button className="lk-banner-edit-btn" onClick={handleEditClick}>
+              <FiEdit2 size={16} />
+            </button>
           </div>
-          <div className="li-info-row">
-            <div className="li-text-info">
-              <h1 className="li-name">{profile.name}</h1>
-              <p className="li-headline">{profile.role}</p>
-              <div className="li-contact-list">
-                {profile.currentAddress && <span className="li-contact-item"><FiMapPin /> {profile.currentAddress}</span>}
-                <span className="li-contact-item"><FiMail /> {profile.email}</span>
-                {profile.phoneNumber && <span className="li-contact-item"><FiPhone /> {profile.phoneNumber}</span>}
-              </div>
-              <div className="li-socials-row">
-                {profile.githubUrl && <a href={profile.githubUrl} className="li-social-link" target="_blank" rel="noreferrer"><FiGithub /> GitHub</a>}
-                {profile.linkedinUrl && <a href={profile.linkedinUrl} className="li-social-link" target="_blank" rel="noreferrer"><FiLinkedin /> LinkedIn</a>}
-                {profile.portfolioUrl && <a href={profile.portfolioUrl} className="li-social-link" target="_blank" rel="noreferrer"><FiGlobe /> Website</a>}
+
+          <div className="lk-intro-content">
+            <div className="lk-avatar-section">
+              <div className="lk-avatar">
+                <span className="lk-avatar-text">{avatarChar}</span>
               </div>
             </div>
-            <div className="li-actions-col">
-              <button className="li-btn-primary" onClick={handleEditClick}><FiEdit2 /> Edit Profile</button>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* About Section */}
-      <div className="li-section-card">
-        <h2 className="li-section-title">About</h2>
-        <p className="li-about-text">
-          {profile.bio || "No biography provided yet. Add information about yourself by editing your profile."}
-        </p>
-      </div>
-
-      {/* Experience Section */}
-      <div className="li-section-card">
-        <div className="li-section-header">
-          <h2 className="li-section-title">Experience</h2>
-          <button className="li-btn-add" onClick={() => setShowExpModal(true)}><FiPlus /> Add experience</button>
-        </div>
-        <div className="li-timeline">
-          {experienceList.length === 0 ? (
-            <p className="li-empty-text">No experience added yet.</p>
-          ) : (
-            experienceList.map(exp => (
-              <div key={exp.id} className="li-timeline-item">
-                <div className="li-item-icon"><FiBriefcase /></div>
-                <div className="li-item-body">
-                  <div className="li-item-header">
-                    <h3 className="li-item-title">{exp.role}</h3>
-                    <button className="li-item-delete" onClick={() => handleDeleteExp(exp.id)}>&times;</button>
-                  </div>
-                  <h4 className="li-item-subtitle">{exp.company} • {exp.jobType}</h4>
-                  <span className="li-item-date">
-                    {new Date(exp.startDate).toLocaleDateString(undefined, {month: 'short', year: 'numeric'})} - {exp.endDate ? new Date(exp.endDate).toLocaleDateString(undefined, {month: 'short', year: 'numeric'}) : 'Present'}
-                  </span>
-                  {exp.location && <p className="li-item-location"><FiMapPin /> {exp.location}</p>}
-                  {exp.description && <p className="li-item-desc">{exp.description}</p>}
+            <div className="lk-intro-details">
+              <div className="lk-details-left">
+                <div className="lk-name-row">
+                  <h1 className="lk-fullname">{profile.name}</h1>
+                  {pronouns && <span className="lk-pronouns">({pronouns})</span>}
+                </div>
+                <p className="lk-headline-role">{profile.role}</p>
+                <div className="lk-meta-location">
+                  {profile.currentAddress && <span>{profile.currentAddress}</span>}
+                  <span className="lk-contact-link-btn">Contact info</span>
+                </div>
+                <div className="lk-connections-count">{connections} connections</div>
+                
+                <div className="lk-actions-row">
+                  <button className="lk-btn lk-btn-blue"><FiSend /> Message</button>
+                  <button className="lk-btn lk-btn-outline">More</button>
                 </div>
               </div>
-            ))
-          )}
-        </div>
-      </div>
 
-      {/* Education Section */}
-      <div className="li-section-card">
-        <div className="li-section-header">
-          <h2 className="li-section-title">Education</h2>
-          <button className="li-btn-add" onClick={() => setShowEduModal(true)}><FiPlus /> Add education</button>
-        </div>
-        <div className="li-timeline">
-          {educationList.length === 0 ? (
-            <p className="li-empty-text">No education added yet.</p>
-          ) : (
-            educationList.map(edu => (
-              <div key={edu.id} className="li-timeline-item">
-                <div className="li-item-icon"><FiBook /></div>
-                <div className="li-item-body">
-                  <div className="li-item-header">
-                    <h3 className="li-item-title">{edu.institution}</h3>
-                    <button className="li-item-delete" onClick={() => handleDeleteEdu(edu.id)}>&times;</button>
-                  </div>
-                  <h4 className="li-item-subtitle">{edu.degree} in {edu.fieldOfStudy}</h4>
-                  <span className="li-item-date">
-                    {new Date(edu.startDate).getFullYear()} - {edu.endDate ? new Date(edu.endDate).getFullYear() : 'Present'}
-                  </span>
-                  {edu.percentage && <p className="li-item-desc">Grade / CGPA: {edu.percentage}</p>}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Projects Section */}
-      <div className="li-section-card">
-        <div className="li-section-header">
-          <h2 className="li-section-title">Projects</h2>
-          <button className="li-btn-add" onClick={() => setShowProjModal(true)}><FiPlus /> Add project</button>
-        </div>
-        <div className="li-projects-grid">
-          {projectList.length === 0 ? (
-            <p className="li-empty-text">No projects added yet.</p>
-          ) : (
-            projectList.map(proj => (
-              <div key={proj.id} className="li-project-card">
-                <div className="li-project-header">
-                  <h3 className="li-project-title">{proj.title}</h3>
-                  <button className="li-item-delete" onClick={() => handleDeleteProj(proj.id)}>&times;</button>
-                </div>
-                <p className="li-project-desc">{proj.description}</p>
-                {proj.techStack && (
-                  <div className="li-tech-tags">
-                    {proj.techStack.split(',').map((tech, idx) => (
-                      <span key={idx} className="li-tag">{tech.trim()}</span>
-                    ))}
+              {/* Right Side Info (Current company/education placeholders matching LinkedIn style) */}
+              <div className="lk-details-right">
+                {experienceList.length > 0 && (
+                  <div className="lk-detail-badge">
+                    <FiBriefcase className="lk-badge-icon" />
+                    <span>{experienceList[0].company}</span>
                   </div>
                 )}
-                <div className="li-project-links">
-                  {proj.githubLink && <a href={proj.githubLink} target="_blank" rel="noreferrer" className="li-link-btn"><FiGithub /> GitHub</a>}
-                  {proj.liveLink && <a href={proj.liveLink} target="_blank" rel="noreferrer" className="li-link-btn"><FiExternalLink /> Live Demo</a>}
-                </div>
+                {educationList.length > 0 && (
+                  <div className="lk-detail-badge">
+                    <FiBook className="lk-badge-icon" />
+                    <span>{educationList[0].institution}</span>
+                  </div>
+                )}
               </div>
-            ))
-          )}
+            </div>
+
+            {/* Badges Box: Open to Work & Providing Services */}
+            <div className="lk-boxes-container">
+              <div className="lk-badge-box">
+                <div className="lk-badge-box-header">
+                  <strong>Open to work</strong>
+                  <button className="lk-badge-box-edit"><FiEdit2 size={12} /></button>
+                </div>
+                <p>{profile.role} roles</p>
+                <span className="lk-box-link">Show details</span>
+              </div>
+
+              <div className="lk-badge-box lk-badge-box-light">
+                <div className="lk-badge-box-header">
+                  <strong>Providing Services</strong>
+                  <button className="lk-badge-box-edit"><FiEdit2 size={12} /></button>
+                </div>
+                <p>Software Development, Technical Consulting...</p>
+                <span className="lk-box-link">Show details</span>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* About Card */}
+        <div className="lk-card">
+          <div className="lk-card-header-row">
+            <h2 className="lk-card-title">About</h2>
+            <button className="lk-card-edit-btn" onClick={handleEditClick}><FiEdit2 /></button>
+          </div>
+          <p className="lk-about-text-content">
+            {profile.bio || "No summary provided yet. Click the edit icon to add your bio summary."}
+          </p>
+        </div>
+
+        {/* Experience Card */}
+        <div className="lk-card">
+          <div className="lk-card-header-row">
+            <h2 className="lk-card-title">Experience</h2>
+            <div className="lk-header-actions">
+              <button className="lk-card-add-btn" onClick={() => setShowExpModal(true)}><FiPlus /> Add</button>
+            </div>
+          </div>
+          <div className="lk-items-list">
+            {experienceList.length === 0 ? (
+              <p className="lk-empty-text">No experience listed yet.</p>
+            ) : (
+              experienceList.map(exp => (
+                <div key={exp.id} className="lk-item-row">
+                  <div className="lk-item-logo-box"><FiBriefcase /></div>
+                  <div className="lk-item-info">
+                    <div className="lk-item-title-row">
+                      <h3 className="lk-item-title">{exp.role}</h3>
+                      <button className="lk-item-delete-btn" onClick={() => handleDeleteExp(exp.id)}>&times;</button>
+                    </div>
+                    <span className="lk-item-subtitle">{exp.company} • {exp.jobType}</span>
+                    <span className="lk-item-dates">
+                      {new Date(exp.startDate).toLocaleDateString(undefined, {month: 'short', year: 'numeric'})} - {exp.endDate ? new Date(exp.endDate).toLocaleDateString(undefined, {month: 'short', year: 'numeric'}) : 'Present'}
+                    </span>
+                    {exp.location && <span className="lk-item-location-text"><FiMapPin /> {exp.location}</span>}
+                    {exp.description && <p className="lk-item-desc-text">{exp.description}</p>}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Education Card */}
+        <div className="lk-card">
+          <div className="lk-card-header-row">
+            <h2 className="lk-card-title">Education</h2>
+            <div className="lk-header-actions">
+              <button className="lk-card-add-btn" onClick={() => setShowEduModal(true)}><FiPlus /> Add</button>
+            </div>
+          </div>
+          <div className="lk-items-list">
+            {educationList.length === 0 ? (
+              <p className="lk-empty-text">No education listed yet.</p>
+            ) : (
+              educationList.map(edu => (
+                <div key={edu.id} className="lk-item-row">
+                  <div className="lk-item-logo-box"><FiBook /></div>
+                  <div className="lk-item-info">
+                    <div className="lk-item-title-row">
+                      <h3 className="lk-item-title">{edu.institution}</h3>
+                      <button className="lk-item-delete-btn" onClick={() => handleDeleteEdu(edu.id)}>&times;</button>
+                    </div>
+                    <span className="lk-item-subtitle">{edu.degree} in {edu.fieldOfStudy}</span>
+                    <span className="lk-item-dates">
+                      {new Date(edu.startDate).getFullYear()} - {edu.endDate ? new Date(edu.endDate).getFullYear() : 'Present'}
+                    </span>
+                    {edu.percentage && <span className="lk-item-location-text">Grade/CGPA: {edu.percentage}</span>}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Projects Card */}
+        <div className="lk-card">
+          <div className="lk-card-header-row">
+            <h2 className="lk-card-title">Featured Projects</h2>
+            <button className="lk-card-add-btn" onClick={() => setShowProjModal(true)}><FiPlus /> Add</button>
+          </div>
+          <div className="lk-projects-container">
+            {projectList.length === 0 ? (
+              <p className="lk-empty-text">No projects listed yet.</p>
+            ) : (
+              projectList.map(proj => (
+                <div key={proj.id} className="lk-project-card-item">
+                  <div className="lk-project-card-header">
+                    <h4>{proj.title}</h4>
+                    <button className="lk-item-delete-btn" onClick={() => handleDeleteProj(proj.id)}>&times;</button>
+                  </div>
+                  <p>{proj.description}</p>
+                  {proj.techStack && (
+                    <div className="lk-tech-tags-list">
+                      {proj.techStack.split(',').map((tech, idx) => (
+                        <span key={idx} className="lk-tech-tag">{tech.trim()}</span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="lk-proj-links-row">
+                    {proj.githubLink && <a href={proj.githubLink} target="_blank" rel="noreferrer"><FiGithub /> Code</a>}
+                    {proj.liveLink && <a href={proj.liveLink} target="_blank" rel="noreferrer"><FiExternalLink /> Live</a>}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
       </div>
 
-      {/* Modals */}
+      {/* Right Column (Widgets matching mockup) */}
+      <div className="lk-right-column">
+        
+        {/* Profile Language Widget */}
+        <div className="lk-card lk-widget-card">
+          <div className="lk-widget-header">
+            <h3>Profile language</h3>
+            <button className="lk-widget-edit"><FiEdit2 size={14} /></button>
+          </div>
+          <div className="lk-lang-buttons">
+            <button 
+              className={`lk-lang-btn ${profileLanguage === 'English' ? 'active' : ''}`}
+              onClick={() => setProfileLanguage('English')}
+            >
+              English
+            </button>
+            <button 
+              className={`lk-lang-btn ${profileLanguage === 'Español' ? 'active' : ''}`}
+              onClick={() => setProfileLanguage('Español')}
+            >
+              Español
+            </button>
+          </div>
+        </div>
+
+        {/* Public Profile & URL Widget */}
+        <div className="lk-card lk-widget-card">
+          <div className="lk-widget-header">
+            <h3>Public profile & URL</h3>
+            <button className="lk-widget-edit"><FiEdit2 size={14} /></button>
+          </div>
+          <p className="lk-widget-url">
+            www.linkedin.com/in/{profile.name.toLowerCase().replace(/\s+/g, '-')}
+          </p>
+        </div>
+
+      </div>
+
+      {/* Edit Intro Form Modal */}
       {isEditing && (
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3>Edit Intro</h3>
+              <h3>Edit intro</h3>
               <button className="modal-close" onClick={() => setIsEditing(false)}><FiX /></button>
             </div>
             <form onSubmit={handleSaveProfile} className="modal-form">
               <div className="form-group">
-                <label>Name</label>
+                <label>Name *</label>
                 <input type="text" name="name" value={editForm.name} onChange={handleEditChange} required />
               </div>
               <div className="form-group">
-                <label>Headline (Role)</label>
-                <input type="text" name="role" value={editForm.role} onChange={handleEditChange} />
+                <label>Pronouns</label>
+                <input type="text" name="pronouns" value={editForm.pronouns} onChange={handleEditChange} placeholder="e.g. He/Him, They/Them" />
+              </div>
+              <div className="form-group">
+                <label>Headline (Role) *</label>
+                <input type="text" name="role" value={editForm.role} onChange={handleEditChange} required />
               </div>
               <div className="form-group">
                 <label>Bio (Summary)</label>
                 <textarea name="bio" value={editForm.bio} onChange={handleEditChange} rows="3" />
               </div>
               <div className="form-group">
+                <label>Address / Location</label>
+                <input type="text" name="currentAddress" value={editForm.currentAddress} onChange={handleEditChange} />
+              </div>
+              <div className="form-group">
                 <label>Phone Number</label>
                 <input type="text" name="phoneNumber" value={editForm.phoneNumber} onChange={handleEditChange} />
               </div>
               <div className="form-group">
-                <label>Address / Location</label>
-                <input type="text" name="currentAddress" value={editForm.currentAddress} onChange={handleEditChange} />
+                <label>Connections Count</label>
+                <input type="text" name="connections" value={editForm.connections} onChange={handleEditChange} />
               </div>
               <div className="form-group">
                 <label>GitHub Link</label>
@@ -428,7 +545,7 @@ const UserProfile = () => {
               </div>
               <div className="form-group">
                 <label>Description</label>
-                <textarea value={newExp.description} onChange={e => setNewExp({...newExp, description: e.target.value})} rows="3" placeholder="Describe your key achievements..." />
+                <textarea value={newExp.description} onChange={e => setNewExp({...newExp, description: e.target.value})} rows="3" placeholder="Describe your achievements..." />
               </div>
               <button type="submit" className="modal-submit">Save Experience</button>
             </form>
@@ -467,7 +584,7 @@ const UserProfile = () => {
               </div>
               <div className="form-group">
                 <label>Grade / CGPA</label>
-                <input type="text" value={newEdu.percentage} onChange={e => setNewEdu({...newEdu, percentage: e.target.value})} placeholder="e.g. 3.8/4.0 or 85%" />
+                <input type="text" value={newEdu.percentage} onChange={e => setNewEdu({...newEdu, percentage: e.target.value})} placeholder="e.g. 3.8/4.0" />
               </div>
               <button type="submit" className="modal-submit">Save Education</button>
             </form>
