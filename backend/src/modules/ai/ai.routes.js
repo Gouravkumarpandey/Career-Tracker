@@ -18,6 +18,7 @@ router.post('/resume/generate', aiController.generateResume);
 router.get('/skill-gap', aiController.getSkillGap);
 router.get('/recommendations/career', aiController.getCareerRecommendations);
 router.get('/recommendations/learning', aiController.getLearningRecommendations);
+router.post('/resume/rag-match', aiController.matchResumeToJob);
 router.post('/chat', aiController.chatAssistant);
 
 module.exports = router;

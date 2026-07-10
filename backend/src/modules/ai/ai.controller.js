@@ -113,6 +113,16 @@ const chatAssistant = async (req, res, next) => {
   }
 };
 
+const matchResumeToJob = async (req, res, next) => {
+  try {
+    const { resumeText, jobDescription } = req.body;
+    const result = await aiService.performRAGMatch(req.user.id, resumeText, jobDescription);
+    res.status(200).json(new ApiResponse(200, result, 'Resume matched with job description successfully via RAG flow.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   analyzeResume,
   analyzeResumeText,
@@ -121,5 +131,6 @@ module.exports = {
   getSkillGap,
   getCareerRecommendations,
   getLearningRecommendations,
-  chatAssistant
+  chatAssistant,
+  matchResumeToJob
 };

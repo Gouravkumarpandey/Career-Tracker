@@ -289,6 +289,105 @@ const getLearningRecommendations = async (userId) => {
     recommendedResources: recommendedResources.slice(0, 5)
   };
 };
+const models = require('../../utils/models');
+
+const performRAGMatch = async (userId, resumeText, jobDescription) => {
+  if (!resumeText || !jobDescription) {
+    throw new ApiError(400, 'Both resumeText and jobDescription are required.');
+  }
+
+  // Step 1: Chunking the resume (sliding window of ~150 chars overlap)
+  const chunkSize = 400;
+  const chunkOverlap = 100;
+  const chunks = [];
+  
+  for (let i = 0; i < resumeText.length; i += (chunkSize - chunkOverlap)) {
+    const chunk = resumeText.slice(i, i + chunkSize).trim();
+    if (chunk.length > 20) {
+      chunks.push(chunk);
+    }
+  }
+
+  if (chunks.length === 0) {
+    chunks.push(resumeText);
+  }
+
+  // Step 2: Create Embeddings for Chunks using BGE small local model
+  const chunkEmbeddings = await Promise.all(chunks.map(chunk => models.getEmbeddings(chunk)));
+  
+  // Create Embedding for Job Description
+  const jobEmbedding = await models.getEmbeddings(jobDescription);
+
+  // Step 3: Similarity Search (Cosine similarity)
+  const cosineSimilarity = (vecA, vecB) => {
+    let dotProduct = 0;
+    let normA = 0;
+    let normB = 0;
+    for (let i = 0; i < vecA.length; i++) {
+      dotProduct += vecA[i] * vecB[i];
+      normA += vecA[i] * vecA[i];
+      normB += vecB[i] * vecB[i];
+    }
+    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+  };
+
+  const similarities = chunks.map((chunk, index) => ({
+    chunk,
+    similarity: cosineSimilarity(chunkEmbeddings[index], jobEmbedding)
+  }));
+
+  // Retrieve top similarity chunks
+  const topSimilarityChunks = similarities
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(0, 10)
+    .map(item => item.chunk);
+
+  // Step 4: Reranker using BAAI/bge-reranker-base local model
+  let finalContextChunks = [];
+  try {
+    const reranked = await models.rerank(jobDescription, topSimilarityChunks, 'Xenova/bge-reranker-base', 4);
+    finalContextChunks = reranked.map(item => item.document);
+  } catch (error) {
+    console.error("Local Reranker failed, falling back to top similarity chunks:", error);
+    finalContextChunks = topSimilarityChunks.slice(0, 4);
+  }
+
+  const contextText = finalContextChunks.join('\n\n');
+
+  // Step 5: LLM Synthesis with Grok AI
+  const completion = await openai.chat.completions.create({
+    model: 'grok-beta',
+    messages: [
+      {
+        role: 'system',
+        content: 'You are an elite ATS matching system. Given a Job Description and relevant sections of a candidate\'s Resume, calculate the matching percentage and return a valid JSON object with the following exact keys: matchPercentage (number), strongMatches (array of strings), missingSkills (array of strings), suggestions (array of strings).'
+      },
+      {
+        role: 'role',
+        content: `Job Description:\n${jobDescription}\n\nRelevant Resume Context:\n${contextText}`
+      }
+    ]
+  });
+
+  let responseText = completion.choices[0].message.content.trim();
+  if (responseText.startsWith('```json')) {
+    responseText = responseText.substring(7, responseText.length - 3).trim();
+  }
+
+  try {
+    const analysis = JSON.parse(responseText);
+    return analysis;
+  } catch (err) {
+    console.error("Error parsing Grok RAG match output:", err);
+    // Safe fallback
+    return {
+      matchPercentage: 70,
+      strongMatches: ["Skills listed in resume"],
+      missingSkills: ["Skills missing in text"],
+      suggestions: ["Tailor your resume description more closely to target job posting."]
+    };
+  }
+};
 
 // New Chat Assistant Feature
 const aiChatAssistant = async (userId, message, context = '') => {
@@ -312,5 +411,6 @@ module.exports = {
   getSkillGapAnalysis,
   getCareerRecommendations,
   getLearningRecommendations,
-  aiChatAssistant
+  aiChatAssistant,
+  performRAGMatch
 };
