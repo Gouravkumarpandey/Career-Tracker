@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
-import { GoogleLogin } from '@react-oauth/google';
+import { useGoogleLogin } from '@react-oauth/google';
+import API_BASE from '../config/api';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ const Signup = () => {
     if (error) setError('');
   };
 
+  // ─── Email / Password Signup ─────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -29,11 +31,9 @@ const Signup = () => {
 
     try {
       const name = `${formData.firstName} ${formData.lastName}`.trim();
-      const response = await fetch('/api/auth/signup', {
+      const response = await fetch(`${API_BASE}/api/auth/signup`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
           email: formData.email,
@@ -42,7 +42,6 @@ const Signup = () => {
       });
 
       const data = await response.json();
-
       if (response.ok) {
         navigate('/login');
       } else {
@@ -56,12 +55,13 @@ const Signup = () => {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
+  // ─── Google OAuth ────────────────────────────────────────────────────────────
+  const handleGoogleSuccess = async (tokenResponse) => {
     try {
-      const response = await fetch('/api/auth/google', {
+      const response = await fetch(`${API_BASE}/api/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken: credentialResponse.credential }),
+        body: JSON.stringify({ accessToken: tokenResponse.access_token }),
       });
 
       const data = await response.json();
@@ -79,11 +79,16 @@ const Signup = () => {
     }
   };
 
+  const googleLogin = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: () => setError('Google signup was cancelled or failed.'),
+  });
+
   return (
     <div className="teal-split-layout">
       {/* Left Side - Signup Form */}
       <div className="teal-split-left">
-        {/* Top Left Logo */}
+        {/* Logo */}
         <div className="teal-login-header">
           <Link to="/" className="logo" style={{ textDecoration: 'none' }}>
             <div className="logo-icon">C</div>
@@ -180,8 +185,13 @@ const Signup = () => {
             <span>or</span>
           </div>
 
+          {/* Google Button — actually triggers OAuth */}
           <div className="purple-socials">
-            <button type="button" className="teal-social-btn google-btn" onClick={() => {}}>
+            <button
+              type="button"
+              className="teal-social-btn google-btn"
+              onClick={() => googleLogin()}
+            >
               <svg className="google-btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -202,9 +212,9 @@ const Signup = () => {
 
       {/* Right Side - Image */}
       <div className="teal-split-right">
-        <img 
-          src="https://cdn.prod.website-files.com/62775a91cc3db44c787149de/67183eb61f2946ce0cd8415e_AI-Interview-Practice.webp" 
-          alt="AI Interview Practice" 
+        <img
+          src="https://cdn.prod.website-files.com/62775a91cc3db44c787149de/67183eb61f2946ce0cd8415e_AI-Interview-Practice.webp"
+          alt="AI Interview Practice"
         />
       </div>
     </div>

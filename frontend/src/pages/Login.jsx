@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiEye, FiEyeOff, FiMail, FiLock } from 'react-icons/fi';
-import { GoogleLogin } from '@react-oauth/google';
+import { useGoogleLogin } from '@react-oauth/google';
 import ReCAPTCHA from 'react-google-recaptcha';
+import API_BASE from '../config/api';
 
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
@@ -20,6 +21,33 @@ const Login = () => {
     if (error) setError('');
   };
 
+  // ─── Google OAuth ────────────────────────────────────────────────────────────
+  const handleGoogleSuccess = async (tokenResponse) => {
+    try {
+      const response = await fetch(`${API_BASE}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessToken: tokenResponse.access_token }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        if (data.data?.accessToken) localStorage.setItem('token', data.data.accessToken);
+        navigate('/dashboard');
+      } else {
+        setError(data.message || 'Google login failed');
+      }
+    } catch (err) {
+      console.error('Google login error', err);
+      setError('An error occurred during Google login.');
+    }
+  };
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: () => setError('Google login was cancelled or failed.'),
+  });
+
+  // ─── Email / Password Login ──────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -31,7 +59,7 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -56,25 +84,6 @@ const Login = () => {
       setCaptchaToken(null);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogleSuccess = async (credentialResponse) => {
-    try {
-      const response = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken: credentialResponse.credential }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        if (data.data?.accessToken) localStorage.setItem('token', data.data.accessToken);
-        navigate('/dashboard');
-      } else {
-        setError(data.message || 'Google Login failed');
-      }
-    } catch (err) {
-      setError('An error occurred during Google login.');
     }
   };
 
@@ -142,7 +151,7 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Google reCAPTCHA v2 */}
+            {/* Google reCAPTCHA */}
             <div className="recaptcha-wrapper">
               <ReCAPTCHA
                 ref={recaptchaRef}
@@ -161,8 +170,13 @@ const Login = () => {
             <span>or continue with</span>
           </div>
 
+          {/* Google Button — actually triggers OAuth */}
           <div className="teal-socials">
-            <button type="button" className="teal-social-btn google-btn" onClick={() => {}}>
+            <button
+              type="button"
+              className="teal-social-btn google-btn"
+              onClick={() => googleLogin()}
+            >
               <svg className="google-btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
