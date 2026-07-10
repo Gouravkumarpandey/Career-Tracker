@@ -14,6 +14,8 @@ import Planner from './pages/Planner';
 import Certifications from './pages/Certifications';
 import ResumeBuilder from './pages/ResumeBuilder';
 
+import LearningTracker from './pages/LearningTracker';
+
 function App() {
   return (
     <Routes>
@@ -27,7 +29,7 @@ function App() {
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="profile" element={<UserProfile />} />
-        <Route path="learning" element={<PlaceholderPage title="Learning Tracker" description="Track your courses, notes, and learning hours." />} />
+        <Route path="learning" element={<LearningTracker />} />
         <Route path="jobs" element={<PlaceholderPage title="Job Tracker" description="Manage your job applications and interviews." />} />
         <Route path="internships" element={<PlaceholderPage title="Internship Tracker" description="Manage your internship applications and statuses." />} />
         <Route path="certifications" element={<Certifications />} />
