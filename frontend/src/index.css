@@ -2370,124 +2370,187 @@ button {
 
 .teal-login-title {
   font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 24px;
-  color: #1a1a1a;
+  font-weight: 800;
+  margin-bottom: 4px;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+}
+
+.login-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 28px;
+}
+
+.login-form-header {
+  margin-bottom: 4px;
+}
+
+.teal-error {
+  background: #fff5f5;
+  color: #e53e3e;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  text-align: center;
+  border: 1px solid #fed7d7;
 }
 
 .teal-login-form {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 18px;
 }
 
-.teal-error {
-  background: #fff5f5;
-  color: #e53e3e;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  text-align: center;
+/* Field Groups */
+.login-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.teal-field {
-  width: 100%;
-}
-
-.teal-field input {
-  width: 100%;
-  padding: 14px 16px;
-  border: 1px solid #c2c8d0;
-  font-size: 14px;
-  color: #333;
-  outline: none;
-  background: #fff;
-}
-
-/* Remove bottom border from first input, remove top border radius from second input */
-.teal-field:first-of-type input {
-  border-radius: 6px 6px 0 0;
-}
-
-.teal-password-field input {
-  border-radius: 0 0 6px 6px;
-  border-top: none;
-}
-
-.teal-field input:focus {
-  border-color: #02605f;
-  z-index: 1;
-  position: relative;
-}
-
-.teal-password-field {
-  position: relative;
-  margin-bottom: 24px;
-}
-
-.teal-eye-btn {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: #888;
-  cursor: pointer;
-  z-index: 2;
-  padding: 0;
-}
-
-.teal-submit-btn {
-  width: 100%;
-  max-width: 200px;
-  margin: 0 auto 16px;
-  padding: 12px 24px;
-  background-color: #f5b000;
-  color: #000;
-  border: none;
-  border-radius: 9999px;
-  font-size: 15px;
+.login-label {
+  font-size: 13px;
   font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
+  color: #374151;
+  letter-spacing: 0.01em;
 }
 
-.teal-submit-btn:hover {
-  opacity: 0.9;
+.login-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.teal-forgot-password {
-  margin-bottom: 24px;
+.login-forgot {
+  font-size: 13px;
+  color: #293681;
+  font-weight: 500;
+  text-decoration: none;
 }
 
-.teal-forgot-password a {
-  color: #02605f;
-  font-size: 14px;
+.login-forgot:hover {
   text-decoration: underline;
 }
 
-.teal-divider {
+.login-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-input-icon {
+  position: absolute;
+  left: 14px;
+  color: #9ca3af;
+  font-size: 16px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.login-input {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1e293b;
+  background: #f8fafc;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.login-input::placeholder {
+  color: #b0bac7;
+}
+
+.login-input:focus {
+  border-color: #293681;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(41, 54, 129, 0.08);
+}
+
+.login-eye-btn {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.login-eye-btn:hover {
+  color: #293681;
+}
+
+/* Submit Button */
+.login-submit-btn {
+  width: 100%;
+  padding: 13px;
+  background: #293681;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  letter-spacing: 0.02em;
+  margin-top: 4px;
+}
+
+.login-submit-btn:hover {
+  background: #1e2860;
+}
+
+.login-submit-btn:active {
+  transform: scale(0.99);
+}
+
+.login-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Google reCAPTCHA wrapper */
+.recaptcha-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  margin: 2px 0;
+}
+
+.recaptcha-wrapper iframe {
+  border-radius: 8px;
+}
+
+
+/* Divider */
+.login-divider {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 24px;
+  margin: 20px 0 16px;
 }
 
-.teal-divider::before,
-.teal-divider::after {
+.login-divider::before,
+.login-divider::after {
   content: '';
   flex: 1;
   height: 1px;
   background: #e5e7eb;
 }
 
-.teal-divider span {
-  font-size: 13px;
-  color: #6b7280;
+.login-divider span {
+  font-size: 12px;
+  color: #9ca3af;
+  white-space: nowrap;
+  font-weight: 500;
 }
 
 .teal-socials {
@@ -2504,41 +2567,48 @@ button {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  padding: 12px 24px;
-  border: none;
+  padding: 11px 24px;
   border-radius: 9999px;
   font-size: 14px;
-  font-weight: 600;
-  color: #fff;
+  font-weight: 500;
   cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
 }
 
 .google-btn {
-  background-color: #1a73e8;
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  color: #3c4043;
+  box-shadow: 0 1px 3px rgba(60,64,67,0.12), 0 1px 2px rgba(60,64,67,0.08);
+  font-family: 'Google Sans', Roboto, Arial, sans-serif;
+  letter-spacing: 0.01em;
+}
+
+.google-btn:hover {
+  background: #f8f9fa;
+  box-shadow: 0 2px 6px rgba(60,64,67,0.18), 0 1px 3px rgba(60,64,67,0.10);
+  border-color: #c6c6c6;
+}
+
+.google-btn:active {
+  background: #f1f3f4;
+  box-shadow: none;
+}
+
+.google-btn-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 .linkedin-btn {
-  background-color: #283e99;
+  background-color: #0a66c2;
+  border: none;
+  color: #fff;
 }
 
-.social-icon {
-  background: #fff;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-weight: bold;
-}
-
-.google-icon {
-  color: #ea4335;
-}
-
-.linkedin-icon {
-  color: #0a66c2;
-  font-size: 12px;
+.linkedin-btn:hover {
+  background-color: #004182;
 }
 
 .teal-footer-text {
