@@ -1,0 +1,22 @@
+node_modules/
+.env
+.env.local
+.env.development
+.env.production
+
+# Prisma
+prisma/migrations/dev.db
+prisma/dev.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Build output
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
