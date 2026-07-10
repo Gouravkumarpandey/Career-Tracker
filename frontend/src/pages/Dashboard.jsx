@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { FiTrendingUp, FiCheckCircle, FiClock, FiTarget, FiActivity, FiFileText, FiUpload } from 'react-icons/fi';
 import './Dashboard.css';
+import api from '../config/api';
 
 const Dashboard = () => {
   const [resumeText, setResumeText] = useState('');
@@ -15,22 +16,16 @@ const Dashboard = () => {
     setError('');
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/ai/resume/analyze-text', {
-        method: 'POST',
+      const response = await api.post('/api/ai/resume/analyze-text', { text: resumeText }, {
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ text: resumeText })
+        }
       });
-      const data = await response.json();
-      if (response.ok) {
-        setAtsScore(data.data.overallScore || Math.round((data.data.grammarScore + data.data.readabilityIndex) / 2));
-      } else {
-        setError(data.message || 'Failed to analyze.');
-      }
+      const data = response.data;
+      setAtsScore(data.data.overallScore || Math.round((data.data.grammarScore + data.data.readabilityIndex) / 2));
     } catch (err) {
-      setError('An error occurred.');
+      console.error(err);
+      setError(err.response?.data?.message || 'An error occurred.');
     } finally {
       setLoading(false);
     }
@@ -53,23 +48,18 @@ const Dashboard = () => {
       const formData = new FormData();
       formData.append('resume', selectedFile);
 
-      const response = await fetch('/api/ai/resume/upload-analyze', {
-        method: 'POST',
+      const response = await api.post('/api/ai/resume/upload-analyze', formData, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
-      const data = await response.json();
-      
-      if (response.ok) {
-        setAtsScore(data.data.overallScore || Math.round((data.data.grammarScore + data.data.readabilityIndex) / 2));
-      } else {
-        setError(data.message || 'Failed to analyze uploaded resume.');
-      }
+      const data = response.data;
+      setAtsScore(data.data.overallScore || Math.round((data.data.grammarScore + data.data.readabilityIndex) / 2));
     } catch (err) {
-      setError('An error occurred during file upload analysis.');
+      console.error(err);
+      setError(err.response?.data?.message || 'An error occurred during file upload analysis.');
     } finally {
       setLoading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';

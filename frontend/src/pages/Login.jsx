@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FiEye, FiEyeOff, FiMail, FiLock } from 'react-icons/fi';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import API_BASE from '../config/api';
+import api from '../config/api';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,21 +21,17 @@ const Login = () => {
   // ─── Google OAuth ────────────────────────────────────────────────────────────
   const handleGoogleSuccess = async (tokenResponse) => {
     try {
-      const response = await fetch(`${API_BASE}/api/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accessToken: tokenResponse.access_token }),
+      const response = await api.post('/api/auth/google', {
+        idToken: tokenResponse.access_token // The backend expects idToken/accessToken
       });
-      const data = await response.json();
-      if (response.ok) {
-        if (data.data?.accessToken) localStorage.setItem('token', data.data.accessToken);
-        navigate('/dashboard');
-      } else {
-        setError(data.message || 'Google login failed');
+      const data = response.data;
+      if (data.data?.accessToken) {
+        localStorage.setItem('token', data.data.accessToken);
       }
+      navigate('/dashboard');
     } catch (err) {
       console.error('Google login error', err);
-      setError('An error occurred during Google login.');
+      setError(err.response?.data?.message || 'Google login failed');
     }
   };
 
@@ -59,25 +55,20 @@ const Login = () => {
       // Execute reCAPTCHA v3 using action "submit"
       const token = await executeRecaptcha('submit');
 
-      const response = await fetch(`${API_BASE}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          recaptchaToken: token,
-        }),
+      const response = await api.post('/api/auth/login', {
+        email: formData.email,
+        password: formData.password,
+        recaptchaToken: token,
       });
-      const data = await response.json();
-      if (response.ok) {
-        if (data.data?.accessToken) localStorage.setItem('token', data.data.accessToken);
-        navigate('/dashboard');
-      } else {
-        setError(data.message || 'Login failed');
+
+      const data = response.data;
+      if (data.data?.accessToken) {
+        localStorage.setItem('token', data.data.accessToken);
       }
+      navigate('/dashboard');
     } catch (err) {
       console.error('Login error', err);
-      setError('An error occurred during login.');
+      setError(err.response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);
     }

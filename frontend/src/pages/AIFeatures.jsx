@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { FiCheckCircle, FiCpu, FiFileText, FiActivity, FiStar, FiUpload } from 'react-icons/fi';
 import './AIFeatures.css';
+import api from '../config/api';
 
 const AIFeatures = () => {
   const [resumeText, setResumeText] = useState('');
@@ -17,25 +18,17 @@ const AIFeatures = () => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/ai/resume/analyze-text', {
-        method: 'POST',
+      const response = await api.post('/api/ai/resume/analyze-text', { text: resumeText }, {
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ text: resumeText })
+        }
       });
 
-      const data = await response.json();
-      
-      if (response.ok) {
-        setResults(data.data);
-      } else {
-        setError(data.message || 'Failed to analyze resume text.');
-      }
+      const data = response.data;
+      setResults(data.data);
     } catch (err) {
       console.error(err);
-      setError('An error occurred during analysis.');
+      setError(err.response?.data?.message || 'An error occurred during analysis.');
     } finally {
       setLoading(false);
     }
@@ -59,25 +52,18 @@ const AIFeatures = () => {
       const formData = new FormData();
       formData.append('resume', selectedFile);
 
-      const response = await fetch('/api/ai/resume/upload-analyze', {
-        method: 'POST',
+      const response = await api.post('/api/ai/resume/upload-analyze', formData, {
         headers: {
-          'Authorization': `Bearer ${token}`
-          // Don't set Content-Type manually when using FormData
-        },
-        body: formData
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
-      const data = await response.json();
-      
-      if (response.ok) {
-        setResults(data.data);
-      } else {
-        setError(data.message || 'Failed to analyze uploaded resume.');
-      }
+      const data = response.data;
+      setResults(data.data);
     } catch (err) {
       console.error(err);
-      setError('An error occurred during file upload analysis.');
+      setError(err.response?.data?.message || 'An error occurred during file upload analysis.');
     } finally {
       setLoading(false);
       // Reset input

@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { useGoogleLogin } from '@react-oauth/google';
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import API_BASE from '../config/api';
+import api from '../config/api';
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { executeRecaptcha } = useGoogleReCaptcha();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -29,39 +27,22 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (!executeRecaptcha) {
-      setError('reCAPTCHA is not initialized yet. Please try again.');
-      return;
-    }
-
     setLoading(true);
 
     try {
-      // Execute reCAPTCHA v3 using action "submit"
-      const token = await executeRecaptcha('submit');
-
       const name = `${formData.firstName} ${formData.lastName}`.trim();
-      const response = await fetch(`${API_BASE}/api/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          email: formData.email,
-          password: formData.password,
-          recaptchaToken: token,
-        }),
+      const response = await api.post('/api/auth/signup', {
+        name,
+        email: formData.email,
+        password: formData.password,
       });
 
-      const data = await response.json();
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         navigate('/login');
-      } else {
-        setError(data.message || 'Signup failed');
       }
     } catch (err) {
       console.error('Signup error', err);
-      setError('An error occurred during signup.');
+      setError(err.response?.data?.message || 'An error occurred during signup.');
     } finally {
       setLoading(false);
     }
@@ -70,24 +51,18 @@ const Signup = () => {
   // ─── Google OAuth ────────────────────────────────────────────────────────────
   const handleGoogleSuccess = async (tokenResponse) => {
     try {
-      const response = await fetch(`${API_BASE}/api/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accessToken: tokenResponse.access_token }),
+      const response = await api.post('/api/auth/google', {
+        idToken: tokenResponse.access_token,
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        if (data.data?.accessToken) {
-          localStorage.setItem('token', data.data.accessToken);
-        }
-        navigate('/dashboard');
-      } else {
-        setError(data.message || 'Google Signup failed');
+      const data = response.data;
+      if (data.data?.accessToken) {
+        localStorage.setItem('token', data.data.accessToken);
       }
+      navigate('/dashboard');
     } catch (err) {
       console.error('Google Signup error', err);
-      setError('An error occurred during Google signup.');
+      setError(err.response?.data?.message || 'An error occurred during Google signup.');
     }
   };
 

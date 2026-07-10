@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FiCpu, FiCopy, FiCheck, FiFileText, FiZap } from 'react-icons/fi';
 import './ResumeBuilder.css';
+import api from '../config/api';
 
 const ResumeBuilder = () => {
   const [formData, setFormData] = useState({
@@ -30,24 +31,17 @@ const ResumeBuilder = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/ai/resume/generate', {
-        method: 'POST',
+      const response = await api.post('/api/ai/resume/generate', formData, {
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
+        }
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        setGeneratedResume(data.data.resumeText);
-      } else {
-        setError(data.message || 'Failed to generate resume.');
-      }
+      const data = response.data;
+      setGeneratedResume(data.data.resumeText);
     } catch (err) {
       console.error(err);
-      setError('An error occurred while connecting to Grok AI.');
+      setError(err.response?.data?.message || 'An error occurred while connecting to Grok AI.');
     } finally {
       setLoading(false);
     }
