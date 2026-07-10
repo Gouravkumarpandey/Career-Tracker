@@ -1,8 +1,27 @@
 const express = require('express');
+const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const prisma = require('./config/prisma'); // Aapki existing prisma config file
 
 const app = express();
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://career-tracker-frontend-gouravkumarpandeys-projects.vercel.app", // standard Vercel format
+  "https://career-tracker-frontend.vercel.app"
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS Policy: Origin not allowed.'), false);
+  },
+  credentials: true
+}));
 
 // JSON parsing middleware
 app.use(express.json());
