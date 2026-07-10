@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { useGoogleLogin } from '@react-oauth/google';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import API_BASE from '../config/api';
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -27,9 +29,18 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!executeRecaptcha) {
+      setError('reCAPTCHA is not initialized yet. Please try again.');
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Execute reCAPTCHA v3 using action "submit"
+      const token = await executeRecaptcha('submit');
+
       const name = `${formData.firstName} ${formData.lastName}`.trim();
       const response = await fetch(`${API_BASE}/api/auth/signup`, {
         method: 'POST',
@@ -38,6 +49,7 @@ const Signup = () => {
           name,
           email: formData.email,
           password: formData.password,
+          recaptchaToken: token,
         }),
       });
 

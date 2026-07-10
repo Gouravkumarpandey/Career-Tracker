@@ -1,20 +1,17 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiEye, FiEyeOff, FiMail, FiLock } from 'react-icons/fi';
 import { useGoogleLogin } from '@react-oauth/google';
-import ReCAPTCHA from 'react-google-recaptcha';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import API_BASE from '../config/api';
-
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 const Login = () => {
   const navigate = useNavigate();
-  const recaptchaRef = useRef(null);
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -52,20 +49,23 @@ const Login = () => {
     e.preventDefault();
     setError('');
 
-    if (!captchaToken) {
-      setError('Please complete the reCAPTCHA verification.');
+    if (!executeRecaptcha) {
+      setError('reCAPTCHA is not initialized yet. Please try again.');
       return;
     }
 
     setLoading(true);
     try {
+      // Execute reCAPTCHA v3 using action "submit"
+      const token = await executeRecaptcha('submit');
+
       const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
-          captchaToken,
+          recaptchaToken: token,
         }),
       });
       const data = await response.json();
@@ -74,14 +74,10 @@ const Login = () => {
         navigate('/dashboard');
       } else {
         setError(data.message || 'Login failed');
-        recaptchaRef.current?.reset();
-        setCaptchaToken(null);
       }
     } catch (err) {
       console.error('Login error', err);
       setError('An error occurred during login.');
-      recaptchaRef.current?.reset();
-      setCaptchaToken(null);
     } finally {
       setLoading(false);
     }
@@ -149,16 +145,6 @@ const Login = () => {
                   {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                 </button>
               </div>
-            </div>
-
-            {/* Google reCAPTCHA */}
-            <div className="recaptcha-wrapper">
-              <ReCAPTCHA
-                ref={recaptchaRef}
-                sitekey={RECAPTCHA_SITE_KEY}
-                onChange={(token) => setCaptchaToken(token)}
-                onExpired={() => setCaptchaToken(null)}
-              />
             </div>
 
             <button type="submit" className="login-submit-btn" disabled={loading}>

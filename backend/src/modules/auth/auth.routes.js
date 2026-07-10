@@ -2,12 +2,13 @@ const express = require('express');
 const authController = require('./auth.controller');
 const validate = require('../../middlewares/validate.middleware');
 const auth = require('../../middlewares/auth.middleware');
+const verifyRecaptcha = require('../../middlewares/recaptcha.middleware');
 const { validateRegister, validateLogin } = require('./auth.validation');
 
 const router = express.Router();
 
-router.post('/register', validate(validateRegister), authController.register);
-router.post('/login', validate(validateLogin), authController.login);
+router.post('/register', verifyRecaptcha, validate(validateRegister), authController.register);
+router.post('/login', verifyRecaptcha, validate(validateLogin), authController.login);
 router.post('/google', authController.googleLogin);
 router.post('/refresh', authController.refresh);
 router.post('/logout', auth, authController.logout);
