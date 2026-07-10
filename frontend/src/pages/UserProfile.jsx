@@ -1,32 +1,122 @@
 import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { 
   FiEdit2, FiGithub, FiLinkedin, FiGlobe, FiUploadCloud, 
-  FiBriefcase, FiBook, FiAward, FiPlus 
+  FiBriefcase, FiBook, FiAward, FiPlus, FiX, FiCheck, FiMail, FiPhone, FiMapPin
 } from 'react-icons/fi';
+import api from '../config/api';
 import './UserProfile.css';
 
 const UserProfile = () => {
-  // Mock data for the full requested feature list
-  const [user, setUser] = useState({
-    name: 'John Pro',
-    role: 'Senior Software Engineer',
-    bio: 'Passionate software developer with 5+ years of experience building scalable web applications. I love solving complex problems and exploring new technologies.',
-    avatar: null, // No avatar to show placeholder
-    socials: {
-      github: 'https://github.com',
-      linkedin: 'https://linkedin.com',
-      portfolio: 'https://portfolio.com'
-    }
+  const { userProfile, refreshProfile } = useOutletContext();
+  const [profile, setProfile] = useState({
+    name: '',
+    email: '',
+    role: 'Student',
+    bio: '',
+    githubUrl: '',
+    linkedinUrl: '',
+    portfolioUrl: '',
+    phoneNumber: '',
+    currentAddress: '',
   });
 
-  const [certs, setCerts] = useState([]);
+  const [educationList, setEducationList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({});
+  const [showEduModal, setShowEduModal] = useState(false);
+  const [newEdu, setNewEdu] = useState({
+    institution: '',
+    degree: '',
+    fieldOfStudy: '',
+    startDate: '',
+    endDate: '',
+    percentage: ''
+  });
 
   useEffect(() => {
-    const savedCerts = localStorage.getItem('careerTrackerCerts');
-    if (savedCerts) {
-      setCerts(JSON.parse(savedCerts));
+    if (userProfile) {
+      setProfile({
+        name: userProfile.name || '',
+        email: userProfile.email || '',
+        role: userProfile.role || 'Student',
+        bio: userProfile.profile?.bio || '',
+        githubUrl: userProfile.profile?.githubUrl || '',
+        linkedinUrl: userProfile.profile?.linkedinUrl || '',
+        portfolioUrl: userProfile.profile?.portfolioUrl || '',
+        phoneNumber: userProfile.profile?.phoneNumber || '',
+        currentAddress: userProfile.profile?.currentAddress || '',
+      });
+      setEducationList(userProfile.education || []);
     }
-  }, []);
+  }, [userProfile]);
+
+  const handleEditClick = () => {
+    setEditForm({ ...profile });
+    setIsEditing(true);
+  };
+
+  const handleEditChange = (e) => {
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      await api.put('/api/users/profile', editForm, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      await refreshProfile();
+      setIsEditing(false);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddEdu = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      await api.post('/api/users/education', newEdu, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      await refreshProfile();
+      setShowEduModal(false);
+      setNewEdu({
+        institution: '',
+        degree: '',
+        fieldOfStudy: '',
+        startDate: '',
+        endDate: '',
+        percentage: ''
+      });
+    } catch (err) {
+      console.error(err);
+      alert('Failed to add education record');
+    }
+  };
+
+  const handleDeleteEdu = async (eduId) => {
+    if (!window.confirm('Are you sure you want to delete this education record?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await api.delete(`/api/users/education/${eduId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      await refreshProfile();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete education record');
+    }
+  };
+
+  const avatarChar = profile.name ? profile.name.charAt(0).toUpperCase() : 'U';
 
   return (
     <div className="profile-container">
@@ -36,199 +126,184 @@ const UserProfile = () => {
         
         <div className="profile-avatar-container">
           <div className="profile-avatar">
-            {user.avatar ? (
-              <img src={user.avatar} alt="Profile" />
-            ) : (
-              <span className="profile-avatar-placeholder">
-                {user.name.charAt(0)}
-              </span>
-            )}
+            <span className="profile-avatar-placeholder">{avatarChar}</span>
           </div>
-          <button className="profile-avatar-edit">
-            <FiEdit2 size={16} />
-          </button>
         </div>
 
         <div className="profile-info">
-          <h1 className="profile-name">{user.name}</h1>
-          <p className="profile-role">{user.role}</p>
+          <h1 className="profile-name">{profile.name}</h1>
+          <p className="profile-role">{profile.role}</p>
           <div className="profile-socials">
-            <a href={user.socials.github} className="social-link" target="_blank" rel="noreferrer"><FiGithub /></a>
-            <a href={user.socials.linkedin} className="social-link" target="_blank" rel="noreferrer"><FiLinkedin /></a>
-            <a href={user.socials.portfolio} className="social-link" target="_blank" rel="noreferrer"><FiGlobe /></a>
+            {profile.githubUrl && <a href={profile.githubUrl} className="social-link" target="_blank" rel="noreferrer"><FiGithub /></a>}
+            {profile.linkedinUrl && <a href={profile.linkedinUrl} className="social-link" target="_blank" rel="noreferrer"><FiLinkedin /></a>}
+            {profile.portfolioUrl && <a href={profile.portfolioUrl} className="social-link" target="_blank" rel="noreferrer"><FiGlobe /></a>}
           </div>
         </div>
 
         <div className="profile-actions">
-          <button className="btn-upload">
-            <FiUploadCloud /> Upload Resume (PDF)
-          </button>
-          <button className="btn-upload" style={{background: 'var(--dash-primary)', color: 'white'}}>
+          <button className="btn-upload" onClick={handleEditClick} style={{background: 'var(--dash-primary)', color: 'white'}}>
             <FiEdit2 size={14} /> Edit Profile
           </button>
         </div>
       </div>
 
+      {/* Main Profile Grid */}
       <div className="profile-grid">
-        {/* Main Column */}
+        {/* Left column */}
         <div className="profile-main-col" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
+          {/* Bio */}
           <div className="profile-section">
             <div className="section-header">
               <h2 className="section-title">About Me (Bio)</h2>
-              <button className="btn-icon"><FiEdit2 /></button>
             </div>
             <p style={{ color: 'var(--dash-text-muted)', lineHeight: '1.6', fontSize: '15px' }}>
-              {user.bio}
+              {profile.bio || "No biography provided yet. Click 'Edit Profile' to add one!"}
             </p>
           </div>
 
-          <div className="profile-section">
-            <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}><FiAward /> Certifications & Badges</h2>
-            {certs.length === 0 ? (
-              <p style={{ color: 'var(--dash-text-muted)' }}>No certifications added yet. Add them in the Certifications tab!</p>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
-                {certs.map(cert => (
-                  <div key={cert.id} style={{ background: 'var(--dash-bg)', padding: '16px', borderRadius: '8px', border: '1px solid var(--dash-border)' }}>
-                    <div style={{ fontWeight: 600, color: 'var(--dash-text-main)', marginBottom: '4px' }}>{cert.name}</div>
-                    <div style={{ fontSize: '13px', color: 'var(--dash-text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <FiBriefcase /> {cert.issuingOrg}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
+          {/* Contact Details */}
           <div className="profile-section">
             <div className="section-header">
-              <h2 className="section-title">Experience</h2>
-              <button className="btn-icon"><FiPlus /></button>
+              <h2 className="section-title">Contact & Location</h2>
             </div>
-            <div className="timeline-list">
-              <div className="timeline-item">
-                <div className="timeline-icon"><FiBriefcase /></div>
-                <div className="timeline-content">
-                  <h3 className="timeline-title">Senior Frontend Engineer</h3>
-                  <p className="timeline-subtitle">Tech Innovators Inc. • Full-time</p>
-                  <span className="timeline-date">Jan 2022 - Present</span>
-                </div>
-                <button className="btn-icon"><FiEdit2 size={16} /></button>
-              </div>
-              <div className="timeline-item">
-                <div className="timeline-icon"><FiBriefcase /></div>
-                <div className="timeline-content">
-                  <h3 className="timeline-title">Software Developer</h3>
-                  <p className="timeline-subtitle">Creative Solutions Ltd. • Full-time</p>
-                  <span className="timeline-date">Aug 2019 - Dec 2021</span>
-                </div>
-                <button className="btn-icon"><FiEdit2 size={16} /></button>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', color: 'var(--dash-text-muted)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FiMail /> {profile.email}</div>
+              {profile.phoneNumber && <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FiPhone /> {profile.phoneNumber}</div>}
+              {profile.currentAddress && <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FiMapPin /> {profile.currentAddress}</div>}
             </div>
           </div>
 
+          {/* Education Timeline */}
           <div className="profile-section">
             <div className="section-header">
               <h2 className="section-title">Education Timeline</h2>
-              <button className="btn-icon"><FiPlus /></button>
+              <button className="btn-icon" onClick={() => setShowEduModal(true)}><FiPlus /></button>
             </div>
             <div className="timeline-list">
-              <div className="timeline-item">
-                <div className="timeline-icon"><FiBook /></div>
-                <div className="timeline-content">
-                  <h3 className="timeline-title">M.S. Computer Science</h3>
-                  <p className="timeline-subtitle">Stanford University</p>
-                  <span className="timeline-date">2017 - 2019 • CGPA: 3.8/4.0</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="profile-section">
-            <div className="section-header">
-              <h2 className="section-title">Projects</h2>
-              <button className="btn-icon"><FiPlus /></button>
-            </div>
-            <div className="timeline-list">
-              <div className="timeline-item" style={{ border: '1px solid var(--dash-border)', padding: '16px', borderRadius: '8px' }}>
-                <div className="timeline-content">
-                  <h3 className="timeline-title">CareerFlow Platform</h3>
-                  <p className="timeline-subtitle" style={{ margin: '8px 0', color: 'var(--dash-text-muted)' }}>
-                    A comprehensive career management SaaS built with React and Node.js.
-                  </p>
-                  <div className="tag-list">
-                    <span className="tag">React</span>
-                    <span className="tag">Node.js</span>
-                    <span className="tag">PostgreSQL</span>
+              {educationList.length === 0 ? (
+                <p style={{ color: 'var(--dash-text-muted)' }}>No education records added yet.</p>
+              ) : (
+                educationList.map(edu => (
+                  <div key={edu.id} className="timeline-item">
+                    <div className="timeline-icon"><FiBook /></div>
+                    <div className="timeline-content">
+                      <h3 className="timeline-title">{edu.degree} in {edu.fieldOfStudy}</h3>
+                      <p className="timeline-subtitle">{edu.institution}</p>
+                      <span className="timeline-date">
+                        {new Date(edu.startDate).getFullYear()} - {edu.endDate ? new Date(edu.endDate).getFullYear() : 'Present'}
+                        {edu.percentage && ` • Grade/CGPA: ${edu.percentage}`}
+                      </span>
+                    </div>
+                    <button className="btn-icon" style={{color: '#ef4444'}} onClick={() => handleDeleteEdu(edu.id)}>&times;</button>
                   </div>
-                </div>
-                <a href="#" className="social-link"><FiGithub /></a>
-              </div>
+                ))
+              )}
             </div>
           </div>
-
         </div>
 
-        {/* Sidebar Column */}
+        {/* Right column */}
         <div className="profile-side-col" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          
+          {/* Static sections/Placeholder info preserved for aesthetic consistency */}
           <div className="profile-section">
             <div className="section-header">
-              <h2 className="section-title">Top Skills</h2>
-              <button className="btn-icon"><FiEdit2 /></button>
+              <h2 className="section-title">Skills & Interests</h2>
             </div>
             <div className="tag-list">
               <span className="tag">React.js</span>
-              <span className="tag">JavaScript (ES6+)</span>
+              <span className="tag">JavaScript</span>
               <span className="tag">Node.js</span>
               <span className="tag">TypeScript</span>
-              <span className="tag">GraphQL</span>
-              <span className="tag">CSS / Tailwind</span>
+              <span className="tag">CSS</span>
             </div>
           </div>
-
-          <div className="profile-section">
-            <div className="section-header">
-              <h2 className="section-title">Certifications</h2>
-              <button className="btn-icon"><FiPlus /></button>
-            </div>
-            <div className="timeline-list">
-              <div className="timeline-item">
-                <div className="timeline-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--dash-success)' }}><FiAward /></div>
-                <div className="timeline-content">
-                  <h3 className="timeline-title" style={{ fontSize: '14px' }}>AWS Certified Developer</h3>
-                  <p className="timeline-subtitle" style={{ fontSize: '12px' }}>Amazon Web Services</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="profile-section">
-            <div className="section-header">
-              <h2 className="section-title">Languages</h2>
-              <button className="btn-icon"><FiPlus /></button>
-            </div>
-            <div className="tag-list">
-              <span className="tag">English (Native)</span>
-              <span className="tag">Spanish (Conversational)</span>
-            </div>
-          </div>
-
-          <div className="profile-section">
-            <div className="section-header">
-              <h2 className="section-title">Interests</h2>
-              <button className="btn-icon"><FiEdit2 /></button>
-            </div>
-            <div className="tag-list">
-              <span className="tag">Open Source</span>
-              <span className="tag">AI/ML</span>
-              <span className="tag">Bouldering</span>
-            </div>
-          </div>
-
         </div>
       </div>
+
+      {/* Edit Profile Modal */}
+      {isEditing && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>Edit Profile</h3>
+              <button className="modal-close" onClick={() => setIsEditing(false)}><FiX /></button>
+            </div>
+            <form onSubmit={handleSaveProfile} className="modal-form">
+              <div className="form-group">
+                <label>Name</label>
+                <input type="text" name="name" value={editForm.name} onChange={handleEditChange} required />
+              </div>
+              <div className="form-group">
+                <label>Bio</label>
+                <textarea name="bio" value={editForm.bio} onChange={handleEditChange} rows="3" />
+              </div>
+              <div className="form-group">
+                <label>Phone Number</label>
+                <input type="text" name="phoneNumber" value={editForm.phoneNumber} onChange={handleEditChange} />
+              </div>
+              <div className="form-group">
+                <label>Address</label>
+                <input type="text" name="currentAddress" value={editForm.currentAddress} onChange={handleEditChange} />
+              </div>
+              <div className="form-group">
+                <label>GitHub Profile Link</label>
+                <input type="url" name="githubUrl" value={editForm.githubUrl} onChange={handleEditChange} />
+              </div>
+              <div className="form-group">
+                <label>LinkedIn Profile Link</label>
+                <input type="url" name="linkedinUrl" value={editForm.linkedinUrl} onChange={handleEditChange} />
+              </div>
+              <div className="form-group">
+                <label>Portfolio Link</label>
+                <input type="url" name="portfolioUrl" value={editForm.portfolioUrl} onChange={handleEditChange} />
+              </div>
+              <button type="submit" className="modal-submit" disabled={loading}>
+                {loading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Education Modal */}
+      {showEduModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>Add Education</h3>
+              <button className="modal-close" onClick={() => setShowEduModal(false)}><FiX /></button>
+            </div>
+            <form onSubmit={handleAddEdu} className="modal-form">
+              <div className="form-group">
+                <label>Institution / School</label>
+                <input type="text" value={newEdu.institution} onChange={e => setNewEdu({...newEdu, institution: e.target.value})} required />
+              </div>
+              <div className="form-group">
+                <label>Degree (e.g. B.S., M.S.)</label>
+                <input type="text" value={newEdu.degree} onChange={e => setNewEdu({...newEdu, degree: e.target.value})} required />
+              </div>
+              <div className="form-group">
+                <label>Field of Study (e.g. Computer Science)</label>
+                <input type="text" value={newEdu.fieldOfStudy} onChange={e => setNewEdu({...newEdu, fieldOfStudy: e.target.value})} required />
+              </div>
+              <div className="form-group">
+                <label>Start Date</label>
+                <input type="date" value={newEdu.startDate} onChange={e => setNewEdu({...newEdu, startDate: e.target.value})} required />
+              </div>
+              <div className="form-group">
+                <label>End Date (Keep empty if current)</label>
+                <input type="date" value={newEdu.endDate} onChange={e => setNewEdu({...newEdu, endDate: e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label>Grade / CGPA</label>
+                <input type="text" value={newEdu.percentage} onChange={e => setNewEdu({...newEdu, percentage: e.target.value})} />
+              </div>
+              <button type="submit" className="modal-submit">Add Record</button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

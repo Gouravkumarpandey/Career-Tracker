@@ -3,11 +3,16 @@ import { NavLink } from 'react-router-dom';
 import { 
   FiHome, FiUser, FiBookOpen, FiCpu, 
   FiBriefcase, FiAward, FiTarget, FiCalendar, 
-  FiFileText, FiPieChart, FiBell, FiSettings 
+  FiFileText, FiPieChart, FiBell, FiSettings,
+  FiLogOut
 } from 'react-icons/fi';
 import './Sidebar.css';
 
-const Sidebar = ({ isOpen, toggleSidebar }) => {
+const Sidebar = ({ isOpen, toggleSidebar, userProfile, onLogout }) => {
+  const name = userProfile?.name || 'Loading...';
+  const role = userProfile?.role || 'User';
+  const avatarText = userProfile?.name ? userProfile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U';
+
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
@@ -106,11 +111,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
       <div className="sidebar-footer">
         <div className="user-profile-mini">
-          <div className="user-avatar">JP</div>
+          <div className="user-avatar">{avatarText}</div>
           <div className="user-info">
-            <div className="user-name">John Pro</div>
-            <div className="user-role">Software Engineer</div>
+            <div className="user-name">{name}</div>
+            <div className="user-role">{role}</div>
           </div>
+          <button className="logout-btn-mini" onClick={onLogout} title="Logout">
+            <FiLogOut size={16} />
+          </button>
         </div>
       </div>
     </aside>
