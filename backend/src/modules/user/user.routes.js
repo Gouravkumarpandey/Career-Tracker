@@ -2,7 +2,7 @@ const express = require('express');
 const userController = require('./user.controller');
 const validate = require('../../middlewares/validate.middleware');
 const auth = require('../../middlewares/auth.middleware');
-const { validateUpdateProfile, validateEducation, validateResume } = require('./user.validation');
+const { validateUpdateProfile, validateEducation, validateResume, validateExperience, validateProject } = require('./user.validation');
 
 const router = express.Router();
 
@@ -15,6 +15,12 @@ router.get('/education', userController.getEducation);
 router.post('/education', validate(validateEducation), userController.createEducation);
 router.put('/education/:id', validate(validateEducation), userController.updateEducation);
 router.delete('/education/:id', userController.deleteEducation);
+
+router.post('/experience', validate(validateExperience), userController.createExperience);
+router.delete('/experience/:id', userController.deleteExperience);
+
+router.post('/projects', validate(validateProject), userController.createProject);
+router.delete('/projects/:id', userController.deleteProject);
 
 router.get('/resumes', userController.getUserResumes);
 router.post('/resumes', validate(validateResume), userController.createResume);

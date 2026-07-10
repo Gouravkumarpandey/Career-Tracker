@@ -74,8 +74,35 @@ const validateResume = (data) => {
   return null;
 };
 
+const validateExperience = (data) => {
+  const { company, role, location, jobType, startDate, endDate, description } = data;
+  if (!company || typeof company !== 'string' || company.trim().length === 0) {
+    return 'Company name is required.';
+  }
+  if (!role || typeof role !== 'string' || role.trim().length === 0) {
+    return 'Role is required.';
+  }
+  if (!startDate || isNaN(Date.parse(startDate))) {
+    return 'Valid start date is required.';
+  }
+  return null;
+};
+
+const validateProject = (data) => {
+  const { title, description, techStack } = data;
+  if (!title || typeof title !== 'string' || title.trim().length === 0) {
+    return 'Project title is required.';
+  }
+  if (!description || typeof description !== 'string') {
+    return 'Description must be a string.';
+  }
+  return null;
+};
+
 module.exports = {
   validateUpdateProfile,
   validateEducation,
-  validateResume
+  validateResume,
+  validateExperience,
+  validateProject
 };

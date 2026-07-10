@@ -75,6 +75,44 @@ const getUserResumes = async (req, res, next) => {
   }
 };
 
+const createExperience = async (req, res, next) => {
+  try {
+    const result = await userService.createExperience(req.user.id, req.body);
+    res.status(201).json(new ApiResponse(201, result, 'Experience record created successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteExperience = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await userService.deleteExperience(req.user.id, parseInt(id));
+    res.status(200).json(new ApiResponse(200, result, 'Experience record deleted successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const createProject = async (req, res, next) => {
+  try {
+    const result = await userService.createProject(req.user.id, req.body);
+    res.status(201).json(new ApiResponse(201, result, 'Project created successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteProject = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await userService.deleteProject(req.user.id, parseInt(id));
+    res.status(200).json(new ApiResponse(200, result, 'Project deleted successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getProfile,
   updateProfile,
@@ -83,5 +121,9 @@ module.exports = {
   updateEducation,
   deleteEducation,
   createResume,
-  getUserResumes
+  getUserResumes,
+  createExperience,
+  deleteExperience,
+  createProject,
+  deleteProject
 };

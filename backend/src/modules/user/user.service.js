@@ -18,6 +18,12 @@ const getUserProfile = async (userId) => {
       skills: {
         orderBy: { name: 'asc' }
       },
+      experiences: {
+        orderBy: { startDate: 'desc' }
+      },
+      projects: {
+        orderBy: { startDate: 'desc' }
+      },
       resumes: {
         orderBy: { createdAt: 'desc' },
         include: {
@@ -226,6 +232,64 @@ const getUserResumes = async (userId) => {
   });
 };
 
+// ==========================================
+// 💼 EXPERIENCE CRUD METHODS
+// ==========================================
+
+const createExperience = async (userId, data) => {
+  const { company, role, location, jobType, startDate, endDate, description } = data;
+  return prisma.experience.create({
+    data: {
+      company,
+      role,
+      location: location || null,
+      jobType: jobType || 'Full-time',
+      startDate: new Date(startDate),
+      endDate: endDate ? new Date(endDate) : null,
+      description: description || null,
+      userId
+    }
+  });
+};
+
+const deleteExperience = async (userId, id) => {
+  const exp = await prisma.experience.findFirst({
+    where: { id, userId }
+  });
+  if (!exp) throw new ApiError(404, 'Experience record not found.');
+  await prisma.experience.delete({ where: { id } });
+  return { message: 'Experience record deleted successfully.' };
+};
+
+// ==========================================
+// 🚀 PROJECT CRUD METHODS
+// ==========================================
+
+const createProject = async (userId, data) => {
+  const { title, description, techStack, liveLink, githubLink, startDate, endDate } = data;
+  return prisma.project.create({
+    data: {
+      title,
+      description,
+      techStack: techStack || '',
+      liveLink: liveLink || null,
+      githubLink: githubLink || null,
+      startDate: startDate ? new Date(startDate) : null,
+      endDate: endDate ? new Date(endDate) : null,
+      userId
+    }
+  });
+};
+
+const deleteProject = async (userId, id) => {
+  const proj = await prisma.project.findFirst({
+    where: { id, userId }
+  });
+  if (!proj) throw new ApiError(404, 'Project not found.');
+  await prisma.project.delete({ where: { id } });
+  return { message: 'Project deleted successfully.' };
+};
+
 module.exports = {
   getUserProfile,
   updateUserProfile,
@@ -234,5 +298,9 @@ module.exports = {
   updateEducation,
   deleteEducation,
   createResume,
-  getUserResumes
+  getUserResumes,
+  createExperience,
+  deleteExperience,
+  createProject,
+  deleteProject
 };
