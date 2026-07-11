@@ -94,6 +94,21 @@
 @media (max-width: 1024px) {
   .dashboard-layout {
     flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  .dashboard-main {
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+  }
+  
+  .dashboard-content {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
