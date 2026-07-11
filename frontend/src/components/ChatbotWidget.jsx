@@ -109,7 +109,6 @@ const ChatbotWidget = () => {
       {!isOpen && (
         <button className="chatbot-toggle-btn" onClick={() => setIsOpen(true)} title="Careerflow AI Assistant">
           <FiMessageSquare size={24} />
-          <span className="pulse-dot"></span>
         </button>
       )}
 
