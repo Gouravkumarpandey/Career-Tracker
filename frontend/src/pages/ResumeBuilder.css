@@ -183,3 +183,15 @@
   color: var(--dash-text-muted);
   gap: 16px;
 }
+
+@media (max-width: 992px) {
+  .resume-builder-container {
+    flex-direction: column;
+    height: auto;
+  }
+  .rb-input-section, .rb-output-section {
+    width: 100%;
+    height: auto;
+    overflow-y: visible;
+  }
+}

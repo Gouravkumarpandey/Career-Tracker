@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import Layout from './components/Layout';
 import DashboardLayout from './components/DashboardLayout';
 import Home from './pages/Home';
@@ -13,8 +14,9 @@ import AIFeatures from './pages/AIFeatures';
 import Planner from './pages/Planner';
 import Certifications from './pages/Certifications';
 import ResumeBuilder from './pages/ResumeBuilder';
-
 import LearningTracker from './pages/LearningTracker';
+
+const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 function App() {
   return (
@@ -23,8 +25,17 @@ function App() {
         <Route index element={<Home />} />
       </Route>
       
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={
+        <GoogleReCaptchaProvider reCaptchaKey={recaptchaSiteKey}>
+          <Signup />
+        </GoogleReCaptchaProvider>
+      } />
+      
+      <Route path="/login" element={
+        <GoogleReCaptchaProvider reCaptchaKey={recaptchaSiteKey}>
+          <Login />
+        </GoogleReCaptchaProvider>
+      } />
 
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<Dashboard />} />

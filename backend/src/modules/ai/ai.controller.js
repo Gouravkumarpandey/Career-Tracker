@@ -1,6 +1,6 @@
 const aiService = require('./ai.service');
 const ApiResponse = require('../../utils/ApiResponse');
-const pdfParse = require('pdf-parse');
+const { PDFParse } = require('pdf-parse');
 
 const analyzeResume = async (req, res, next) => {
   try {
@@ -38,7 +38,8 @@ const uploadAnalyzeResume = async (req, res, next) => {
     
     // Parse PDF
     if (req.file.mimetype === 'application/pdf') {
-      const data = await pdfParse(req.file.buffer);
+      const parser = new PDFParse({ data: req.file.buffer });
+      const data = await parser.getText();
       extractedText = data.text;
     } else {
       return res.status(400).json({ success: false, message: 'Only PDF files are supported at this time.' });
@@ -113,6 +114,19 @@ const chatAssistant = async (req, res, next) => {
   }
 };
 
+const publicChatAssistant = async (req, res, next) => {
+  try {
+    const { message, context } = req.body;
+    if (!message) {
+      return res.status(400).json({ success: false, message: 'Message is required.' });
+    }
+    const result = await aiService.aiChatAssistant(null, message, context || 'Website Guest asking about platform features');
+    res.status(200).json(new ApiResponse(200, result, 'AI response generated successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
 const matchResumeToJob = async (req, res, next) => {
   try {
     const { resumeText, jobDescription } = req.body;
@@ -132,5 +146,6 @@ module.exports = {
   getCareerRecommendations,
   getLearningRecommendations,
   chatAssistant,
+  publicChatAssistant,
   matchResumeToJob
 };

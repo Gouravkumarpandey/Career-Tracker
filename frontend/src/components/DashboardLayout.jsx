@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import api from '../config/api';
@@ -7,6 +7,7 @@ import './DashboardLayout.css';
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
 
@@ -44,8 +45,13 @@ const DashboardLayout = () => {
     fetchProfile();
   }, [navigate]);
 
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location]);
+
   return (
     <div className="dashboard-layout">
+      {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
       <Sidebar 
         isOpen={sidebarOpen} 
         toggleSidebar={toggleSidebar} 

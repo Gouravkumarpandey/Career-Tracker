@@ -9,8 +9,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
     password: '',
     agreed: false,
@@ -41,9 +40,8 @@ const Signup = () => {
       // Execute reCAPTCHA v3 using action "submit"
       const token = await executeRecaptcha('submit');
 
-      const name = `${formData.firstName} ${formData.lastName}`.trim();
       const response = await api.post('/api/auth/signup', {
-        name,
+        name: formData.name,
         email: formData.email,
         password: formData.password,
         recaptchaToken: token,
@@ -97,30 +95,16 @@ const Signup = () => {
           <form onSubmit={handleSubmit} className="purple-login-form">
             {error && <div className="teal-error">{error}</div>}
 
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <div className="purple-field" style={{ flex: 1 }}>
-                <label>First Name</label>
-                <input
-                  type="text"
-                  name="firstName"
-                  placeholder="Your first name"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="purple-field" style={{ flex: 1 }}>
-                <label>Last Name</label>
-                <input
-                  type="text"
-                  name="lastName"
-                  placeholder="Your last name"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <div className="purple-field">
+              <label>Full Name</label>
+              <input
+                type="text"
+                name="name"
+                placeholder="Your full name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
             </div>
 
             <div className="purple-field">

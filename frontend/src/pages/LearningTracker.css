@@ -442,3 +442,16 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 600px) {
+  .lt-form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .lt-panel-card {
+    padding: 20px 16px;
+  }
+  .lt-header-card {
+    padding: 16px;
+  }
+}

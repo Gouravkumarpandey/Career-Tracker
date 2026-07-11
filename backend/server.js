@@ -12,6 +12,9 @@ async function startServer() {
     
     app.listen(PORT, () => {
       console.log(`🚀 Server running in ${env.NODE_ENV} mode at http://localhost:${PORT}`);
+      // Start expiry scheduler
+      const { startExpiryScheduler } = require('./src/utils/expiryScheduler');
+      startExpiryScheduler();
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

@@ -121,6 +121,34 @@
   }
   
   .search-bar {
+    width: 200px;
+  }
+}
+
+@media (max-width: 640px) {
+  .search-bar {
     display: none;
+  }
+  
+  .header {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-btn span {
+    display: none;
+  }
+  
+  .add-btn {
+    padding: 10px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+  }
+  
+  .header-right {
+    gap: 12px;
   }
 }

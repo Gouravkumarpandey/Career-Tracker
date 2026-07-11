@@ -44,8 +44,18 @@
   background: none;
   border: none;
   color: var(--dash-sidebar-text);
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-close:hover {
+  background-color: var(--dash-sidebar-hover);
+  color: white;
 }
 
 .sidebar-content {
@@ -190,13 +200,15 @@
     left: 0;
     top: 0;
     transform: translateX(-100%);
+    box-shadow: none;
   }
   
   .sidebar.open {
     transform: translateX(0);
+    box-shadow: 10px 0 30px rgba(15, 23, 42, 0.35);
   }
 
   .sidebar-close {
-    display: block;
+    display: flex;
   }
 }

@@ -171,11 +171,31 @@ button {
 }
 
 @media (max-width: 768px) {
-  .hamburger { display: block; }
-  .nav-menu { display: none; flex-direction: column; width: 100%; }
-  .nav-menu.active { display: flex; }
-  .nav-links, .nav-actions { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .nav-links a, .nav-actions .btn { width: 100%; justify-content: flex-start; }
+  .navbar .container {
+    flex-wrap: wrap;
+  }
+  .hamburger {
+    display: block;
+  }
+  .nav-menu {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 16px;
+  }
+  .nav-menu.active {
+    display: flex;
+  }
+  .nav-links, .nav-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+  }
+  .nav-links a, .nav-actions .btn {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
 
@@ -2116,7 +2136,15 @@ button {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Center the form vertically without needing margin auto */
+  justify-content: flex-start;
+  padding: 40px 48px;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.teal-split-left::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 .teal-split-right {
@@ -2145,10 +2173,12 @@ button {
 }
 
 .teal-login-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 32px 48px;
+  padding: 0 0 40px 0;
+  width: 100%;
+}
+
+.teal-login-header .logo {
+  color: #293681;
 }
 
 /* Purple Form Styles */
@@ -2190,7 +2220,13 @@ button {
   color: #1a0b2e;
 }
 
+.purple-form-row {
+  display: flex;
+  gap: 12px;
+}
+
 .purple-field input {
+  width: 100%;
   padding: 12px 16px;
   border: 1px solid #d1d1e0;
   border-radius: 8px;
@@ -2624,4 +2660,96 @@ button {
 
 .teal-footer-text a:hover {
   text-decoration: underline;
+}
+
+/* Landing Page Responsive Overrides */
+@media (max-width: 992px) {
+  .hero .container {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 40px !important;
+    padding: 0 24px !important;
+  }
+  
+  .hero-content {
+    max-width: 100% !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .hero-content h1 {
+    font-size: 38px !important;
+    text-align: center !important;
+  }
+  
+  .hero-content p {
+    font-size: 16px !important;
+    text-align: center !important;
+  }
+  
+  .hero-content .check-item {
+    justify-content: center !important;
+  }
+  
+  .hero-image {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  
+  .hero-cta {
+    justify-content: center !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-content h1 {
+    font-size: 28px !important;
+  }
+  
+  .hero-cta {
+    width: 100%;
+  }
+  
+  .hero-cta a {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Login & Signup Responsive Overrides */
+@media (max-width: 768px), (max-height: 700px) {
+  .teal-split-layout {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+    flex-direction: column;
+  }
+  
+  .teal-split-left {
+    justify-content: flex-start !important;
+    padding: 32px 24px 40px !important;
+    min-height: 100vh;
+    height: auto !important;
+  }
+  
+  .teal-login-header {
+    padding: 0 0 24px 0 !important;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .teal-login-container,
+  .purple-login-container {
+    margin: 10px auto 0 !important;
+    padding: 0 16px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .purple-form-row {
+    flex-direction: column;
+    gap: 20px;
+  }
 }

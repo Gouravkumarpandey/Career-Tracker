@@ -4,7 +4,7 @@ import {
   FiHome, FiUser, FiBookOpen, FiCpu, 
   FiBriefcase, FiAward, FiTarget, FiCalendar, 
   FiFileText, FiPieChart, FiBell, FiSettings,
-  FiLogOut
+  FiLogOut, FiX
 } from 'react-icons/fi';
 import './Sidebar.css';
 
@@ -20,8 +20,8 @@ const Sidebar = ({ isOpen, toggleSidebar, userProfile, onLogout }) => {
           <div className="sidebar-logo-icon">C</div>
           CareerTracker
         </NavLink>
-        <button className="sidebar-close" onClick={toggleSidebar}>
-          &times;
+        <button className="sidebar-close" onClick={toggleSidebar} aria-label="Close Sidebar">
+          <FiX />
         </button>
       </div>
 

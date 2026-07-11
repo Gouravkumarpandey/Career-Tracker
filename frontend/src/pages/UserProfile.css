@@ -670,3 +670,10 @@
     flex-direction: column;
   }
 }
+
+@media (max-width: 540px) {
+  .modal-content {
+    width: calc(100% - 32px);
+    margin: 16px;
+  }
+}

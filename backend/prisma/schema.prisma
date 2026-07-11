@@ -170,15 +170,19 @@ model Project {
 }
 
 model Certification {
-  id             Int       @id @default(autoincrement())
-  name           String    
-  issuingOrg     String    
-  issueDate      DateTime
-  expiryDate     DateTime?
-  credentialId   String?
-  credentialUrl  String?
+  id                 Int       @id @default(autoincrement())
+  name               String    
+  issuingOrg         String    
+  issueDate          DateTime
+  expiryDate         DateTime?
+  credentialId       String?
+  credentialUrl      String?
+  score              String?
+  badge              String?
+  fileUrl            String?
+  expiryReminderSent Boolean   @default(false)
   
-  userId         Int
+  userId             Int
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("certifications")

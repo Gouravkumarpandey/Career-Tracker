@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
+import ChatbotWidget from '../components/ChatbotWidget';
 import { 
   FaCheck, 
   FaRegTimesCircle, 
@@ -486,9 +487,7 @@ const Home = () => {
       </section>
 
 
-      <button className="scroll-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-        ↑
-      </button>
+      <ChatbotWidget />
       <Footer />
     </div>
   );

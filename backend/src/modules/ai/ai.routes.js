@@ -9,6 +9,8 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
+router.post('/public-chat', aiController.publicChatAssistant);
+
 router.use(auth); // Protect all routes below this middleware
 
 router.post('/resume/analyze', aiController.analyzeResume);
