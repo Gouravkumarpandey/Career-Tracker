@@ -119,7 +119,7 @@ const Dashboard = () => {
   // 1. Goal Completion %
   const completedGoalsCount = apiData?.goalStats?.completedGoals ?? 3;
   const totalGoalsCount = apiData?.goalStats?.totalGoals ?? 5;
-  const goalCompletionPercentage = Math.round((completedGoalsCount / totalGoalsCount) * 100);
+  let goalCompletionPercentage = Math.round((completedGoalsCount / totalGoalsCount) * 100);
 
   // 2. Daily & Weekly Progress
   const mockTasks = [

@@ -1003,13 +1003,49 @@ button {
 .pricing-section .container {
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+/* Pricing Toggle Switch */
+.pricing-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: 4px;
+  border-radius: 9999px;
+  margin: 0 auto 30px;
+  border: 1px solid #cbd5e1;
+}
+
+.pricing-toggle .toggle-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.pricing-toggle .toggle-btn.active {
+  background: #2563eb;
+  color: white;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
 }
 
 .pricing-section h2 {
   font-size: 40px;
   font-weight: 700;
-  color: #95CCDD;
+  color: var(--secondary-color);
   margin-bottom: 16px;
+  text-align: center;
+  width: 100%;
 }
 
 .pricing-section .subtitle {
@@ -1017,6 +1053,7 @@ button {
   max-width: 600px;
   margin: 0 auto 40px;
   font-size: 15px;
+  text-align: center;
 }
 
 .pricing-cards {
@@ -2972,4 +3009,212 @@ button {
 
 .otp-digit-input::selection {
   background: transparent;
+}
+
+/* ==========================================
+   LANDING PAGE RESPONSIVE POLISH OVERRIDES
+   ========================================== */
+
+@media (max-width: 992px) {
+  .resources-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Hero Section */
+  .hero {
+    padding: 20px 0 60px !important;
+  }
+  .hero .container {
+    flex-direction: column !important;
+    gap: 30px !important;
+    padding: 0 16px !important;
+    text-align: center !important;
+  }
+  .hero-content {
+    max-width: 100% !important;
+    text-align: center !important;
+  }
+  .hero-content h1 {
+    font-size: 32px !important;
+    line-height: 1.2 !important;
+    margin-bottom: 16px !important;
+  }
+  .hero-content p {
+    font-size: 15px !important;
+    margin-bottom: 24px !important;
+  }
+  .hero-content .check-item {
+    justify-content: center !important;
+    font-size: 14px !important;
+  }
+  .hero-cta {
+    justify-content: center !important;
+  }
+  .hero-cta a {
+    width: 100% !important;
+    text-align: center !important;
+  }
+  .hero-image {
+    width: 100% !important;
+    justify-content: center !important;
+    margin-top: 10px !important;
+  }
+  .hero-image img {
+    max-width: 100% !important;
+  }
+
+  /* Job Application Tracker Section */
+  .tracker-inner {
+    flex-direction: column !important;
+    padding: 40px 16px 0 !important;
+    gap: 30px !important;
+    text-align: center !important;
+  }
+  .tracker-content {
+    max-width: 100% !important;
+    flex: 1 !important;
+  }
+  .tracker-heading {
+    font-size: 28px !important;
+    line-height: 1.2 !important;
+  }
+  .tracker-desc {
+    font-size: 14px !important;
+    margin-bottom: 16px !important;
+  }
+  .tracker-screenshot {
+    width: 100% !important;
+    margin-left: 0 !important;
+    justify-content: center !important;
+  }
+  .tracker-screenshot img {
+    width: 100% !important;
+    margin-right: 0 !important;
+  }
+
+  /* Simplify Features */
+  .feature-row {
+    flex-direction: column !important;
+    gap: 20px !important;
+    margin-bottom: 40px !important;
+    text-align: center !important;
+  }
+  .feature-row.reverse {
+    flex-direction: column !important;
+  }
+  .feature-content h3 {
+    font-size: 24px !important;
+  }
+  .feature-content p {
+    font-size: 15px !important;
+    text-align: center !important;
+    margin: 0 auto 20px !important;
+  }
+  .feature-image img {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.05) !important;
+  }
+
+  /* Resources Grid */
+  .resources-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    margin-top: 24px !important;
+  }
+
+  /* Testimonials Scroll */
+  .testimonial-card {
+    flex: 0 0 85% !important;
+    min-width: 260px !important;
+    padding: 20px !important;
+  }
+
+  /* Community Section Heading */
+  .community-section .section-title {
+    font-size: 28px !important;
+  }
+  .community-section {
+    padding: 40px 0 !important;
+  }
+
+  /* Trusted Companies Heading */
+  .trusted-companies {
+    padding: 40px 0 !important;
+  }
+  .trusted-companies h2 {
+    font-size: 20px !important;
+    padding: 0 16px !important;
+  }
+  .trusted-companies .subtitle {
+    font-size: 14px !important;
+    margin-bottom: 24px !important;
+    padding: 0 16px !important;
+  }
+
+  /* Final CTA */
+  .final-cta-section h2 {
+    font-size: 32px !important;
+  }
+  .final-cta-section p {
+    font-size: 15px !important;
+  }
+
+  /* General Section Title Scaling */
+  .section-title {
+    font-size: 26px !important;
+    margin-bottom: 30px !important;
+    text-align: center !important;
+    line-height: 1.3 !important;
+  }
+
+  /* Pricing Cards Horizontal Swipe Slider */
+  .pricing-cards {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    gap: 16px !important;
+    padding: 20px 16px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    width: 100vw !important;
+    margin-left: -16px !important;
+    box-sizing: border-box !important;
+  }
+
+  .pricing-cards::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .pricing-card {
+    flex: 0 0 85% !important;
+    scroll-snap-align: center !important;
+    min-width: 280px !important;
+    margin: 0 !important;
+  }
+
+  /* Pricing Header Centering Overrides */
+  .pricing-section .container {
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  .pricing-section h2 {
+    text-align: center !important;
+    width: 100% !important;
+    font-size: 28px !important;
+    margin: 0 auto 16px !important;
+  }
+
+  .pricing-section .subtitle {
+    text-align: center !important;
+    width: 100% !important;
+    font-size: 14px !important;
+    margin: 0 auto 24px !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+  }
 }

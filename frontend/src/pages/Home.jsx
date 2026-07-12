@@ -221,7 +221,7 @@ const Home = () => {
       <section className="simplify-section">
         <div className="container">
           <h2 className="section-title text-center reveal">
-            <span className="highlight">Simplify Every Step</span> of Your<br/>Job Search with Careerflow
+            <span className="highlight">Simplify Every Step</span>
           </h2>
 
           <div className="feature-row reveal">
@@ -349,9 +349,7 @@ const Home = () => {
           <p className="subtitle" style={{ marginBottom: '40px' }}>Whether you're starting out or need extra support, we have a plan for you</p>
           
           <div className="pricing-toggle">
-             <span className="toggle-btn">Weekly</span>
              <span className="toggle-btn">Monthly</span>
-             <span className="toggle-btn">Quarterly</span>
              <span className="toggle-btn active">Yearly (20% saved)</span>
           </div>
 

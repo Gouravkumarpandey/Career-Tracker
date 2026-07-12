@@ -21,9 +21,7 @@ const errorMiddleware = (err, req, res, next) => {
     ...(env.NODE_ENV === 'development' && { stack: err.stack })
   };
 
-  if (env.NODE_ENV === 'development') {
-    console.error('❌ Error Middleware Caught:', err);
-  }
+  console.error('❌ Error Middleware Caught:', err);
 
   res.status(statusCode).json(response);
 };
