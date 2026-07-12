@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import Sidebar from './Sidebar';
 import Header from './Header';
 import api from '../config/api';
 import './DashboardLayout.css';
@@ -8,12 +7,7 @@ import './DashboardLayout.css';
 const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
 
   const fetchProfile = async () => {
     try {
@@ -45,25 +39,12 @@ const DashboardLayout = () => {
     fetchProfile();
   }, [navigate]);
 
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [location]);
-
   return (
-    <div className="dashboard-layout">
-      {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
-      <Sidebar 
-        isOpen={sidebarOpen} 
-        toggleSidebar={toggleSidebar} 
-        userProfile={userProfile} 
-        onLogout={handleLogout}
-      />
-      <div className="dashboard-main">
-        <Header toggleSidebar={toggleSidebar} onLogout={handleLogout} />
-        <main className="dashboard-content">
-          <Outlet context={{ userProfile, refreshProfile: fetchProfile }} />
-        </main>
-      </div>
+    <div className="dashboard-layout" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+      <Header userProfile={userProfile} onLogout={handleLogout} />
+      <main className="dashboard-content" style={{ flex: 1, overflowY: 'auto' }}>
+        <Outlet context={{ userProfile, refreshProfile: fetchProfile }} />
+      </main>
     </div>
   );
 };

@@ -1,8 +1,6 @@
 /* Modern Premium Job Tracker Styling */
 .jobs-container {
   padding: 30px;
-  max-width: 1200px;
-  margin: 0 auto;
   font-family: 'Inter', sans-serif;
   color: #1f2937;
 }
@@ -666,5 +664,70 @@
     grid-template-columns: repeat(4, 280px);
     overflow-x: auto;
     padding-bottom: 12px;
+  }
+}
+
+/* ====== COMPREHENSIVE MOBILE RESPONSIVENESS ====== */
+
+/* Tablet (=900px) */
+@media (max-width: 900px) {
+  .jobs-layout {
+    flex-direction: column !important;
+    gap: 20px;
+  }
+  .jobs-sidebar {
+    width: 100% !important;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .jobs-list {
+    width: 100% !important;
+  }
+  .job-detail-panel {
+    display: none;
+  }
+}
+
+/* Phone (=640px) */
+@media (max-width: 640px) {
+  .jobs-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .jobs-search-bar {
+    width: 100% !important;
+  }
+  .jobs-tab-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+  .job-card-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .application-card {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .app-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pagination-bar {
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-heading {
+    font-size: 22px !important;
+  }
+  .filter-chips {
+    flex-wrap: wrap;
   }
 }

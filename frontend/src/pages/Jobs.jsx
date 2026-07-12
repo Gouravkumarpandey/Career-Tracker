@@ -232,10 +232,7 @@ const Jobs = () => {
 
   return (
     <div className="jobs-container">
-      <div className="jobs-header">
-        <h1 className="jobs-title">Job Tracker & Recommendations</h1>
-        <p className="jobs-subtitle">Search live career options, secure AI matchmaking, and monitor interviews.</p>
-      </div>
+      <h1 className="page-heading">Job Tracker</h1>
 
       {/* Tabs */}
       <div className="jobs-tabs">

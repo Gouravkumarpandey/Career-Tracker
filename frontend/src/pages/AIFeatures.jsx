@@ -180,16 +180,8 @@ const AIFeatures = () => {
 
   return (
     <div className="ai-dashboard-container">
-      {/* Top Banner Header */}
-      <div className="ai-dashboard-header">
-        <div className="ai-header-left">
-          <h1>AI Career Intelligence Suite</h1>
-          <p>Optimize your resume, prepare for interviews, and map your path using Grok AI.</p>
-        </div>
-        <div className="ai-powered-tag">
-          <FiCpu /> Powered by Grok (xAI)
-        </div>
-      </div>
+      {/* Simple Page Heading */}
+      <h1 className="page-heading">AI Features</h1>
 
       {/* Grid Dashboard */}
       <div className="ai-grid-layout">

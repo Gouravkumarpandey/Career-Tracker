@@ -26,13 +26,7 @@ const LearningTracker = () => {
   const [bmUrl, setBmUrl] = useState('');
 
   // 4. Completed Topics States
-  const [topics, setTopics] = useState([
-    { id: 1, title: 'HTML & CSS Basics', completed: true },
-    { id: 2, title: 'JavaScript Fundamentals', completed: true },
-    { id: 3, title: 'React Hooks & State', completed: false },
-    { id: 4, title: 'Node Express Routing', completed: false },
-    { id: 5, title: 'Database Relations (Prisma)', completed: false }
-  ]);
+  const [topics, setTopics] = useState([]);
   const [newTopicTitle, setNewTopicTitle] = useState('');
 
   // 5. Revision Reminders States
@@ -222,10 +216,7 @@ const LearningTracker = () => {
 
   return (
     <div className="lt-container">
-      <div className="lt-header-card">
-        <h1>Learning Tracker & Planner</h1>
-        <p>Search online courses, take study notes, bookmark resources, and plan revision alerts.</p>
-      </div>
+      <h1 className="page-heading">Learning Tracker</h1>
 
       {/* Grid Menu */}
       <div className="lt-grid-layout">

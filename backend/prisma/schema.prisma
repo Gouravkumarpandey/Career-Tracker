@@ -15,6 +15,12 @@ model User {
   password              String
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @default(now()) @updatedAt
+  currentStreak         Int                     @default(0)
+  longestStreak         Int                     @default(0)
+  activeDays            Int                     @default(0)
+  totalScore            Int                     @default(0)
+  totalActivities       Int                     @default(0)
+  lastActiveDate        String?
   careers               Career[]
   skills                Skill[]
   education             Education[]
@@ -51,6 +57,9 @@ model User {
   sharedExperiences     InterviewExperience[]
   collaborations        ProjectCollaborator[]
   resumes               Resume[]
+  activityLogs          ActivityLog[]
+  dailyActivities       DailyActivity[]
+  calendarEvents        CalendarEvent[]
 
   @@map("users")
 }
@@ -761,4 +770,42 @@ model BlockedIpLog {
   blockedAt       DateTime  @default(now())
 
   @@map("blocked_ip_logs")
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  points    Int
+  createdAt DateTime @default(now())
+
+  @@map("activity_logs")
+}
+
+model DailyActivity {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date          String
+  score         Int      @default(0)
+  qualified     Boolean  @default(false)
+
+  @@unique([userId, date])
+  @@map("daily_activities")
+}
+
+model CalendarEvent {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  type        String   // 'task', 'goal', 'planner', 'reminder'
+  eventDate   DateTime // Date and time when the event/task should happen
+  sendEmail   Boolean  @default(true)
+  emailSent   Boolean  @default(false)
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("calendar_events")
 }

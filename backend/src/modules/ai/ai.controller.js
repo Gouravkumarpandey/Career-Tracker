@@ -1,6 +1,7 @@
 const aiService = require('./ai.service');
 const ApiResponse = require('../../utils/ApiResponse');
 const { PDFParse } = require('pdf-parse');
+const activityService = require('../activity/activity.service');
 
 const analyzeResume = async (req, res, next) => {
   try {
@@ -22,6 +23,8 @@ const analyzeResumeText = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Resume text is required.' });
     }
     const result = await aiService.analyzeResumeTextDirect(req.user.id, text);
+    // Log resume upload/update activity
+    await activityService.logActivity(req.user.id, 'RESUME_UPLOAD');
     res.status(200).json(new ApiResponse(200, result, 'Resume ATS analysis completed successfully.'));
   } catch (error) {
     next(error);
@@ -50,6 +53,8 @@ const uploadAnalyzeResume = async (req, res, next) => {
     }
 
     const result = await aiService.analyzeResumeTextDirect(req.user.id, extractedText);
+    // Log resume upload/update activity
+    await activityService.logActivity(req.user.id, 'RESUME_UPLOAD');
     res.status(200).json(new ApiResponse(200, result, 'Resume file ATS analysis completed successfully.'));
   } catch (error) {
     console.error("File parsing error:", error);

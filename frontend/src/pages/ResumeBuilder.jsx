@@ -59,8 +59,7 @@ const ResumeBuilder = () => {
       {/* Input Section */}
       <div className="rb-input-section">
         <div className="rb-header">
-          <h1>AI Resume Builder</h1>
-          <p>Provide your background, and Grok will generate a perfectly formatted, ATS-optimized resume.</p>
+          <h1 className="page-heading" style={{ margin: '0 0 16px 0' }}>Resume Builder</h1>
         </div>
 
         {error && <div style={{ color: '#ef4444', marginBottom: '16px', padding: '12px', background: 'rgba(239,68,68,0.1)', borderRadius: '8px' }}>{error}</div>}

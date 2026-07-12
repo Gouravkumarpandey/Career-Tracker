@@ -242,10 +242,7 @@ const Internships = () => {
 
   return (
     <div className="internships-container">
-      <div className="internships-header">
-        <h1 className="internships-title">Internship Search & Tracker</h1>
-        <p className="internships-subtitle">Search live internship openings, like your options, and track application stages.</p>
-      </div>
+      <h1 className="page-heading">Internships</h1>
 
       {/* Tabs */}
       <div className="internships-tabs">

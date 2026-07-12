@@ -443,3 +443,38 @@
     gap: 16px;
   }
 }
+
+/* ====== COMPREHENSIVE MOBILE RESPONSIVENESS ====== */
+
+@media (max-width: 900px) {
+  .certifications-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .cert-form-row {
+    flex-direction: column !important;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .certifications-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .cert-card-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .cert-card-actions button {
+    width: 100%;
+  }
+  .cert-filter-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-heading {
+    font-size: 22px !important;
+  }
+}

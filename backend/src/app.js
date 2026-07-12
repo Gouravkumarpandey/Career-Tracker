@@ -183,6 +183,10 @@ app.post('/api/auth/login', async (req, res) => {
     const authService = require('./modules/auth/auth.service');
     const result = await authService.login(email, password);
 
+    // Log login activity
+    const activityService = require('./modules/activity/activity.service');
+    await activityService.logActivity(result.user.id, 'LOGIN');
+
     res.status(200).json({
       success: true,
       message: "Login Successful!",

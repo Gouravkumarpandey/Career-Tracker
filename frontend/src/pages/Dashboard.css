@@ -41,11 +41,6 @@
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--dash-shadow);
-}
-
 .stat-icon {
   width: 52px;
   height: 52px;
@@ -192,78 +187,175 @@
   height: 8px;
   border-radius: 50%;
 }
-
-/* Skill Growth Graph */
-.graph-card {
+/* Activity Heatmap Calendar Styles */
+.activity-heatmap-card {
   padding: 24px;
 }
 
-.skill-graph-container {
-  width: 100%;
-  aspect-ratio: 600 / 240;
-  height: auto;
-  min-height: 180px;
-  background: var(--dash-bg);
-  border-radius: 8px;
-  border: 1px solid var(--dash-border);
-  padding: 16px;
-  margin-top: 16px;
+.heatmap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.heatmap-header .header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.heatmap-header .active-days-count {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--dash-text-main);
+}
+
+.heatmap-header .info-icon {
+  color: var(--dash-text-muted);
+  cursor: pointer;
+}
+
+.heatmap-header .global-select-wrapper {
   position: relative;
 }
 
-.skill-svg-chart {
-  width: 100%;
-  height: 100%;
-}
-
-.graph-grid-line {
-  stroke: var(--dash-border);
-  stroke-width: 1;
-  stroke-dasharray: 4 4;
-}
-
-.graph-curve-line {
-  fill: none;
-  stroke: var(--dash-primary);
-  stroke-width: 3.5;
-}
-
-.graph-area-fill {
-  fill: rgba(37, 99, 235, 0.08);
-}
-
-.graph-dot {
-  fill: var(--dash-surface);
-  stroke: var(--dash-primary);
-  stroke-width: 3.5;
+.heatmap-header .global-select {
+  background: var(--dash-bg);
+  border: 1px solid var(--dash-border);
+  color: var(--dash-text-main);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  outline: none;
   cursor: pointer;
-  transition: r 0.2s ease, fill 0.2s ease;
 }
 
-.graph-dot:hover {
-  r: 8px;
-  fill: var(--dash-primary);
+.heatmap-header .streak-badge {
+  background: rgba(234, 88, 12, 0.1);
+  border: 1px solid rgba(234, 88, 12, 0.2);
+  color: #ea580c;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.graph-axis-label {
+.heatmap-header .streak-badge .sub {
+  color: var(--dash-text-muted);
+  font-weight: 500;
   font-size: 11px;
-  fill: var(--dash-text-muted);
-  font-weight: 600;
-  text-anchor: middle;
+  margin-left: 4px;
 }
 
-.graph-axis-y-label {
-  font-size: 10px;
-  fill: var(--dash-text-muted);
-  font-weight: 600;
+.heatmap-grid-container {
+  overflow-x: auto;
+  padding-bottom: 8px;
 }
 
-.graph-footer-stats {
+.contribution-map-container {
+  min-width: 550px;
+}
+
+.months-row {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.month-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.weeks-container {
+  display: flex;
+  gap: 3px;
+}
+
+.week-column {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.day-square {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  transition: transform 0.1s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-square.empty {
+  visibility: hidden;
+}
+
+/* Colors for levels */
+.day-square.level-0 {
+  background-color: #27272a; /* Zinc 800 */
+}
+
+.day-square.level-1 {
+  background-color: #4ade80; /* Light Green */
+}
+
+.day-square.level-2 {
+  background-color: #22c55e; /* Green */
+}
+
+.day-square.level-3 {
+  background-color: #16a34a; /* Dark Green */
+}
+
+.day-square.level-4 {
+  background-color: #ea580c; /* Orange/Fire */
+  box-shadow: 0 0 4px #ea580c;
+}
+
+.fire-indicator {
+  font-size: 6px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.month-name-label {
+  font-size: 11px;
+  color: var(--dash-text-muted);
+  font-weight: 700;
+  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+.heatmap-footer {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-top: 16px;
+  padding-top: 12px;
   border-top: 1px solid var(--dash-border);
-  padding-top: 16px;
+  font-size: 12px;
+  color: var(--dash-text-muted);
+  font-weight: 600;
+}
+
+.heatmap-footer .legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.heatmap-footer .legend .day-square {
+  cursor: default;
 }
 
 /* Monthly Analytics Report */
@@ -400,8 +492,8 @@
    STREAK CALENDAR - MATCHING THE SCREENSHOT
    ============================================= */
 .streak-calendar-card {
-  background: #111113 !important; /* Premium Dark Background */
-  border: 1px solid #222226 !important;
+  background: #0f172a !important; /* Premium Deep Blue Background */
+  border: 1px solid #1e293b !important;
   color: #ffffff;
   padding: 24px;
   border-radius: var(--dash-radius);
@@ -541,7 +633,7 @@
 .calendar-day {
   aspect-ratio: 1;
   background: transparent;
-  border: 1px solid transparent;
+  border: 1px solid #1e293b;
   color: #888892;
   font-size: 14px;
   font-weight: 700;
@@ -557,6 +649,7 @@
 }
 
 .calendar-day.empty {
+  border: 1px solid transparent;
   cursor: default;
   pointer-events: none;
 }
@@ -635,11 +728,6 @@
   transition: background 0.2s ease, padding-left 0.2s ease;
   border-radius: 6px;
   padding: 10px 8px;
-}
-
-.task-item.interactive:hover {
-  background: var(--dash-bg);
-  padding-left: 12px;
 }
 
 .task-item.completed .task-text {

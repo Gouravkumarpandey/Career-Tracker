@@ -1,25 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { 
   FiTrendingUp, FiCheckCircle, FiClock, FiTarget, FiActivity, 
-  FiFileText, FiUpload, FiCalendar, FiChevronLeft, FiChevronRight, 
-  FiAward, FiSliders, FiCheckSquare, FiInfo, FiZap 
+  FiCalendar, FiAward, FiSliders, FiZap, FiChevronLeft, FiChevronRight, FiInfo 
 } from 'react-icons/fi';
 import './Dashboard.css';
 import api from '../config/api';
 
 const Dashboard = () => {
-  // --- Existing Quick ATS Checker State ---
-  const [resumeText, setResumeText] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [atsScore, setAtsScore] = useState(null);
-  const [error, setError] = useState('');
-  const fileInputRef = useRef(null);
+  const { userProfile } = useOutletContext() || {};
 
   // --- Dynamic Dashboard Metrics & Stats State ---
   const [apiData, setApiData] = useState(null);
   
-  // Interactive Tasks for Daily/Weekly Progress
-  const [tasks, setTasks] = useState([
+  // Interactive Tasks for Daily/Weekly Progress calculation
+  const [tasks] = useState([
     { id: 1, text: 'Complete React Course Section 4', time: '10:00 AM', completed: true, points: 20 },
     { id: 2, text: 'Update Resume with new project', time: '2:00 PM', completed: false, points: 30 },
     { id: 3, text: 'Apply for Frontend Internships', time: '4:30 PM', completed: false, points: 25 },
@@ -27,70 +22,99 @@ const Dashboard = () => {
     { id: 5, text: 'Review feedback on PR', time: '7:30 PM', completed: false, points: 10 }
   ]);
 
-  // Calendar Streak State
-  // July 2026 matching the screenshot
+  // Calendar Month State matching July 2026
   const [currentYear, setCurrentYear] = useState(2026);
   const [currentMonth, setCurrentMonth] = useState(6); // 0-indexed, so 6 is July
 
-  // Streak history configuration. Keys format: "YYYY-MM-DD".
-  // 'missed' (red with x), 'completed' (green with tick), 'active' (blue with </>)
-  const [streakHistory, setStreakHistory] = useState({
-    "2026-07-01": "missed",
-    "2026-07-02": "missed",
-    "2026-07-03": "missed",
-    "2026-07-04": "missed",
-    "2026-07-05": "completed",
-    "2026-07-06": "missed",
-    "2026-07-07": "completed",
-    "2026-07-08": "completed",
-    "2026-07-09": "completed",
-    "2026-07-10": "active"
-  });
+  // Streak states
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [longestStreak, setLongestStreak] = useState(0);
+  const [streakHistory, setStreakHistory] = useState({});
 
-  // Calculate streaks dynamically
-  const calculateStreak = () => {
-    let currentStreak = 0;
-    let longestStreak = 4; // Mock baseline longest
-    
-    // Sort dates ascending
-    const sortedDates = Object.keys(streakHistory)
-      .filter(dateStr => streakHistory[dateStr] === 'completed' || streakHistory[dateStr] === 'active')
-      .sort();
-      
-    // Calculate current visit streak ending today (2026-07-10)
-    let checkDate = new Date(2026, 6, 10); // July 10, 2026
-    while (true) {
-      const formatted = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
-      if (streakHistory[formatted] === 'completed' || streakHistory[formatted] === 'active') {
-        currentStreak++;
-        checkDate.setDate(checkDate.getDate() - 1);
-      } else {
-        break;
-      }
-    }
-    
-    // Compute longest streak
-    let tempStreak = 0;
-    let startCheck = new Date(2026, 6, 1);
-    const endCheck = new Date(2026, 6, 10);
-    
-    while (startCheck <= endCheck) {
-      const formatted = `${startCheck.getFullYear()}-${String(startCheck.getMonth() + 1).padStart(2, '0')}-${String(startCheck.getDate()).padStart(2, '0')}`;
-      if (streakHistory[formatted] === 'completed' || streakHistory[formatted] === 'active') {
-        tempStreak++;
-        if (tempStreak > longestStreak) {
-          longestStreak = tempStreak;
+  // Activity Log Heatmap State
+  const [activityData, setActivityData] = useState({ dailyActivities: [], currentStreak: 0, longestStreak: 0 });
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const res = await api.get('/api/activities', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setActivityData(res.data.data);
         }
-      } else if (streakHistory[formatted] === 'missed') {
-        tempStreak = 0;
+      } catch (err) {
+        console.warn("Could not load activity log data", err);
       }
-      startCheck.setDate(startCheck.getDate() + 1);
+    };
+    fetchActivities();
+  }, [userProfile]);
+
+  useEffect(() => {
+    if (!userProfile) return;
+
+    const streakKey = `streak_data_${userProfile.id || userProfile.email}`;
+    const savedData = localStorage.getItem(streakKey);
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const currentTimestamp = now.getTime();
+
+    let streakData = {
+      currentStreak: 0,
+      longestStreak: 0,
+      lastActivityDate: null,
+      lastActivityTimestamp: null,
+      history: {}
+    };
+
+    if (savedData) {
+      try {
+        streakData = JSON.parse(savedData);
+      } catch (e) {
+        console.error("Failed to parse streak data", e);
+      }
     }
 
-    return { current: currentStreak, longest: longestStreak };
-  };
+    // Check if 24 hours have passed since last activity (if lastActivityTimestamp exists)
+    if (streakData.lastActivityTimestamp) {
+      const msDiff = currentTimestamp - streakData.lastActivityTimestamp;
+      const hoursDiff = msDiff / (1000 * 60 * 60);
 
-  const { current: currentStreak, longest: longestStreak } = calculateStreak();
+      if (hoursDiff > 24) {
+        // End streak and start fresh
+        streakData.currentStreak = 0;
+      }
+    }
+
+    // Record today's visit/activity
+    if (streakData.lastActivityDate !== todayStr) {
+      // It's a new day! Increment the streak
+      streakData.currentStreak += 1;
+      if (streakData.currentStreak > streakData.longestStreak) {
+        streakData.longestStreak = streakData.currentStreak;
+      }
+      streakData.history[todayStr] = "active";
+    } else {
+      // Already visited today
+      if (streakData.currentStreak === 0) {
+        streakData.currentStreak = 1;
+      }
+      streakData.history[todayStr] = "active";
+    }
+
+    // Update timestamps
+    streakData.lastActivityDate = todayStr;
+    streakData.lastActivityTimestamp = currentTimestamp;
+
+    // Save back to localStorage
+    localStorage.setItem(streakKey, JSON.stringify(streakData));
+
+    // Update React states
+    setCurrentStreak(streakData.currentStreak);
+    setLongestStreak(streakData.longestStreak);
+    setStreakHistory(streakData.history || {});
+  }, [userProfile]);
 
   // Load backend statistics if available
   useEffect(() => {
@@ -110,11 +134,6 @@ const Dashboard = () => {
     fetchStats();
   }, []);
 
-  // Toggle tasks completion
-  const handleToggleTask = (id) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
-  };
-
   // --- Calculations for dynamic metrics ---
   // 1. Goal Completion %
   const completedGoalsCount = apiData?.goalStats?.completedGoals ?? 3;
@@ -130,7 +149,6 @@ const Dashboard = () => {
   const weeklyProgressPercent = Math.round(60 + (dailyProgressPercent * 0.2));
 
   // 3. Productivity Score
-  // Calculated based on completed tasks, streak multipliers, and career readiness
   const baseProductivity = Math.round((completedDailyPoints / totalDailyPoints) * 80);
   const streakBonus = Math.min(20, currentStreak * 2);
   const productivityScore = Math.min(100, baseProductivity + streakBonus + 10);
@@ -249,61 +267,110 @@ const Dashboard = () => {
     return cells;
   };
 
-  // --- Existing ATS Checker Handlers ---
-  const handleQuickAnalyze = async () => {
-    if (!resumeText.trim()) return;
-    setLoading(true);
-    setError('');
-    try {
-      const token = localStorage.getItem('token');
-      const response = await api.post('/api/ai/resume/analyze-text', { text: resumeText }, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = response.data;
-      setAtsScore(data.data.overallScore || Math.round((data.data.grammarScore + data.data.readabilityIndex) / 2));
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || 'An error occurred.');
-    } finally {
-      setLoading(false);
+  const activeDaysCount = activityData.activeDays || 0;
+  const totalActivitiesCount = activityData.totalActivities || 0;
+
+  const getMonthList = () => {
+    const list = [];
+    let m = currentMonth + 1; // start from 12 months ago
+    let y = currentYear - 1;
+    for (let i = 0; i < 12; i++) {
+      if (m > 11) {
+        m = 0;
+        y++;
+      }
+      list.push({ month: m, year: y });
+      m++;
     }
+    return list;
   };
 
-  const handleFileUpload = async (e) => {
-    const selectedFile = e.target.files[0];
-    if (!selectedFile) return;
-
-    if (selectedFile.type !== 'application/pdf') {
-      setError('Please upload a valid PDF file.');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
+  const renderContributionMap = () => {
+    const months = getMonthList();
+    const activityMap = {};
+    activityData.dailyActivities?.forEach(act => {
+      activityMap[act.date] = act.score;
+    });
     
-    try {
-      const token = localStorage.getItem('token');
-      const formData = new FormData();
-      formData.append('resume', selectedFile);
+    return (
+      <div className="contribution-map-container">
+        <div className="months-row">
+          {months.map(({ month, year }) => {
+            const daysCount = new Date(year, month + 1, 0).getDate();
+            const firstDay = new Date(year, month, 1).getDay(); // 0 = Sun, 1 = Mon, ...
+            const startIdx = firstDay === 0 ? 6 : firstDay - 1;
 
-      const response = await api.post('/api/ai/resume/upload-analyze', formData, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+            const cells = [];
+            for (let i = 0; i < startIdx; i++) {
+              cells.push({ dateStr: null, count: 0, isPadding: true });
+            }
+            for (let day = 1; day <= daysCount; day++) {
+              const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+              const count = activityMap[dateStr] || 0;
+              cells.push({ dateStr, count, isPadding: false, dayNum: day });
+            }
 
-      const data = response.data;
-      setAtsScore(data.data.overallScore || Math.round((data.data.grammarScore + data.data.readabilityIndex) / 2));
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || 'An error occurred during file upload analysis.');
-    } finally {
-      setLoading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
+            const weeks = [];
+            let currentWeek = [];
+            cells.forEach((cell, idx) => {
+              currentWeek.push(cell);
+              if (currentWeek.length === 7 || idx === cells.length - 1) {
+                while (currentWeek.length < 7) {
+                  currentWeek.push({ dateStr: null, count: 0, isPadding: true });
+                }
+                weeks.push(currentWeek);
+                currentWeek = [];
+              }
+            });
+
+            return (
+              <div key={`${year}-${month}`} className="month-block">
+                <div className="weeks-container">
+                  {weeks.map((week, wIdx) => (
+                    <div key={wIdx} className="week-column">
+                      {week.map((day, dIdx) => {
+                        let colorClass = "day-square empty";
+                        let tooltip = "";
+                        
+                        if (!day.isPadding) {
+                          if (day.count === 0) {
+                            colorClass = "day-square level-0";
+                            tooltip = `${day.dateStr}: No activity`;
+                          } else if (day.count <= 2) {
+                            colorClass = "day-square level-1";
+                            tooltip = `${day.dateStr}: ${day.count} activities`;
+                          } else if (day.count <= 5) {
+                            colorClass = "day-square level-2";
+                            tooltip = `${day.dateStr}: ${day.count} activities`;
+                          } else if (day.count <= 10) {
+                            colorClass = "day-square level-3";
+                            tooltip = `${day.dateStr}: ${day.count} activities`;
+                          } else {
+                            colorClass = "day-square level-4";
+                            tooltip = `${day.dateStr}: ${day.count} activities`;
+                          }
+                        }
+
+                        return (
+                          <div 
+                            key={dIdx} 
+                            className={colorClass} 
+                            title={tooltip}
+                          >
+                            {day.count >= 10 && <span className="fire-indicator">🔥</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+                <div className="month-name-label">{monthNames[month]}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -356,7 +423,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Main Section Left: Skill Growth Graph & Monthly Analytics & ATS */}
+      {/* Main Section Left: Skill Growth Graph & Monthly Analytics */}
       <div className="chart-section main-dashboard-left">
         
         {/* Core Circular Metrics & Readiness Section */}
@@ -431,59 +498,34 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Skill Growth Graph */}
-        <div className="dash-card graph-card">
-          <h2 className="dash-title">Skill Growth & Activity Area</h2>
-          <div className="skill-graph-container">
-            {/* Custom interactive responsive SVG graph */}
-            <svg viewBox="0 0 600 240" className="skill-svg-chart">
-              {/* Grid Lines */}
-              <line x1="50" y1="200" x2="550" y2="200" className="graph-grid-line" />
-              <line x1="50" y1="140" x2="550" y2="140" className="graph-grid-line" />
-              <line x1="50" y1="80" x2="550" y2="80" className="graph-grid-line" />
-              <line x1="50" y1="20" x2="550" y2="20" className="graph-grid-line" />
-
-              {/* Graph Fills (Area) */}
-              <path 
-                d="M 50 200 Q 150 120 250 150 T 450 60 T 550 40 L 550 200 Z" 
-                className="graph-area-fill" 
-              />
-
-              {/* Graph Curves */}
-              <path 
-                d="M 50 200 Q 150 120 250 150 T 450 60 T 550 40" 
-                className="graph-curve-line" 
-              />
-
-              {/* Data points */}
-              <circle cx="50" cy="200" r="5" className="graph-dot" />
-              <circle cx="150" cy="135" r="5" className="graph-dot" />
-              <circle cx="250" cy="150" r="5" className="graph-dot" />
-              <circle cx="350" cy="95" r="5" className="graph-dot" />
-              <circle cx="450" cy="60" r="5" className="graph-dot" />
-              <circle cx="550" cy="40" r="5" className="graph-dot" />
-
-              {/* Labels */}
-              <text x="50" y="220" className="graph-axis-label">Jan</text>
-              <text x="150" y="220" className="graph-axis-label">Feb</text>
-              <text x="250" y="220" className="graph-axis-label">Mar</text>
-              <text x="350" y="220" className="graph-axis-label">Apr</text>
-              <text x="450" y="220" className="graph-axis-label">May</text>
-              <text x="550" y="220" className="graph-axis-label">Jun</text>
-
-              <text x="20" y="25" className="graph-axis-y-label">Expert</text>
-              <text x="20" y="145" className="graph-axis-y-label">Inter</text>
-              <text x="20" y="205" className="graph-axis-y-label">Beg</text>
-            </svg>
-          </div>
-          <div className="graph-footer-stats">
-            <div>
-              <span className="stat-subtext">Primary Skill Node</span>
-              <h4>React & JavaScript Development</h4>
+        {/* Activity Heatmap Calendar */}
+        <div className="dash-card activity-heatmap-card">
+          <div className="heatmap-header">
+            <div className="header-left">
+              <span className="active-days-count">{activeDaysCount} Active days</span>
+              <FiInfo className="info-icon" title="Days with at least 1 meaningful action logged" />
             </div>
-            <div>
-              <span className="stat-subtext">Avg Progress Rate</span>
-              <h4 style={{ color: 'var(--dash-success)' }}>+24.8% Monthly Growth</h4>
+            <div className="header-right">
+              <span className="streak-badge">
+                🔥 {activityData.currentStreak || 0} Day AC Streak! <span className="sub">Longest: {activityData.longestStreak || 0}</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="heatmap-grid-container">
+            {renderContributionMap()}
+          </div>
+
+          <div className="heatmap-footer">
+            <span className="footer-left">{activeDaysCount} problems solved this year</span>
+            <div className="footer-right legend">
+              <span>Less</span>
+              <div className="day-square level-0" title="No activity"></div>
+              <div className="day-square level-1" title="1-2 activities"></div>
+              <div className="day-square level-2" title="3-5 activities"></div>
+              <div className="day-square level-3" title="6-10 activities"></div>
+              <div className="day-square level-4" title="10+ activities"><span className="fire-indicator">🔥</span></div>
+              <span>More</span>
             </div>
           </div>
         </div>
@@ -515,57 +557,9 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Existing Quick ATS Checker */}
-        <div className="dash-card ats-checker-card">
-          <h2 className="dash-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FiFileText /> Quick ATS Score Checker</span>
-            <div>
-              <button 
-                onClick={() => fileInputRef.current.click()}
-                disabled={loading}
-                className="btn-upload-pdf"
-              >
-                <FiUpload /> Upload PDF
-              </button>
-              <input type="file" accept=".pdf" ref={fileInputRef} onChange={handleFileUpload} style={{ display: 'none' }} />
-            </div>
-          </h2>
-          <p style={{ color: 'var(--dash-text-muted)', marginBottom: '16px', fontSize: '14px' }}>
-            Powered by Grok AI. Paste your resume text or upload a PDF to get a quick compatibility score.
-          </p>
-          
-          {error && <div style={{ color: '#ef4444', marginBottom: '12px', fontSize: '14px' }}>{error}</div>}
-          
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            <textarea 
-              placeholder="Paste your resume here..."
-              value={resumeText}
-              onChange={(e) => setResumeText(e.target.value)}
-              className="ats-textarea"
-            ></textarea>
-            
-            <div className="ats-submit-wrapper">
-              <button 
-                onClick={handleQuickAnalyze}
-                disabled={loading || !resumeText.trim()}
-                className="btn-get-score"
-              >
-                {loading ? 'Analyzing...' : <><FiActivity /> Get Score</>}
-              </button>
-              
-              {atsScore !== null && (
-                <div className="ats-score-badge">
-                  <div style={{ fontSize: '11px', fontWeight: 'bold' }}>ATS SCORE</div>
-                  <div style={{ fontSize: '32px', fontWeight: '900' }}>{atsScore}</div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
       </div>
 
-      {/* Side Section Right: Streak Calendar & Tasks */}
+      {/* Side Section Right: Streak Counter & Progress */}
       <div className="side-section main-dashboard-right">
         
         {/* Streak Calendar Card - High Fidelity Dark Style exactly matching image */}
@@ -616,7 +610,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Daily / Weekly Progress & Today's Tasks */}
+        {/* Daily / Weekly Progress */}
         <div className="dash-card tasks-progress-card">
           <h2 className="dash-title">Tasks & Progression</h2>
           
@@ -635,26 +629,6 @@ const Dashboard = () => {
           <div className="progress-bar-bg">
             <div className="progress-bar-fill" style={{ width: `${weeklyProgressPercent}%` }}></div>
           </div>
-
-          <h3 className="dash-subtitle" style={{ marginTop: '28px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FiCheckSquare /> Today's Tasks
-          </h3>
-          
-          <ul className="task-list">
-            {tasks.map(task => (
-              <li 
-                key={task.id} 
-                className={`task-item interactive ${task.completed ? 'completed' : ''}`}
-                onClick={() => handleToggleTask(task.id)}
-              >
-                <div className={`task-checkbox-custom ${task.completed ? 'checked' : ''}`}>
-                  {task.completed && <span>✓</span>}
-                </div>
-                <span className="task-text">{task.text}</span>
-                <span className="task-time">{task.time}</span>
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
     </div>

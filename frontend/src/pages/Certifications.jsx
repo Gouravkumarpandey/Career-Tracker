@@ -154,11 +154,8 @@ const Certifications = () => {
 
   return (
     <div className="cert-container">
-      <div className="cert-header">
-        <div className="cert-title">
-          <h1>Certification Tracker</h1>
-          <p>Manage credentials from Coursera, NPTEL, Udemy, and more. Track scores, badges, and expiry reminders.</p>
-        </div>
+      <div className="cert-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h1 className="page-heading" style={{ margin: 0 }}>Certifications</h1>
         <button className="btn-add-cert" onClick={() => setIsModalOpen(true)}>
           <FiPlus /> Add Certificate
         </button>

@@ -345,14 +345,16 @@
 
 /* Calendar Styles */
 .calendar-grid {
-  background: var(--dash-surface); border-radius: 12px; border: 1px solid var(--dash-border);
-  padding: 24px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+  display: grid; 
+  grid-template-columns: repeat(7, 1fr); 
+  gap: 8px;
 }
 .cal-header-day { text-align: center; font-weight: 600; color: var(--dash-text-muted); padding-bottom: 12px; }
 .cal-day {
   aspect-ratio: 1; background: var(--dash-bg); border: 1px solid var(--dash-border); border-radius: 8px;
   padding: 8px; display: flex; flex-direction: column; transition: border-color 0.2s; cursor: pointer;
 }
+.cal-day.selected { border-color: var(--dash-primary); background: rgba(37, 99, 235, 0.05); }
 .cal-day:hover { border-color: var(--dash-primary); }
 .cal-date { font-weight: 600; color: var(--dash-text-main); font-size: 14px; margin-bottom: 4px; }
 .cal-day.today { background: rgba(37, 99, 235, 0.05); border-color: var(--dash-primary); }
@@ -486,20 +488,51 @@
     align-items: flex-start;
     gap: 16px;
   }
-  
+  .planner-tabs {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding: 6px;
+  }
+  .planner-tab {
+    padding: 8px 14px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
   .kanban-board {
     height: auto;
     flex-direction: column;
   }
-  
   .kanban-column {
-    min-height: 300px;
+    min-height: 250px;
     height: auto;
+    min-width: unset;
+  }
+  /* Calendar two-column → single column */
+  .planner-calendar-view {
+    grid-template-columns: 1fr !important;
   }
 }
 
 @media (max-width: 600px) {
   .notes-editor-area {
-    padding: 20px;
+    padding: 16px;
+  }
+  /* Pomodoro */
+  .pomodoro-timer {
+    font-size: 56px !important;
   }
 }
+
+@media (max-width: 480px) {
+  .planner-tab {
+    padding: 7px 10px;
+    font-size: 12px;
+    gap: 5px;
+  }
+  .planner-tab svg {
+    display: none;
+  }
+}
+

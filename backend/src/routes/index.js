@@ -11,6 +11,8 @@ const certificationRoutes = require('../modules/certification/certification.rout
 const analyticsRoutes = require('../modules/analytics/analytics.routes');
 const notificationRoutes = require('../modules/notification/notification.routes');
 const aiRoutes = require('../modules/ai/ai.routes');
+const activityRoutes = require('../modules/activity/activity.routes');
+const calendarRoutes = require('../modules/calendar/calendar.routes');
 
 const router = express.Router();
 
@@ -26,5 +28,7 @@ router.use('/certifications', certificationRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/ai', aiRoutes);
+router.use('/activities', activityRoutes);
+router.use('/calendar-events', calendarRoutes);
 
 module.exports = router;

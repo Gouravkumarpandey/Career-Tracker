@@ -5,29 +5,17 @@ import {
   FiTarget, FiFileText, FiEdit3
 } from 'react-icons/fi';
 import './Planner.css';
+import api from '../config/api';
 
-const initialHabits = [
-  { id: 1, name: 'Read 1 Tech Article', streak: 12, days: [true, true, true, false, true, true, false] },
-  { id: 2, name: 'LeetCode Problem', streak: 45, days: [true, true, true, true, true, true, true] },
-  { id: 3, name: 'Networking Outreach', streak: 3, days: [false, false, true, true, false, true, false] }
-];
+const initialHabits = [];
 
 const initialTasks = {
-  todo: [
-    { id: 1, title: 'Update Resume', desc: 'Add new fullstack project and rewrite summary.', tag: 'tag-red', type: 'High Priority' }
-  ],
-  inProgress: [
-    { id: 3, title: 'Apply for Internships', desc: 'Send 5 applications on LinkedIn.', tag: 'tag-green', type: 'Job Search' }
-  ],
-  done: [
-    { id: 4, title: 'Mock Interview', desc: 'Completed peer mock interview.', tag: 'tag-blue', type: 'Prep' }
-  ]
+  todo: [],
+  inProgress: [],
+  done: []
 };
 
-const initialNotes = [
-  { id: 1, title: 'Interview Prep Notes', body: 'Concepts to review:\n- React hooks lifecycle\n- Event Loop in Node.js\n- System Design tradeoffs' },
-  { id: 2, title: 'Job Application Strategy', body: 'Targeting mid-level frontend roles in FinTech.' }
-];
+const initialNotes = [];
 
 const Planner = () => {
   const [activeTab, setActiveTab] = useState('board');
@@ -39,22 +27,54 @@ const Planner = () => {
 
   // Notes State
   const [notes, setNotes] = useState(initialNotes);
-  const [activeNoteId, setActiveNoteId] = useState(1);
+  const [activeNoteId, setActiveNoteId] = useState(null);
   const bodyRef = useRef(null);
 
   // Habits State
   const [habits, setHabits] = useState(initialHabits);
   const [newHabitName, setNewHabitName] = useState('');
 
-  // Calendar State
-  const [calendarEvents, setCalendarEvents] = useState([5, 12, 15, 22]); // Array of dates that have events
+  // Calendar States
+  const [selectedDate, setSelectedDate] = useState(12); // Default to July 12 (today)
+  const [selectedHour, setSelectedHour] = useState('09');
+  const [selectedMinute, setSelectedMinute] = useState('00');
+  const [selectedAmPm, setSelectedAmPm] = useState('AM');
+  const [newCalendarItem, setNewCalendarItem] = useState({ type: 'task', text: '' });
+  const [calendarEventsData, setCalendarEventsData] = useState({});
 
-  // Load from local storage
+  const fetchCalendarEvents = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await api.get('/api/calendar-events', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const list = res.data.data || [];
+      const grouped = {};
+      list.forEach(event => {
+        const dateObj = new Date(event.eventDate);
+        if (dateObj.getMonth() === 6 && dateObj.getFullYear() === 2026) {
+          const dateVal = dateObj.getDate();
+          if (!grouped[dateVal]) grouped[dateVal] = [];
+          grouped[dateVal].push({
+            id: event.id,
+            type: event.type,
+            text: event.title,
+            completed: event.completed,
+            time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+          });
+        }
+      });
+      setCalendarEventsData(grouped);
+    } catch (err) {
+      console.error('Failed to fetch calendar events:', err);
+    }
+  };
+
+  // Load from local storage & API
   useEffect(() => {
     const savedTasks = localStorage.getItem('careerTrackerTasks');
     const savedNotes = localStorage.getItem('careerTrackerNotes');
     const savedHabits = localStorage.getItem('careerTrackerHabits');
-    const savedEvents = localStorage.getItem('careerTrackerEvents');
 
     if (savedTasks) setTasks(JSON.parse(savedTasks));
     if (savedNotes) {
@@ -63,14 +83,13 @@ const Planner = () => {
       if (pNotes.length > 0) setActiveNoteId(pNotes[0].id);
     }
     if (savedHabits) setHabits(JSON.parse(savedHabits));
-    if (savedEvents) setCalendarEvents(JSON.parse(savedEvents));
+    fetchCalendarEvents();
   }, []);
 
   // Save to local storage
   useEffect(() => { localStorage.setItem('careerTrackerTasks', JSON.stringify(tasks)); }, [tasks]);
   useEffect(() => { localStorage.setItem('careerTrackerNotes', JSON.stringify(notes)); }, [notes]);
   useEffect(() => { localStorage.setItem('careerTrackerHabits', JSON.stringify(habits)); }, [habits]);
-  useEffect(() => { localStorage.setItem('careerTrackerEvents', JSON.stringify(calendarEvents)); }, [calendarEvents]);
 
   // Task Handlers
   const handleAddTask = (col) => {
@@ -349,47 +368,243 @@ const Planner = () => {
   );
 
   // Calendar Handlers
-  const toggleCalendarEvent = (date) => {
-    if (date <= 0 || date > 31) return; // Ignore mock padding dates
-    setCalendarEvents(prev => 
-      prev.includes(date) ? prev.filter(d => d !== date) : [...prev, date]
-    );
+  // Convert 12h picker values → 24h for ISO
+  const getEventTimeISO = () => {
+    let hour = parseInt(selectedHour, 10);
+    if (selectedAmPm === 'AM' && hour === 12) hour = 0;
+    if (selectedAmPm === 'PM' && hour !== 12) hour += 12;
+    const hh = String(hour).padStart(2, '0');
+    return `2026-07-${String(selectedDate).padStart(2, '0')}T${hh}:${selectedMinute}:00`;
+  };
+
+  const handleAddCalendarItem = async (e) => {
+    e.preventDefault();
+    if (!newCalendarItem.text.trim()) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      const eventDateStr = getEventTimeISO();
+      
+      await api.post('/api/calendar-events', {
+        title: newCalendarItem.text,
+        type: newCalendarItem.type,
+        eventDate: eventDateStr,
+        sendEmail: true
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setNewCalendarItem(prev => ({ ...prev, text: '' }));
+      fetchCalendarEvents();
+    } catch (err) {
+      console.error('Failed to create calendar event:', err);
+    }
+  };
+
+  const handleToggleCalendarItem = async (eventId, currentCompleted) => {
+    try {
+      const token = localStorage.getItem('token');
+      await api.put(`/api/calendar-events/${eventId}`, {
+        completed: !currentCompleted
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchCalendarEvents();
+    } catch (err) {
+      console.error('Failed to toggle event completion:', err);
+    }
+  };
+
+  const handleDeleteCalendarItem = async (eventId) => {
+    if (!window.confirm('Are you sure you want to delete this event?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await api.delete(`/api/calendar-events/${eventId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchCalendarEvents();
+    } catch (err) {
+      console.error('Failed to delete calendar event:', err);
+    }
   };
 
   const renderCalendar = () => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const dates = Array.from({length: 35}, (_, i) => i - 2); 
     
+    const selectedEvents = calendarEventsData[selectedDate] || [];
+
     return (
-      <div className="calendar-grid">
-        {days.map(d => <div key={d} className="cal-header-day">{d}</div>)}
-        {dates.map((date, i) => {
-          const isToday = date === 15; // mock today
-          const hasEvent = calendarEvents.includes(date);
-          return (
-            <div 
-              key={i} 
-              className={`cal-day ${isToday ? 'today' : ''}`} 
-              style={{ opacity: date <= 0 || date > 31 ? 0.3 : 1, cursor: date > 0 && date <= 31 ? 'pointer' : 'default' }}
-              onClick={() => toggleCalendarEvent(date)}
-            >
-              <div className="cal-date">{date > 0 && date <= 31 ? date : ''}</div>
-              {hasEvent && <div className="cal-dot"></div>}
+      <div className="planner-calendar-view" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
+        {/* Left Grid */}
+        <div className="calendar-grid-box" style={{ background: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '12px', padding: '20px' }}>
+          <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 700 }}>July 2026</h3>
+          <div className="calendar-grid">
+            {days.map(d => <div key={d} className="cal-header-day">{d}</div>)}
+            {dates.map((date, i) => {
+              const isToday = date === 12; // mock today is July 12
+              const isSelected = selectedDate === date;
+              const hasEvents = calendarEventsData[date] && calendarEventsData[date].length > 0;
+              return (
+                <div 
+                  key={i} 
+                  className={`cal-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`} 
+                  style={{ 
+                    opacity: date <= 0 || date > 31 ? 0.3 : 1, 
+                    cursor: date > 0 && date <= 31 ? 'pointer' : 'default',
+                    border: isSelected ? '2px solid var(--dash-primary)' : '1px solid var(--dash-border)',
+                    position: 'relative'
+                  }}
+                  onClick={() => date > 0 && date <= 31 && setSelectedDate(date)}
+                >
+                  <div className="cal-date">{date > 0 && date <= 31 ? date : ''}</div>
+                  {hasEvents && (
+                    <div className="cal-dot" style={{ position: 'absolute', bottom: '4px', left: '50%', transform: 'translateX(-50%)', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--dash-primary)' }}></div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right Details Panel */}
+        <div className="calendar-details-panel" style={{ background: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="details-header" style={{ borderBottom: '1px solid var(--dash-border)', paddingBottom: '12px' }}>
+            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>Events on July {selectedDate}</h3>
+          </div>
+
+          <div className="details-items-list" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {selectedEvents.length === 0 ? (
+              <p style={{ color: 'var(--dash-text-muted)', fontSize: '14px', fontStyle: 'italic', margin: 0 }}>No deadlines, tasks, or reminders for this day.</p>
+            ) : (
+              selectedEvents.map((item, idx) => {
+                let badgeColor = '#ef4444'; // default red
+                let badgeText = 'Reminder';
+                let icon = '🔔';
+                
+                if (item.type === 'goal') {
+                  badgeColor = '#ea580c';
+                  badgeText = 'Goal Deadline';
+                  icon = '🎯';
+                } else if (item.type === 'task') {
+                  badgeColor = '#2563eb';
+                  badgeText = 'Daily Task';
+                  icon = '✔';
+                } else if (item.type === 'planner') {
+                  badgeColor = '#10b981';
+                  badgeText = 'Planner Event';
+                  icon = '📅';
+                }
+
+                return (
+                  <div key={idx} className="cal-event-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--dash-bg)', padding: '12px', borderRadius: '8px', border: '1px solid var(--dash-border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+                      <span style={{ fontSize: '18px', cursor: 'pointer' }} onClick={() => handleToggleCalendarItem(item.id, item.completed)}>
+                        {item.completed ? '✅' : icon}
+                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 600, textDecoration: item.completed ? 'line-through' : 'none', color: item.completed ? 'var(--dash-text-muted)' : 'var(--dash-text-main)' }}>
+                          {item.text} <span style={{ fontSize: '11px', color: 'var(--dash-text-muted)', fontWeight: 400 }}>({item.time})</span>
+                        </span>
+                        <span style={{ fontSize: '11px', color: badgeColor, fontWeight: 700, textTransform: 'uppercase', marginTop: '2px' }}>
+                          {badgeText}
+                        </span>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => handleDeleteCalendarItem(item.id)}
+                      style={{ background: 'transparent', border: 'none', color: 'var(--dash-text-muted)', fontSize: '18px', cursor: 'pointer' }}
+                    >
+                      &times;
+                    </button>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <form onSubmit={handleAddCalendarItem} style={{ borderTop: '1px solid var(--dash-border)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 600 }}>Add Event / Goal / Task</span>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <select 
+                value={newCalendarItem.type} 
+                onChange={e => setNewCalendarItem({ ...newCalendarItem, type: e.target.value })}
+                style={{ padding: '8px', borderRadius: '8px', border: '1px solid var(--dash-border)', background: 'var(--dash-bg)', color: 'var(--dash-text-main)', fontSize: '13px' }}
+              >
+                <option value="task">Daily Task</option>
+                <option value="goal">Goal Deadline</option>
+                <option value="planner">Planner Event</option>
+                <option value="reminder">Reminder</option>
+              </select>
+              <input 
+                type="text"
+                placeholder="Title..."
+                value={newCalendarItem.text}
+                onChange={e => setNewCalendarItem({ ...newCalendarItem, text: e.target.value })}
+                style={{ flex: 1, minWidth: '120px', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--dash-border)', background: 'var(--dash-bg)', color: 'var(--dash-text-main)', fontSize: '13px' }}
+              />
+              {/* Custom 12-hour time picker */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--dash-bg)', border: '1px solid var(--dash-border)', borderRadius: '8px', padding: '4px 8px' }}>
+                <select
+                  value={selectedHour}
+                  onChange={e => setSelectedHour(e.target.value)}
+                  style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--dash-text-main)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: '4px 2px' }}
+                >
+                  {['01','02','03','04','05','06','07','08','09','10','11','12'].map(h => (
+                    <option key={h} value={h}>{h}</option>
+                  ))}
+                </select>
+                <span style={{ color: 'var(--dash-text-muted)', fontWeight: 700, fontSize: '13px' }}>:</span>
+                <select
+                  value={selectedMinute}
+                  onChange={e => setSelectedMinute(e.target.value)}
+                  style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--dash-text-main)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: '4px 2px' }}
+                >
+                  {['00','05','10','15','20','25','30','35','40','45','50','55'].map(m => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+                <div style={{ display: 'flex', gap: '2px', marginLeft: '6px' }}>
+                  {['AM','PM'].map(period => (
+                    <button
+                      key={period}
+                      type="button"
+                      onClick={() => setSelectedAmPm(period)}
+                      style={{
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        background: selectedAmPm === period ? 'var(--dash-primary)' : 'transparent',
+                        color: selectedAmPm === period ? 'white' : 'var(--dash-text-muted)',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {period}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button 
+                type="submit"
+                style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: 'var(--dash-primary)', color: 'white', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}
+              >
+                Add
+              </button>
             </div>
-          );
-        })}
+          </form>
+        </div>
       </div>
     );
   };
 
   return (
     <div className="planner-container">
-      <div className="planner-header">
-        <div className="planner-title">
-          <h1>Planner Hub</h1>
-          <p>Organize your tasks, notes, and track your habits.</p>
-        </div>
-        <div className="planner-tabs">
+      <div className="planner-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
+        <h1 className="page-heading" style={{ margin: 0 }}>Goals</h1>
+        <div className="planner-tabs" style={{ margin: 0 }}>
           <button className={`planner-tab ${activeTab === 'board' ? 'active' : ''}`} onClick={() => setActiveTab('board')}>
             <FiLayout /> Task Board
           </button>

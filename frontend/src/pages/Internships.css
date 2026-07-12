@@ -1,8 +1,6 @@
 /* Modern Premium Internship Tracker Styling */
 .internships-container {
   padding: 30px;
-  max-width: 1200px;
-  margin: 0 auto;
   font-family: 'Inter', sans-serif;
   color: #1f2937;
 }
@@ -426,5 +424,53 @@
     grid-template-columns: repeat(4, 280px);
     overflow-x: auto;
     padding-bottom: 12px;
+  }
+}
+
+/* ====== COMPREHENSIVE MOBILE RESPONSIVENESS ====== */
+
+@media (max-width: 900px) {
+  .internships-layout {
+    flex-direction: column !important;
+  }
+  .internship-filters-panel {
+    width: 100% !important;
+  }
+  .internship-results-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .internship-tracker-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .internship-results-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .internship-card {
+    padding: 16px !important;
+  }
+  .internship-search-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .internship-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+  .internship-card-footer {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .internship-card-footer .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-heading {
+    font-size: 22px !important;
   }
 }

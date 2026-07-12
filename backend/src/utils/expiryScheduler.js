@@ -76,15 +76,82 @@ CareerFlow Team`;
   }
 };
 
-const startExpiryScheduler = () => {
-  // Run check immediately on startup
-  checkExpiringCertifications();
+const checkCalendarEventReminders = async () => {
+  console.log('[Scheduler] Checking for calendar event reminders...');
+  try {
+    const fifteenMinutesFromNow = new Date(Date.now() + 15 * 60 * 1000);
+    
+    const upcomingEvents = await prisma.calendarEvent.findMany({
+      where: {
+        eventDate: {
+          lte: fifteenMinutesFromNow,
+          gte: new Date()
+        },
+        sendEmail: true,
+        emailSent: false,
+        completed: false
+      },
+      include: {
+        user: true
+      }
+    });
 
-  // Run check every 24 hours (86400000 ms)
+    if (upcomingEvents.length === 0) {
+      return;
+    }
+
+    console.log(`[Scheduler] Found ${upcomingEvents.length} upcoming calendar event(s). Dispatching email reminders...`);
+
+    for (const event of upcomingEvents) {
+      const userEmail = event.user.email;
+      const userName = event.user.name;
+      const eventTimeStr = new Date(event.eventDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const emailSubject = `Reminder: "${event.title}" is scheduled at ${eventTimeStr}`;
+      const emailBody = `Hello ${userName},
+
+This is a reminder for your upcoming task/goal:
+- Title: ${event.title}
+- Scheduled Time: ${eventTimeStr}
+
+Best regards,
+CareerFlow Team`;
+
+      const emailHtml = `<p>Hello <strong>${userName}</strong>,</p>
+<p>This is a reminder for your upcoming task/goal:</p>
+<p><strong>${event.title}</strong> is scheduled to start at <strong>${eventTimeStr}</strong> (in 15 minutes).</p>
+<p>Best regards,<br/><strong>CareerFlow Team</strong></p>`;
+
+      try {
+        await sendMail(userEmail, emailSubject, emailBody, emailHtml);
+      } catch (err) {
+        console.error(`[Scheduler] Failed to dispatch email to ${userEmail}:`, err);
+      }
+
+      await prisma.calendarEvent.update({
+        where: { id: event.id },
+        data: { emailSent: true }
+      });
+    }
+  } catch (error) {
+    console.error('[Scheduler] Error checking calendar event reminders:', error);
+  }
+};
+
+const startExpiryScheduler = () => {
+  // Run checks immediately on startup
+  checkExpiringCertifications();
+  checkCalendarEventReminders();
+
+  // Run certification check every 24 hours (86400000 ms)
   setInterval(checkExpiringCertifications, 86400000);
+
+  // Run calendar reminders check every minute (60000 ms)
+  setInterval(checkCalendarEventReminders, 60000);
 };
 
 module.exports = {
   checkExpiringCertifications,
+  checkCalendarEventReminders,
   startExpiryScheduler
 };
