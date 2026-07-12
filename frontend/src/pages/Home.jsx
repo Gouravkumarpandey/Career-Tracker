@@ -453,21 +453,39 @@ const Home = () => {
           
           <div className="resources-grid">
             <div className="resource-card">
-              <div className="resource-image bg-blue-grad-1"></div>
+              <div className="resource-image">
+                <img 
+                  src="https://images.cakeresume.com/images/c2cacc8b-069f-424b-8b5e-3e147fc0a8a0.png" 
+                  alt="Communication Skills Guide"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
+              </div>
               <div className="resource-content">
                 <h3>Communication Skills for Your Resume: 12 Examples and How to Show Them</h3>
                 <p>A resume-focused guide covering the three types of communication skills, 12 specific skills worth listing by role...</p>
               </div>
             </div>
             <div className="resource-card">
-              <div className="resource-image bg-blue-grad-2"></div>
+              <div className="resource-image">
+                <img 
+                  src="https://cdn.prod.website-files.com/635c591478332fd4db25d46e/6a3acbfe7881b1360d4d6ecf_Ghost%20Jobs.webp" 
+                  alt="Ghost Jobs Search Guide"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
+              </div>
               <div className="resource-content">
                 <h3>Ghost Jobs Are Everywhere: Here's What That Means for Your Job Search</h3>
                 <p>An educational guide explaining what ghost jobs are, why they're now 20-40% of job board listings...</p>
               </div>
             </div>
             <div className="resource-card">
-              <div className="resource-image bg-blue-grad-3"></div>
+              <div className="resource-image">
+                <img 
+                  src="https://img.magnific.com/free-vector/career-development-poster-with-woman-ladder_107791-8302.jpg" 
+                  alt="Careerflow vs Jobright comparison"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
+              </div>
               <div className="resource-content">
                 <h3>Careerflow vs Jobright (2026): Which Should You Use?</h3>
                 <p>A feature-by-feature comparison of Careerflow and Jobright across resume building, job matching, LinkedIn optimization...</p>
