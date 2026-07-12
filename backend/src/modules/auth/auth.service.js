@@ -199,6 +199,15 @@ const sendOtp = async (email) => {
     throw new ApiError(400, 'Please provide a valid email address.');
   }
 
+  // Check if user already exists
+  const existingUser = await prisma.user.findUnique({
+    where: { email: email.toLowerCase() }
+  });
+
+  if (existingUser) {
+    throw new ApiError(400, 'An account with this email already exists. Please log in instead.');
+  }
+
   // Generate a random 6-digit numeric OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes expiration

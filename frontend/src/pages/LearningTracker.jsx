@@ -179,39 +179,72 @@ const LearningTracker = () => {
   };
 
   // 5. Revision Reminder handlers
+  const fetchReminders = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await api.get('/api/calendar-events', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const list = res.data.data || [];
+      // Filter for revision reminder events
+      const filtered = list.filter(event => event.type === 'reminder');
+      setReminders(filtered.map(item => ({
+        id: item.id,
+        topic: item.title.replace('Revision: ', ''),
+        time: item.eventDate
+      })));
+    } catch (err) {
+      console.error("Failed to fetch revision reminders", err);
+    }
+  };
+
+  useEffect(() => {
+    const savedNotes = localStorage.getItem('lt_notes');
+    if (savedNotes) setNotes(JSON.parse(savedNotes));
+
+    const savedBookmarks = localStorage.getItem('lt_bookmarks');
+    if (savedBookmarks) setBookmarks(JSON.parse(savedBookmarks));
+
+    const savedTopics = localStorage.getItem('lt_topics');
+    if (savedTopics) setTopics(JSON.parse(savedTopics));
+
+    fetchReminders();
+  }, []);
+
   const handleAddReminder = async (e) => {
     e.preventDefault();
     if (!remTopic.trim() || !remTime) return;
 
-    const newRem = {
-      id: Date.now(),
-      topic: remTopic,
-      time: remTime,
-      active: true
-    };
-
-    saveRemindersToStore([...reminders, newRem]);
-
-    // Send scheduled alert trigger request to backend if mail server configured
     try {
       const token = localStorage.getItem('token');
-      await api.post('/api/notifications', {
-        title: 'Revision Reminder Alert',
-        message: `Time to revise: ${remTopic}`,
-        scheduledAt: remTime
+      await api.post('/api/calendar-events', {
+        title: `Revision: ${remTopic}`,
+        type: 'reminder',
+        eventDate: new Date(remTime),
+        sendEmail: true
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      fetchReminders();
+      setRemTopic('');
+      setRemTime('');
     } catch (err) {
-      console.warn("Mail scheduler offline, saved reminder locally.");
+      console.error("Failed to schedule revision reminder email", err);
+      alert("Failed to schedule reminder alarm.");
     }
-
-    setRemTopic('');
-    setRemTime('');
   };
 
-  const handleDeleteReminder = (id) => {
-    saveRemindersToStore(reminders.filter(r => r.id !== id));
+  const handleDeleteReminder = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      await api.delete(`/api/calendar-events/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchReminders();
+    } catch (err) {
+      console.error("Failed to delete reminder", err);
+    }
   };
 
   return (

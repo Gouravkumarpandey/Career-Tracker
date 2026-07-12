@@ -29,15 +29,80 @@
   --dash-header-height: 70px;
 }
 
-/* Dark Mode (optional/future) */
 [data-theme='dark'] {
-  --dash-bg: #0f172a;
-  --dash-surface: #1e293b;
-  --dash-border: #334155;
-  --dash-text-main: #f8fafc;
-  --dash-text-muted: #94a3b8;
-  --dash-header-bg: #1e293b;
+  --dash-bg: #000000;
+  --dash-surface: #121214;
+  --dash-border: #222226;
+  --dash-text-main: #ffffff;
+  --dash-text-muted: #a1a1aa;
+  --dash-header-bg: #121214;
 }
+
+/* Global Dark Mode Overrides to prevent invisible elements */
+[data-theme='dark'] body,
+[data-theme='dark'] #root,
+[data-theme='dark'] .dashboard-layout,
+[data-theme='dark'] .dashboard-content,
+[data-theme='dark'] .jobs-container,
+[data-theme='dark'] .internships-container,
+[data-theme='dark'] .lt-container,
+[data-theme='dark'] .certifications-container,
+[data-theme='dark'] .rb-container,
+[data-theme='dark'] .settings-container,
+[data-theme='dark'] .profile-container {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+[data-theme='dark'] .job-card,
+[data-theme='dark'] .job-detail-side,
+[data-theme='dark'] .search-bar-container,
+[data-theme='dark'] .internship-card,
+[data-theme='dark'] .internship-detail-side,
+[data-theme='dark'] .internship-search-container,
+[data-theme='dark'] .lt-header-card,
+[data-theme='dark'] .lt-sidebar-menu,
+[data-theme='dark'] .lt-panel-card,
+[data-theme='dark'] .cert-card,
+[data-theme='dark'] .cert-form-card,
+[data-theme='dark'] .settings-card,
+[data-theme='dark'] .profile-card,
+[data-theme='dark'] .rb-input-section,
+[data-theme='dark'] .rb-output-section {
+  background-color: #121214 !important;
+  border-color: #222226 !important;
+  color: #ffffff !important;
+}
+
+/* Keep the text visible */
+[data-theme='dark'] h1,
+[data-theme='dark'] h2,
+[data-theme='dark'] h3,
+[data-theme='dark'] h4,
+[data-theme='dark'] h5,
+[data-theme='dark'] h6,
+[data-theme='dark'] label,
+[data-theme='dark'] p,
+[data-theme='dark'] span:not(.streak-calendar-card *):not(.activity-heatmap-card *),
+[data-theme='dark'] div:not(.streak-calendar-card *):not(.activity-heatmap-card *) {
+  color: #ffffff !important;
+}
+
+/* Inputs, textareas, selects */
+[data-theme='dark'] input,
+[data-theme='dark'] textarea,
+[data-theme='dark'] select {
+  background-color: #1a1a1e !important;
+  border-color: #333338 !important;
+  color: #ffffff !important;
+}
+
+/* Reset placeholder colors */
+[data-theme='dark'] input::placeholder,
+[data-theme='dark'] textarea::placeholder {
+  color: #71717a !important;
+}
+
 
 .dashboard-layout {
   display: flex;

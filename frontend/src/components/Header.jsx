@@ -60,7 +60,7 @@ const Header = ({ userProfile, onLogout }) => {
           {/* Left Side: Brand Logo */}
           <Link to="/dashboard" className="header-logo">
             <div className="header-logo-icon">C</div>
-            <span className="header-logo-text">CareerTracker</span>
+            <span className="header-logo-text">Careerflow.ai</span>
           </Link>
 
           {/* Center: Navigation Links (desktop) */}
