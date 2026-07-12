@@ -11,11 +11,23 @@ const NAV_LINKS = [
   { to: '/dashboard/ai', label: 'AI Features' },
 ];
 
+const DRAWER_LINKS = [
+  { to: '/dashboard', label: 'Home', end: true },
+  { to: '/dashboard/learning', label: 'Learning' },
+  { to: '/dashboard/jobs', label: 'Jobs' },
+  { to: '/dashboard/goals', label: 'Goals' },
+  { to: '/dashboard/ai', label: 'AI Features' },
+  { to: '/dashboard/internships', label: 'Internships' },
+  { to: '/dashboard/resume-builder', label: 'Resume Builder' },
+  { to: '/dashboard/analytics', label: 'Analytics' },
+];
+
 const Header = ({ userProfile, onLogout }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const dropdownRef = useRef(null);
+  const hamburgerRef = useRef(null);
 
   const name = userProfile?.name || 'User';
   const avatarText = userProfile?.name
@@ -27,19 +39,19 @@ const Header = ({ userProfile, onLogout }) => {
     document.documentElement.setAttribute('data-theme', darkMode ? 'light' : 'dark');
   };
 
-  // Close dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setDropdownOpen(false);
       }
+      if (hamburgerRef.current && !hamburgerRef.current.contains(e.target)) {
+        setMobileMenuOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  // Close mobile menu on route change (via link click)
-  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
     <>
@@ -86,17 +98,8 @@ const Header = ({ userProfile, onLogout }) => {
                   <Link to="/dashboard/profile" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
                     <FiUser className="item-icon" /> User Profile
                   </Link>
-                  <Link to="/dashboard/internships" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
-                    <FiAward className="item-icon" /> Internships
-                  </Link>
                   <Link to="/dashboard/certifications" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
                     <FiAward className="item-icon" /> Certifications
-                  </Link>
-                  <Link to="/dashboard/resume-builder" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
-                    <FiSettings className="item-icon" /> Resume Builder
-                  </Link>
-                  <Link to="/dashboard/analytics" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
-                    <FiSettings className="item-icon" /> Analytics
                   </Link>
                   <Link to="/dashboard/notifications" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
                     <FiBell className="item-icon" /> Notifications
@@ -112,69 +115,36 @@ const Header = ({ userProfile, onLogout }) => {
               )}
             </div>
 
-            {/* Hamburger button — mobile only */}
-            <button
-              className="hamburger-btn"
-              onClick={() => setMobileMenuOpen(true)}
-              aria-label="Open menu"
-            >
-              <FiMenu size={22} />
-            </button>
+            {/* Hamburger button dropdown — mobile only */}
+            <div className="hamburger-dropdown-wrapper" ref={hamburgerRef}>
+              <button
+                className="hamburger-btn"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? <FiX size={22} /> : <FiMenu size={22} />}
+              </button>
+
+              {mobileMenuOpen && (
+                <div className="hamburger-dropdown-menu">
+                  {DRAWER_LINKS.map(link => (
+                    <NavLink
+                      key={link.to}
+                      to={link.to}
+                      end={link.end}
+                      className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
+                      style={{ textDecoration: 'none' }}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {link.label}
+                    </NavLink>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
-
-      {/* Mobile Drawer Overlay */}
-      {mobileMenuOpen && (
-        <div className="mobile-overlay" onClick={closeMobileMenu}>
-          <nav className="mobile-drawer" onClick={e => e.stopPropagation()}>
-            <div className="mobile-drawer-header">
-              <Link to="/dashboard" className="header-logo" onClick={closeMobileMenu}>
-                <div className="header-logo-icon">C</div>
-                <span>CareerTracker</span>
-              </Link>
-              <button className="mobile-close-btn" onClick={closeMobileMenu} aria-label="Close menu">
-                <FiX size={22} />
-              </button>
-            </div>
-
-            <div className="mobile-nav-links">
-              {NAV_LINKS.map(link => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  end={link.end}
-                  className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}
-                  onClick={closeMobileMenu}
-                >
-                  {link.label}
-                </NavLink>
-              ))}
-              <hr className="dropdown-divider" style={{ margin: '12px 0' }} />
-              <NavLink to="/dashboard/profile" className="mobile-nav-item" onClick={closeMobileMenu}><FiUser /> Profile</NavLink>
-              <NavLink to="/dashboard/internships" className="mobile-nav-item" onClick={closeMobileMenu}><FiAward /> Internships</NavLink>
-              <NavLink to="/dashboard/certifications" className="mobile-nav-item" onClick={closeMobileMenu}><FiAward /> Certifications</NavLink>
-              <NavLink to="/dashboard/resume-builder" className="mobile-nav-item" onClick={closeMobileMenu}><FiSettings /> Resume Builder</NavLink>
-              <NavLink to="/dashboard/analytics" className="mobile-nav-item" onClick={closeMobileMenu}><FiSettings /> Analytics</NavLink>
-              <NavLink to="/dashboard/notifications" className="mobile-nav-item" onClick={closeMobileMenu}><FiBell /> Notifications</NavLink>
-              <NavLink to="/dashboard/settings" className="mobile-nav-item" onClick={closeMobileMenu}><FiSettings /> Settings</NavLink>
-            </div>
-
-            <div className="mobile-drawer-footer">
-              <div className="mobile-user-info">
-                <div className="avatar-btn" style={{ pointerEvents: 'none' }}>{avatarText}</div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '14px', color: '#fff' }}>{name}</div>
-                  <div style={{ fontSize: '12px', color: '#888892' }}>{userProfile?.email}</div>
-                </div>
-              </div>
-              <button className="dropdown-item logout" onClick={() => { closeMobileMenu(); onLogout(); }} style={{ width: '100%', marginTop: '8px' }}>
-                <FiLogOut className="item-icon" /> Logout
-              </button>
-            </div>
-          </nav>
-        </div>
-      )}
     </>
   );
 };

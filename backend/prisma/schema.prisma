@@ -458,12 +458,16 @@ model SkillEndorsement {
 }
 
 model Resume {
-  id              Int       @id @default(autoincrement())
-  title           String
-  createdAt       DateTime  @default(now())
-  userId          Int
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  metricsAnalysis ResumeMetricsAnalysis?
+  id                    Int       @id @default(autoincrement())
+  title                 String
+  resumeText            String?   @db.Text
+  cloudinaryUrl         String?
+  cloudinaryPublicId    String?
+  cloudinaryUploadedAt  DateTime?
+  createdAt             DateTime  @default(now())
+  userId                Int
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  metricsAnalysis       ResumeMetricsAnalysis?
 
   @@map("resumes")
 }

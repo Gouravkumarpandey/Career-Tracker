@@ -86,9 +86,6 @@ const Jobs = () => {
       });
       const jobs = response.data.data || [];
       setSearchResults(jobs);
-      if (jobs.length > 0) {
-        setSelectedJob(jobs[0]);
-      }
     } catch (err) {
       console.error('Online job search failed', err);
     } finally {
@@ -297,7 +294,7 @@ const Jobs = () => {
           ) : (
             <div className="jobs-split-layout">
               {/* Left Column - List */}
-              <div className="jobs-list-side">
+              <div className={`jobs-list-side ${selectedJob ? 'has-selected-mobile' : ''}`}>
                 {searchResults.map(job => (
                   <div 
                     key={job.id} 
@@ -316,9 +313,16 @@ const Jobs = () => {
               </div>
 
               {/* Right Column - Detail */}
-              <div className="job-detail-side">
+              <div className={`job-detail-side ${selectedJob ? 'active-mobile' : ''}`}>
                 {selectedJob ? (
                   <>
+                    <button 
+                      className="job-back-btn-mobile"
+                      onClick={() => setSelectedJob(null)}
+                      style={{ display: 'none', marginBottom: '16px', padding: '8px 12px', background: 'var(--dash-bg)', border: '1px solid var(--dash-border)', borderRadius: '8px', color: 'var(--dash-text-main)', fontWeight: 600, cursor: 'pointer' }}
+                    >
+                      ← Back to Jobs List
+                    </button>
                     <div className="job-detail-header">
                       <div>
                         <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>{selectedJob.title}</h2>

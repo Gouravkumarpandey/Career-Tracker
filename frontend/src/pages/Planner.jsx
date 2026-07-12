@@ -233,7 +233,7 @@ const Planner = () => {
 
   const renderNotes = () => (
     <div className="notes-container">
-      <div className="notes-sidebar">
+      <div className={`notes-sidebar ${activeNoteId ? 'has-active-note' : ''}`}>
         <div className="notes-sidebar-header">
           <span style={{ fontWeight: 600, color: 'var(--dash-text-muted)', fontSize: '14px' }}>Private Notes</span>
           <button className="btn-new-note" onClick={createNewNote} title="New Note"><FiEdit3 /></button>
@@ -250,9 +250,16 @@ const Planner = () => {
           ))}
         </div>
       </div>
-      <div className="notes-editor-area">
+      <div className={`notes-editor-area ${activeNoteId ? 'active-note' : ''}`}>
         {activeNote ? (
           <>
+            <button 
+              className="notes-back-btn-mobile"
+              onClick={() => setActiveNoteId(null)}
+              style={{ display: 'none', marginBottom: '16px', background: 'none', border: 'none', color: 'var(--dash-primary)', fontWeight: 700, cursor: 'pointer', alignItems: 'center', gap: '4px', padding: 0 }}
+            >
+              ← Back to Notes
+            </button>
             <input 
               className="notion-title-input" 
               placeholder="Untitled" 
@@ -617,16 +624,12 @@ const Planner = () => {
           <button className={`planner-tab ${activeTab === 'habits' ? 'active' : ''}`} onClick={() => setActiveTab('habits')}>
             <FiCheckSquare /> Habits
           </button>
-          <button className={`planner-tab ${activeTab === 'timer' ? 'active' : ''}`} onClick={() => setActiveTab('timer')}>
-            <FiClock /> Focus Timer
-          </button>
         </div>
       </div>
 
       <div className="planner-content">
         {activeTab === 'board' && renderKanban()}
         {activeTab === 'notes' && renderNotes()}
-        {activeTab === 'timer' && renderPomodoro()}
         {activeTab === 'habits' && renderHabits()}
         {activeTab === 'calendar' && renderCalendar()}
       </div>

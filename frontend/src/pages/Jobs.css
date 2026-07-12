@@ -638,11 +638,21 @@
   .jobs-list-side {
     max-height: 400px;
   }
+  .jobs-list-side.has-selected-mobile {
+    display: none;
+  }
 
   .job-detail-side {
+    display: none;
     position: static;
     max-height: unset;
     padding: 16px;
+  }
+  .job-detail-side.active-mobile {
+    display: block;
+  }
+  .job-back-btn-mobile {
+    display: inline-flex !important;
   }
 
   .ai-recommendation-card {

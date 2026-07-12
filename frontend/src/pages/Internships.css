@@ -413,11 +413,21 @@
   .internships-list-side {
     max-height: 400px;
   }
+  .internships-list-side.has-selected-mobile {
+    display: none;
+  }
 
   .internship-detail-side {
+    display: none;
     position: static;
     max-height: unset;
     padding: 16px;
+  }
+  .internship-detail-side.active-mobile {
+    display: block;
+  }
+  .internship-back-btn-mobile {
+    display: inline-flex !important;
   }
 
   .tracker-board {

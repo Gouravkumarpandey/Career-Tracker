@@ -2266,28 +2266,28 @@ button {
 }
 
 .purple-login-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
   color: #1a0b2e; /* Dark indigo */
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .purple-login-subtitle {
-  font-size: 18px;
+  font-size: 15px;
   color: #6b6b80;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
 }
 
 .purple-login-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 .purple-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .purple-field label {
@@ -2303,10 +2303,10 @@ button {
 
 .purple-field input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border: 1px solid #d1d1e0;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14.5px;
   outline: none;
   transition: border-color 0.2s;
   color: #333;
@@ -2347,11 +2347,11 @@ button {
   color: white;
   border: none;
   border-radius: 8px;
-  padding: 14px;
-  font-size: 16px;
+  padding: 12px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 8px;
+  margin-top: 4px;
   transition: background-color 0.2s;
 }
 
@@ -2364,9 +2364,9 @@ button {
   align-items: center;
   text-align: center;
   color: #8a8a9e;
-  margin: 32px 0;
+  margin: 20px 0;
   font-style: italic;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .purple-divider::before,
@@ -2388,7 +2388,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 }
 
 .purple-social-btn {
@@ -2824,8 +2824,57 @@ button {
     width: 100% !important;
   }
 
+  .purple-login-title {
+    font-size: 26px !important;
+    text-align: center;
+  }
+
+  .purple-login-subtitle {
+    font-size: 15px !important;
+    margin-bottom: 18px !important;
+    text-align: center;
+  }
+
+  .purple-login-form {
+    gap: 14px !important;
+  }
+
+  .purple-field {
+    gap: 6px !important;
+  }
+
+  .purple-field label {
+    font-size: 13px !important;
+  }
+
+  .purple-field input {
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+    height: auto !important;
+  }
+
+  .purple-submit-btn {
+    padding: 12px !important;
+    font-size: 15px !important;
+    margin-top: 4px !important;
+  }
+
+  .purple-divider {
+    margin: 20px 0 !important;
+    font-size: 14px !important;
+  }
+
+  .purple-socials {
+    margin-bottom: 20px !important;
+  }
+
+  .purple-footer-links {
+    margin-top: 12px !important;
+    font-size: 13px !important;
+  }
+
   .purple-form-row {
     flex-direction: column;
-    gap: 20px;
+    gap: 14px;
   }
 }

@@ -99,30 +99,14 @@ const Internships = () => {
       });
       let jobs = response.data.data || [];
       
-      // Strict matching for specific query keywords if user actively searched
-      if (searchQuery) {
-        const queryWords = searchQuery.toLowerCase().split(/\s+/).filter(word => word.length > 1 && word !== 'internship' && word !== 'intern');
-        if (queryWords.length > 0) {
-          jobs = jobs.filter(job => 
-            queryWords.some(word => 
-              job.title.toLowerCase().includes(word) || 
-              job.description.toLowerCase().includes(word)
-            )
-          );
-        }
-      } else {
-        // Normal list logic: Ensure they are internships if query is empty (default load)
-        jobs = jobs.filter(job => 
-          job.title.toLowerCase().includes('intern') || 
-          job.jobType.toLowerCase().includes('intern') || 
-          job.description.toLowerCase().includes('intern')
-        );
-      }
+      // Filter to make sure returned listings look like internships
+      jobs = jobs.filter(job => 
+        job.title.toLowerCase().includes('intern') || 
+        (job.jobType && job.jobType.toLowerCase().includes('intern')) || 
+        job.description.toLowerCase().includes('intern')
+      );
 
       setSearchResults(jobs);
-      if (jobs.length > 0) {
-        setSelectedInternship(jobs[0]);
-      }
     } catch (err) {
       console.error('Online internship search failed', err);
     } finally {
@@ -307,7 +291,7 @@ const Internships = () => {
           ) : (
             <div className="internships-split-layout">
               {/* Left Column - List */}
-              <div className="internships-list-side">
+              <div className={`internships-list-side ${selectedInternship ? 'has-selected-mobile' : ''}`}>
                 {searchResults.map(internship => (
                   <div 
                     key={internship.id} 
@@ -325,9 +309,16 @@ const Internships = () => {
               </div>
 
               {/* Right Column - Detail */}
-              <div className="internship-detail-side">
+              <div className={`internship-detail-side ${selectedInternship ? 'active-mobile' : ''}`}>
                 {selectedInternship ? (
                   <>
+                    <button 
+                      className="internship-back-btn-mobile"
+                      onClick={() => setSelectedInternship(null)}
+                      style={{ display: 'none', marginBottom: '16px', padding: '8px 12px', background: 'var(--dash-bg)', border: '1px solid var(--dash-border)', borderRadius: '8px', color: 'var(--dash-text-main)', fontWeight: 600, cursor: 'pointer' }}
+                    >
+                      ← Back to Internship List
+                    </button>
                     <div className="internship-detail-header">
                       <div>
                         <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>{selectedInternship.title}</h2>

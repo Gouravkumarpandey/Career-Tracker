@@ -513,15 +513,56 @@
   .planner-calendar-view {
     grid-template-columns: 1fr !important;
   }
-}
-
-@media (max-width: 600px) {
-  .notes-editor-area {
-    padding: 16px;
+  .calendar-grid {
+    gap: 4px;
   }
-  /* Pomodoro */
-  .pomodoro-timer {
-    font-size: 56px !important;
+  .cal-day {
+    padding: 4px;
+  }
+  .cal-date {
+    font-size: 12px;
+  }
+
+  /* Notes container responsive split */
+  .notes-container {
+    flex-direction: column;
+    height: 480px;
+  }
+  .notes-sidebar {
+    width: 100% !important;
+    border-right: none;
+    border-bottom: 1px solid var(--dash-border);
+    display: flex;
+    flex-direction: column;
+  }
+  .notes-sidebar.has-active-note {
+    display: none;
+  }
+  .notes-editor-area {
+    display: none;
+  }
+  .notes-editor-area.active-note {
+    display: flex;
+    padding: 20px;
+  }
+  .notes-back-btn-mobile {
+    display: inline-flex !important;
+  }
+
+  /* Habits responsive rows */
+  .habit-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+  }
+  .habit-days {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .habit-day {
+    width: 38px;
+    height: 38px;
   }
 }
 
@@ -534,5 +575,13 @@
   .planner-tab svg {
     display: none;
   }
+  .cal-day {
+    border-radius: 4px;
+  }
+  .habit-day {
+    width: 32px;
+    height: 32px;
+  }
 }
+
 
