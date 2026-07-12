@@ -163,23 +163,29 @@ const Dashboard = () => {
     productivityScore = Math.min(100, baseProductivity + streakBonus + 10);
   }
 
-  // Safety checks to prevent NaN
-  if (isNaN(productivityScore)) {
+  // 4. Career Readiness Score
+  let careerReadinessScore = Number(apiData?.careerReadinessScore ?? 78.5);
+
+  // Safety checks to prevent NaN and Infinite values
+  if (isNaN(productivityScore) || !isFinite(productivityScore)) {
     productivityScore = 40;
   }
-  if (isNaN(dailyProgressPercent)) {
+  if (isNaN(dailyProgressPercent) || !isFinite(dailyProgressPercent)) {
     dailyProgressPercent = 0;
   }
-  if (isNaN(weeklyProgressPercent)) {
+  if (isNaN(weeklyProgressPercent) || !isFinite(weeklyProgressPercent)) {
     weeklyProgressPercent = 60;
+  }
+  if (isNaN(goalCompletionPercentage) || !isFinite(goalCompletionPercentage)) {
+    goalCompletionPercentage = 0;
+  }
+  if (isNaN(careerReadinessScore) || !isFinite(careerReadinessScore)) {
+    careerReadinessScore = 75;
   }
 
   // 3. Time Invested
   const certsCount = apiData?.certificationStats?.activeCertifications ?? 0;
   const timeInvested = (completedTopicsCount * 4) + (certsCount * 10) + 12;
-
-  // 4. Career Readiness Score
-  const careerReadinessScore = apiData?.careerReadinessScore ?? 78.5;
 
   // Month navigation helpers
   const prevMonth = () => {

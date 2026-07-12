@@ -229,34 +229,34 @@ const Jobs = () => {
 
   return (
     <div className="jobs-container">
-      <h1 className="page-heading">Job Tracker</h1>
-
-      {/* Tabs */}
-      <div className="jobs-tabs">
-        <button 
-          className={`jobs-tab ${activeTab === 'search' ? 'active' : ''}`}
-          onClick={() => setActiveTab('search')}
-        >
-          Search Live Jobs
-        </button>
-        <button 
-          className={`jobs-tab ${activeTab === 'recommendations' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveTab('recommendations');
-            if (aiRecs.length === 0) handleFetchAiRecommendations();
-          }}
-        >
-          AI Recommendations
-        </button>
-        <button 
-          className={`jobs-tab ${activeTab === 'tracker' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveTab('tracker');
-            fetchTrackerData();
-          }}
-        >
-          Applications Tracker ({applications.length})
-        </button>
+      <div className="jobs-header-row">
+        <h1 className="page-heading" style={{ margin: 0 }}>Job Tracker</h1>
+        <div className="jobs-tabs">
+          <button 
+            className={`jobs-tab ${activeTab === 'search' ? 'active' : ''}`}
+            onClick={() => setActiveTab('search')}
+          >
+            Search Live Jobs
+          </button>
+          <button 
+            className={`jobs-tab ${activeTab === 'recommendations' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('recommendations');
+              if (aiRecs.length === 0) handleFetchAiRecommendations();
+            }}
+          >
+            AI Recommendations
+          </button>
+          <button 
+            className={`jobs-tab ${activeTab === 'tracker' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('tracker');
+              fetchTrackerData();
+            }}
+          >
+            Applications Tracker ({applications.length})
+          </button>
+        </div>
       </div>
 
       {/* Tab 1: Live Job Search */}

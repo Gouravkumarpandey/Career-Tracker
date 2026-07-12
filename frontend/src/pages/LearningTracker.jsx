@@ -303,28 +303,28 @@ const LearningTracker = () => {
 
   return (
     <div className="lt-container">
-      <h1 className="page-heading">Learning Tracker</h1>
-
-      {/* Grid Menu */}
-      <div className="lt-grid-layout">
-        <div className="lt-sidebar-menu">
-          <button className={`lt-menu-btn ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => setActiveTab('courses')}>
+      <div className="lt-header-row">
+        <h1 className="page-heading" style={{ margin: 0 }}>Learning Tracker</h1>
+        <div className="lt-tabs">
+          <button className={`lt-tab-btn ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => setActiveTab('courses')}>
             <FiSearch /> Courses Search
           </button>
-          <button className={`lt-menu-btn ${activeTab === 'notes' ? 'active' : ''}`} onClick={() => setActiveTab('notes')}>
+          <button className={`lt-tab-btn ${activeTab === 'notes' ? 'active' : ''}`} onClick={() => setActiveTab('notes')}>
             <FiFileText /> Study Notes
           </button>
-          <button className={`lt-menu-btn ${activeTab === 'bookmarks' ? 'active' : ''}`} onClick={() => setActiveTab('bookmarks')}>
+          <button className={`lt-tab-btn ${activeTab === 'bookmarks' ? 'active' : ''}`} onClick={() => setActiveTab('bookmarks')}>
             <FiBookmark /> Resource Bookmarks
           </button>
-          <button className={`lt-menu-btn ${activeTab === 'topics' ? 'active' : ''}`} onClick={() => setActiveTab('topics')}>
+          <button className={`lt-tab-btn ${activeTab === 'topics' ? 'active' : ''}`} onClick={() => setActiveTab('topics')}>
             <FiCheckSquare /> Topic Progression
           </button>
-          <button className={`lt-menu-btn ${activeTab === 'reminders' ? 'active' : ''}`} onClick={() => setActiveTab('reminders')}>
+          <button className={`lt-tab-btn ${activeTab === 'reminders' ? 'active' : ''}`} onClick={() => setActiveTab('reminders')}>
             <FiClock /> Revision Reminders
           </button>
         </div>
+      </div>
 
+      <div className="lt-content-layout">
         <div className="lt-content-panel">
           
           {/* 1. Course Search */}

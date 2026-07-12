@@ -239,7 +239,7 @@ const Certifications = () => {
 
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content">
+          <div className="modal-content cert-modal-content">
             <div className="modal-header">
               <h2>Add New Certification</h2>
               <button className="btn-close" onClick={() => setIsModalOpen(false)}><FiX /></button>
@@ -258,7 +258,7 @@ const Certifications = () => {
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '16px' }} className="form-row">
+              <div className="form-row">
                 <div className="form-group" style={{ flex: 1 }}>
                   <label>Provider (Issuing Org) *</label>
                   <select 
@@ -304,7 +304,7 @@ const Certifications = () => {
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '16px' }} className="form-row">
+              <div className="form-row">
                 <div className="form-group" style={{ flex: 1 }}>
                   <label>Badge name or Level</label>
                   <input 
@@ -327,7 +327,7 @@ const Certifications = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '16px' }} className="form-row">
+              <div className="form-row">
                 <div className="form-group" style={{ flex: 1 }}>
                   <label>Issue Date *</label>
                   <input 

@@ -23,33 +23,65 @@
   font-size: 1rem;
 }
 
-/* Tabs System */
+/* Centered Horizontal Jobs Header Row */
+.jobs-header-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+  gap: 16px;
+  width: 100%;
+}
+
+.jobs-header-row .page-heading {
+  text-align: center;
+}
+
 .jobs-tabs {
   display: flex;
-  gap: 12px;
-  border-bottom: 2px solid #e5e7eb;
-  margin-bottom: 24px;
+  gap: 8px;
+  background: #ffffff;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.jobs-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .jobs-tab {
-  padding: 12px 20px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #6b7280;
-  background: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
   border: none;
+  background: transparent;
+  color: #475569;
+  font-weight: 600;
+  font-size: 13.5px;
   cursor: pointer;
-  border-bottom: 3px solid transparent;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .jobs-tab:hover {
-  color: #0d9488;
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 .jobs-tab.active {
-  color: #0d9488;
-  border-bottom-color: #0d9488;
+  background: #2563eb;
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
 /* Search Dashboard Layout */
