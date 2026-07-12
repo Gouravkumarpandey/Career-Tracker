@@ -2795,7 +2795,7 @@ button {
 }
 
 /* Login & Signup Responsive Overrides */
-@media (max-width: 768px), (max-height: 700px) {
+@media (max-width: 768px) {
   .teal-split-layout {
     height: auto !important;
     min-height: 100vh !important;
