@@ -341,68 +341,78 @@ const Home = () => {
 
       {/* Pricing Section */}
       <section className="pricing-section">
-        <div className="container text-center">
-          <h2 className="section-title" style={{ marginBottom: '16px', color: 'var(--secondary-color)' }}>
-            Simple Pricing,<br/>
-            Powerful Features
-          </h2>
-          <p className="subtitle" style={{ marginBottom: '40px' }}>Whether you're starting out or need extra support, we have a plan for you</p>
-          
-          <div className="pricing-toggle">
-             <span className="toggle-btn">Monthly</span>
-             <span className="toggle-btn active">Yearly (20% saved)</span>
+        <div className="pricing-bg-glow" />
+        <div className="container">
+          <div className="pricing-header">
+            <span className="pricing-badge">Pricing Plans</span>
+            <h2 className="pricing-main-title">Simple Pricing,<br/><span className="pricing-title-highlight">Powerful Features</span></h2>
+            <p className="pricing-subtitle">Whether you're starting out or need extra support, we have a plan for you</p>
+            <div className="pricing-toggle">
+               <span className="toggle-btn">Monthly</span>
+               <span className="toggle-btn active">Yearly (20% saved)</span>
+            </div>
           </div>
 
           <div className="pricing-cards">
             {/* Standard Card */}
-            <div className="pricing-card basic reveal">
-              <div className="plan-name">Standard</div>
-              <p className="plan-desc">For individuals and<br/>early job seekers</p>
-              <div className="features-title">Features</div>
-              <ul className="plan-features">
-                <li><FaCheck size={10}/> Skill-based job recommendations</li>
-                <li><FaCheck size={10}/> Application tracker (up to 20)</li>
-                <li className="disabled"><FaCheck size={10}/> Interview prep resources</li>
-                <li className="disabled"><FaCheck size={10}/> Priority AI suggestions</li>
-              </ul>
-              <div className="price-box">
-                <div className="price">₹499<span className="period">/Month</span></div>
-                <button className="btn btn-outline-green">Get Started</button>
+            <div className="pricing-card pricing-card-free reveal">
+              <div className="pricing-card-header">
+                <div className="plan-icon">🎯</div>
+                <div className="plan-name">Standard</div>
+                <p className="plan-desc">Perfect for individuals and early job seekers</p>
               </div>
+              <div className="plan-price-block">
+                <div className="plan-price">Free<span className="plan-period"></span></div>
+                <div className="plan-price-note">No credit card required</div>
+              </div>
+              <ul className="plan-features">
+                <li><span className="check-icon">✓</span> Skill-based job recommendations</li>
+                <li><span className="check-icon">✓</span> Application tracker (up to 20)</li>
+                <li className="disabled"><span className="check-icon">✗</span> Interview prep resources</li>
+                <li className="disabled"><span className="check-icon">✗</span> Priority AI suggestions</li>
+              </ul>
+              <button className="plan-btn plan-btn-free">Get Started Free</button>
             </div>
-            
-            {/* Startup Card */}
-            <div className="pricing-card popular reveal">
-              <div className="plan-name">Pro</div>
-              <p className="plan-desc">For serious job seekers who<br/>want maximum results</p>
-              <div className="features-title">Features</div>
-              <ul className="plan-features">
-                <li><FaCheck size={10}/> Skill-based job recommendations</li>
-                <li><FaCheck size={10}/> Unlimited application tracking</li>
-                <li><FaCheck size={10}/> Interview prep resources</li>
-                <li><FaCheck size={10}/> Priority AI suggestions</li>
-              </ul>
-              <div className="price-box">
-                <div className="price">₹999<span className="period">/Month</span></div>
-                <button className="btn btn-white-green">Get Started</button>
+
+            {/* Pro Card — Popular */}
+            <div className="pricing-card pricing-card-popular reveal">
+              <div className="popular-badge">Most Popular</div>
+              <div className="pricing-card-header">
+                <div className="plan-icon">🚀</div>
+                <div className="plan-name">Pro</div>
+                <p className="plan-desc">For serious job seekers who want maximum results</p>
               </div>
+              <div className="plan-price-block">
+                <div className="plan-price">₹999<span className="plan-period">/mo</span></div>
+                <div className="plan-price-note">Billed yearly</div>
+              </div>
+              <ul className="plan-features">
+                <li><span className="check-icon">✓</span> Skill-based job recommendations</li>
+                <li><span className="check-icon">✓</span> Unlimited application tracking</li>
+                <li><span className="check-icon">✓</span> Interview prep resources</li>
+                <li><span className="check-icon">✓</span> Priority AI suggestions</li>
+              </ul>
+              <button className="plan-btn plan-btn-primary">Get Started</button>
             </div>
 
             {/* Enterprise Card */}
-            <div className="pricing-card basic reveal">
-              <div className="plan-name">Enterprise</div>
-              <p className="plan-desc">For teams, colleges &<br/>placement consultants</p>
-              <div className="features-title">Features</div>
-              <ul className="plan-features">
-                <li><FaCheck size={10}/> Everything in Pro</li>
-                <li><FaCheck size={10}/> Team dashboards & analytics</li>
-                <li><FaCheck size={10}/> Dedicated account manager</li>
-                <li><FaCheck size={10}/> Custom integrations</li>
-              </ul>
-              <div className="price-box">
-                <div className="price">₹2,499<span className="period">/Month</span></div>
-                <button className="btn btn-outline-green">Get Started</button>
+            <div className="pricing-card reveal">
+              <div className="pricing-card-header">
+                <div className="plan-icon">🏢</div>
+                <div className="plan-name">Enterprise</div>
+                <p className="plan-desc">For teams, colleges & placement consultants</p>
               </div>
+              <div className="plan-price-block">
+                <div className="plan-price">₹2,499<span className="plan-period">/mo</span></div>
+                <div className="plan-price-note">Billed yearly</div>
+              </div>
+              <ul className="plan-features">
+                <li><span className="check-icon">✓</span> Everything in Pro</li>
+                <li><span className="check-icon">✓</span> Team dashboards & analytics</li>
+                <li><span className="check-icon">✓</span> Dedicated account manager</li>
+                <li><span className="check-icon">✓</span> Custom integrations</li>
+              </ul>
+              <button className="plan-btn plan-btn-outline">Get Started</button>
             </div>
           </div>
         </div>
