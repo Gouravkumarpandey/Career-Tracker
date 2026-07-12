@@ -13,5 +13,8 @@ router.post('/google', authController.googleLogin);
 router.post('/refresh', authController.refresh);
 router.post('/logout', auth, authController.logout);
 router.get('/me', auth, authController.me);
+router.post('/send-otp', authController.sendOtp);
+router.post('/verify-otp', authController.verifyOtp);
 
 module.exports = router;
+

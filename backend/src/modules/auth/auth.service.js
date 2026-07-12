@@ -189,11 +189,73 @@ const googleLogin = async (idToken) => {
   }
 };
 
+const { sendMail } = require('../../utils/emailService');
+
+// In-memory OTP storage: Map mapping email -> { otp, expiresAt }
+const activeOtps = new Map();
+
+const sendOtp = async (email) => {
+  if (!email || typeof email !== 'string' || !email.includes('@')) {
+    throw new ApiError(400, 'Please provide a valid email address.');
+  }
+
+  // Generate a random 6-digit numeric OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes expiration
+
+  activeOtps.set(email.toLowerCase(), { otp, expiresAt });
+
+  const emailSubject = 'Your Verification OTP Code';
+  const emailBody = `Hello,
+
+Your One-Time Password (OTP) for verification is: ${otp}
+
+This OTP is valid for 5 minutes. Please do not share this code with anyone.
+
+Best regards,
+CareerFlow Team`;
+
+  const emailHtml = `<p>Hello,</p>
+<p>Your One-Time Password (OTP) for verification is: <strong style="font-size: 1.2em; letter-spacing: 2px;">${otp}</strong></p>
+<p>This OTP is valid for <strong>5 minutes</strong>. Please do not share this code with anyone.</p>
+<p>Best regards,<br/><strong>CareerFlow Team</strong></p>`;
+
+  await sendMail(email, emailSubject, emailBody, emailHtml);
+  return { success: true, message: 'OTP sent successfully.' };
+};
+
+const verifyOtp = async (email, otp) => {
+  if (!email || !otp) {
+    throw new ApiError(400, 'Email and OTP are required.');
+  }
+
+  const record = activeOtps.get(email.toLowerCase());
+  if (!record) {
+    throw new ApiError(400, 'Invalid OTP or OTP has expired.');
+  }
+
+  if (Date.now() > record.expiresAt) {
+    activeOtps.delete(email.toLowerCase());
+    throw new ApiError(400, 'OTP has expired.');
+  }
+
+  if (record.otp !== otp.trim()) {
+    throw new ApiError(400, 'Invalid OTP code.');
+  }
+
+  // Clean up OTP on successful verification
+  activeOtps.delete(email.toLowerCase());
+  return { success: true, message: 'OTP verified successfully.' };
+};
+
 module.exports = {
   register,
   login,
   refresh,
   logout,
   googleLogin,
-  getUserRole
+  getUserRole,
+  sendOtp,
+  verifyOtp
 };
+

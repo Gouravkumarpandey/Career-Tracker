@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const { sendMail } = require('./emailService');
 
 const checkExpiringCertifications = async () => {
   console.log('[Scheduler] Checking for expiring certifications...');
@@ -32,13 +33,8 @@ const checkExpiringCertifications = async () => {
       const userEmail = cert.user.email;
       const userName = cert.user.name;
 
-      console.log(`
-========================================================================
-📧 [EMAIL DISPATCHED]
-To: ${userEmail} (${userName})
-Subject: Action Required: Your Certification "${cert.name}" is Expiring Soon!
-------------------------------------------------------------------------
-Hello ${userName},
+      const emailSubject = `Action Required: Your Certification "${cert.name}" is Expiring Soon!`;
+      const emailBody = `Hello ${userName},
 
 This is an automated notification from your Career Tracker.
 Your certification details:
@@ -46,13 +42,28 @@ Your certification details:
 - Provider: ${cert.issuingOrg}
 - Expiration Date: ${new Date(cert.expiryDate).toLocaleDateString()}
 
-Please make arrangements to renew or update this credential to maintain 
-your Career Readiness Score.
+Please make arrangements to renew or update this credential to maintain your Career Readiness Score.
 
 Best regards,
-CareerFlow Team
-========================================================================
-      `);
+CareerFlow Team`;
+
+      const emailHtml = `<p>Hello <strong>${userName}</strong>,</p>
+<p>This is an automated notification from your Career Tracker.</p>
+<p>Your certification details:</p>
+<ul>
+  <li><strong>Name:</strong> ${cert.name}</li>
+  <li><strong>Provider:</strong> ${cert.issuingOrg}</li>
+  <li><strong>Expiration Date:</strong> ${new Date(cert.expiryDate).toLocaleDateString()}</li>
+</ul>
+<p>Please make arrangements to renew or update this credential to maintain your Career Readiness Score.</p>
+<p>Best regards,<br/><strong>CareerFlow Team</strong></p>`;
+
+      try {
+        await sendMail(userEmail, emailSubject, emailBody, emailHtml);
+      } catch (err) {
+        console.error(`[Scheduler] Failed to dispatch email to ${userEmail}:`, err);
+      }
+
 
       // Mark reminder as sent
       await prisma.certification.update({

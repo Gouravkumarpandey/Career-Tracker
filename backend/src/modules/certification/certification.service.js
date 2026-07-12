@@ -81,7 +81,7 @@ const createCert = async (userId, data, file) => {
 
   const fileUrl = saveCertificateFile(file);
 
-  return prisma.certification.create({
+  const cert = await prisma.certification.create({
     data: {
       name,
       issuingOrg,
@@ -96,6 +96,12 @@ const createCert = async (userId, data, file) => {
       userId
     }
   });
+
+  // Trigger immediate expiry email notification check
+  const { checkExpiringCertifications } = require('../../utils/expiryScheduler');
+  checkExpiringCertifications().catch(err => console.error('[Scheduler] Expiry check failed:', err));
+
+  return cert;
 };
 
 const updateCert = async (userId, id, data, file) => {
@@ -118,7 +124,7 @@ const updateCert = async (userId, id, data, file) => {
     }
   }
 
-  return prisma.certification.update({
+  const updatedCert = await prisma.certification.update({
     where: { id },
     data: {
       name,
@@ -134,6 +140,12 @@ const updateCert = async (userId, id, data, file) => {
       ...(expiryDate !== undefined && { expiryReminderSent: false })
     }
   });
+
+  // Trigger immediate expiry email notification check
+  const { checkExpiringCertifications } = require('../../utils/expiryScheduler');
+  checkExpiringCertifications().catch(err => console.error('[Scheduler] Expiry check failed:', err));
+
+  return updatedCert;
 };
 
 const deleteCert = async (userId, id) => {

@@ -15,6 +15,9 @@ import Planner from './pages/Planner';
 import Certifications from './pages/Certifications';
 import ResumeBuilder from './pages/ResumeBuilder';
 import LearningTracker from './pages/LearningTracker';
+import Jobs from './pages/Jobs';
+import Internships from './pages/Internships';
+
 
 const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
@@ -41,8 +44,8 @@ function App() {
         <Route index element={<Dashboard />} />
         <Route path="profile" element={<UserProfile />} />
         <Route path="learning" element={<LearningTracker />} />
-        <Route path="jobs" element={<PlaceholderPage title="Job Tracker" description="Manage your job applications and interviews." />} />
-        <Route path="internships" element={<PlaceholderPage title="Internship Tracker" description="Manage your internship applications and statuses." />} />
+        <Route path="jobs" element={<Jobs />} />
+        <Route path="internships" element={<Internships />} />
         <Route path="certifications" element={<Certifications />} />
         <Route path="ai" element={<AIFeatures />} />
         <Route path="goals" element={<PlaceholderPage title="Goal Management" description="Set and track your daily to long-term goals." />} />

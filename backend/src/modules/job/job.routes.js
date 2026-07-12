@@ -9,6 +9,10 @@ const router = express.Router();
 
 router.use(auth); // Protect all routes below this middleware
 
+router.get('/search/online', jobController.searchOnlineJobs);
+router.get('/recommendations/ai', jobController.getAiRecommendations);
+router.post('/external', jobController.createOrGetExternalJob);
+
 // Static routes first to prevent conflict with /:id
 router.get('/saved', jobController.getSavedJobs);
 router.get('/applications', jobController.getApplications);

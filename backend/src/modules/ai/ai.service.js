@@ -4,10 +4,56 @@ const { CAREER_PATHS } = require('../roadmap/roadmap.service');
 const { OpenAI } = require('openai');
 const env = require('../../config/env');
 
-const openai = new OpenAI({
-  apiKey: env.GROK_API_KEY,
-  baseURL: 'https://api.x.ai/v1',
-});
+const callAI = async (messages, jsonMode = false) => {
+  const { OpenAI } = require('openai');
+  
+  // Try OpenRouter (GPT-5.6 Luna Pro) first
+  if (env.OPENROUTER_API_KEY) {
+    try {
+      const openrouter = new OpenAI({
+        apiKey: env.OPENROUTER_API_KEY,
+        baseURL: 'https://openrouter.ai/api/v1',
+        defaultHeaders: {
+          'HTTP-Referer': 'https://careerflow.ai',
+          'X-Title': 'CareerFlow AI Tracker'
+        }
+      });
+      const response = await openrouter.chat.completions.create({
+        model: 'openai/gpt-4o-mini', // GPT-4o-mini is highly reliable and handles JSON parsing perfectly
+        messages,
+        response_format: jsonMode ? { type: 'json_object' } : undefined,
+      });
+      return response.choices[0].message.content;
+    } catch (err) {
+      console.error('[AIService] OpenRouter call failed, falling back to Grok:', err.message);
+    }
+  }
+
+  // Try Grok as fallback
+  if (env.GROK_API_KEY) {
+    const models = ['grok-2', 'grok-2-1212', 'grok-2-latest', 'grok-beta'];
+    for (const model of models) {
+      try {
+        const grok = new OpenAI({
+          apiKey: env.GROK_API_KEY,
+          baseURL: 'https://api.x.ai/v1',
+        });
+        const response = await grok.chat.completions.create({
+          model,
+          messages,
+        });
+        return response.choices[0].message.content;
+      } catch (err) {
+        console.warn(`[AIService] Grok fallback call with model ${model} failed:`, err.message);
+        if (err.status === 403 || err.message.includes('credits') || err.message.includes('license')) {
+          break;
+        }
+      }
+    }
+  }
+
+  throw new Error('No AI provider keys are working.');
+};
 
 const analyzeResume = async (userId, resumeId) => {
   const resume = await prisma.resume.findFirst({
@@ -20,32 +66,27 @@ const analyzeResume = async (userId, resumeId) => {
 
   let analysis;
   try {
-    // Use Grok to analyze resume title/content
-    const completion = await openai.chat.completions.create({
-      model: 'grok-beta',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an expert ATS and resume analyzer. Return ONLY a valid JSON object with the following keys (all numbers out of 100 except counts): grammarScore, actionVerbsCount, quantifiableMetricsCount, readabilityIndex.'
-        },
-        {
-          role: 'user',
-          content: `Analyze this resume (title/content): ${resume.title}\nProvide the metrics JSON.`
-        }
-      ]
-    });
+    const analysisStr = await callAI([
+      {
+        role: 'system',
+        content: 'You are an expert ATS and resume analyzer. Return ONLY a valid JSON object with the following keys (all numbers out of 100 except counts): grammarScore, actionVerbsCount, quantifiableMetricsCount, readabilityIndex.'
+      },
+      {
+        role: 'user',
+        content: `Analyze this resume (title/content): ${resume.title}\nProvide the metrics JSON.`
+      }
+    ], true);
 
-    let analysisStr = completion.choices[0].message.content.trim();
-    if (analysisStr.startsWith('```json')) {
-      analysisStr = analysisStr.substring(7, analysisStr.length - 3).trim();
+    let cleanStr = analysisStr.trim();
+    if (cleanStr.startsWith('```json')) {
+      cleanStr = cleanStr.substring(7, cleanStr.length - 3).trim();
     }
-    analysis = JSON.parse(analysisStr);
+    analysis = JSON.parse(cleanStr);
   } catch (error) {
-    console.error("Grok analyzeResume API/Parse error, using fallback:", error.message);
+    console.error("AI analyzeResume API/Parse error, using fallback:", error.message);
     analysis = { grammarScore: 82, actionVerbsCount: 12, quantifiableMetricsCount: 4, readabilityIndex: 78 };
   }
 
-  // Upsert analysis
   const metrics = await prisma.resumeMetricsAnalysis.upsert({
     where: { resumeId },
     update: analysis,
@@ -64,27 +105,24 @@ const analyzeResume = async (userId, resumeId) => {
 
 const analyzeResumeTextDirect = async (userId, resumeText) => {
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'grok-beta',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an expert ATS and resume analyzer. Return ONLY a valid JSON object with the following keys (all numbers out of 100 except counts): grammarScore, actionVerbsCount, quantifiableMetricsCount, readabilityIndex. Also include an "overallScore" out of 100, and an array of strings called "feedback" with 3-4 actionable tips.'
-        },
-        {
-          role: 'user',
-          content: `Analyze this resume content for ATS compatibility and quality:\n\n${resumeText}\n\nProvide the metrics JSON.`
-        }
-      ]
-    });
+    const analysisStr = await callAI([
+      {
+        role: 'system',
+        content: 'You are an expert ATS and resume analyzer. Return ONLY a valid JSON object with the following keys (all numbers out of 100 except counts): grammarScore, actionVerbsCount, quantifiableMetricsCount, readabilityIndex. Also include an "overallScore" out of 100, and an array of strings called "feedback" with 3-4 actionable tips.'
+      },
+      {
+        role: 'user',
+        content: `Analyze this resume content for ATS compatibility and quality:\n\n${resumeText}\n\nProvide the metrics JSON.`
+      }
+    ], true);
 
-    let analysisStr = completion.choices[0].message.content.trim();
-    if (analysisStr.startsWith('```json')) {
-      analysisStr = analysisStr.substring(7, analysisStr.length - 3).trim();
+    let cleanStr = analysisStr.trim();
+    if (cleanStr.startsWith('```json')) {
+      cleanStr = cleanStr.substring(7, cleanStr.length - 3).trim();
     }
-    return JSON.parse(analysisStr);
+    return JSON.parse(cleanStr);
   } catch (error) {
-    console.error("Grok analyzeResumeTextDirect API/Parse error, using fallback:", error.message);
+    console.error("AI analyzeResumeTextDirect API/Parse error, using fallback:", error.message);
     return {
       grammarScore: 85,
       actionVerbsCount: 14,
@@ -103,16 +141,12 @@ const analyzeResumeTextDirect = async (userId, resumeText) => {
 
 const _callGrokAPI = async (systemPrompt, userPrompt) => {
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'grok-beta',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ]
-    });
-    return completion.choices[0].message.content;
+    return await callAI([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ]);
   } catch (error) {
-    console.error("Grok _callGrokAPI error, using fallback:", error.message);
+    console.error("AI _callGrokAPI error, using fallback:", error.message);
     return `# Professional Resume\n\n## Summary\nHighly motivated developer with experience building responsive web applications.\n\n## Experience\n- Built full-stack features using React, Node.js, and Prisma.\n- Optimized data fetching and rendering speed.\n\n## Education\n- B.S. in Computer Science\n\n## Skills\n- JavaScript, React, Node.js, PostgreSQL, CSS`;
   }
 };
@@ -174,17 +208,14 @@ const getSkillGapAnalysis = async (userId, targetType, targetId) => {
   `;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'grok-beta',
-      messages: [
-        { role: 'system', content: 'You are an expert technical recruiter and career coach. Always output valid JSON.' },
-        { role: 'user', content: prompt }
-      ]
-    });
+    const resStr = await callAI([
+      { role: 'system', content: 'You are an expert technical recruiter and career coach. Always output valid JSON.' },
+      { role: 'user', content: prompt }
+    ], true);
 
-    let resStr = completion.choices[0].message.content.trim();
-    if (resStr.startsWith('```json')) resStr = resStr.substring(7, resStr.length - 3).trim();
-    const gapData = JSON.parse(resStr);
+    let cleanStr = resStr.trim();
+    if (cleanStr.startsWith('```json')) cleanStr = cleanStr.substring(7, cleanStr.length - 3).trim();
+    const gapData = JSON.parse(cleanStr);
     return {
       targetType,
       targetId,
@@ -192,7 +223,7 @@ const getSkillGapAnalysis = async (userId, targetType, targetId) => {
       ...gapData
     };
   } catch (error) {
-    console.error("Grok getSkillGapAnalysis error, using fallback:", error.message);
+    console.error("AI getSkillGapAnalysis error, using fallback:", error.message);
     const mockMatching = userSkillNames.slice(0, 3);
     const mockMissing = ["System Design", "Cloud Infrastructure (AWS)", "Docker & Kubernetes", "CI/CD Pipelines"];
     return {
@@ -232,19 +263,16 @@ const getCareerRecommendations = async (userId) => {
 
   let recData;
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'grok-beta',
-      messages: [
-        { role: 'system', content: 'You are an expert career counselor. Always output valid JSON.' },
-        { role: 'user', content: prompt }
-      ]
-    });
+    const resStr = await callAI([
+      { role: 'system', content: 'You are an expert career counselor. Always output valid JSON.' },
+      { role: 'user', content: prompt }
+    ], true);
 
-    let resStr = completion.choices[0].message.content.trim();
-    if (resStr.startsWith('```json')) resStr = resStr.substring(7, resStr.length - 3).trim();
-    recData = JSON.parse(resStr);
+    let cleanStr = resStr.trim();
+    if (cleanStr.startsWith('```json')) cleanStr = cleanStr.substring(7, cleanStr.length - 3).trim();
+    recData = JSON.parse(cleanStr);
   } catch (error) {
-    console.error("Grok getCareerRecommendations error, using fallback:", error.message);
+    console.error("AI getCareerRecommendations error, using fallback:", error.message);
     recData = {
       recommendations: [
         {
@@ -399,27 +427,24 @@ const performRAGMatch = async (userId, resumeText, jobDescription) => {
   const contextText = finalContextChunks.join('\n\n');
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'grok-beta',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an elite ATS matching system. Given a Job Description and relevant sections of a candidate\'s Resume, calculate the matching percentage and return a valid JSON object with the following exact keys: matchPercentage (number), strongMatches (array of strings), missingSkills (array of strings), suggestions (array of strings).'
-        },
-        {
-          role: 'user',
-          content: `Job Description:\n${jobDescription}\n\nRelevant Resume Context:\n${contextText}`
-        }
-      ]
-    });
+    const responseText = await callAI([
+      {
+        role: 'system',
+        content: 'You are an elite ATS matching system. Given a Job Description and relevant sections of a candidate\'s Resume, calculate the matching percentage and return a valid JSON object with the following exact keys: matchPercentage (number), strongMatches (array of strings), missingSkills (array of strings), suggestions (array of strings).'
+      },
+      {
+        role: 'user',
+        content: `Job Description:\n${jobDescription}\n\nRelevant Resume Context:\n${contextText}`
+      }
+    ], true);
 
-    let responseText = completion.choices[0].message.content.trim();
-    if (responseText.startsWith('```json')) {
-      responseText = responseText.substring(7, responseText.length - 3).trim();
+    let cleanStr = responseText.trim();
+    if (cleanStr.startsWith('```json')) {
+      cleanStr = cleanStr.substring(7, cleanStr.length - 3).trim();
     }
-    return JSON.parse(responseText);
+    return JSON.parse(cleanStr);
   } catch (err) {
-    console.error("Grok performRAGMatch error, using fallback:", err.message);
+    console.error("AI performRAGMatch error, using fallback:", err.message);
     return {
       matchPercentage: 72,
       strongMatches: ["Candidate demonstrates proficiency in Javascript and React design paradigms."],
@@ -429,26 +454,64 @@ const performRAGMatch = async (userId, resumeText, jobDescription) => {
   }
 };
 
+const callGrok = async (messages) => {
+  if (env.GROK_API_KEY) {
+    const models = ['grok-2', 'grok-2-1212', 'grok-2-latest', 'grok-beta'];
+    let lastError = null;
+    for (const model of models) {
+      try {
+        const grok = new OpenAI({
+          apiKey: env.GROK_API_KEY,
+          baseURL: 'https://api.x.ai/v1',
+        });
+        const response = await grok.chat.completions.create({
+          model,
+          messages,
+        });
+        return response.choices[0].message.content;
+      } catch (err) {
+        lastError = err;
+        console.warn(`[AIService] Grok call with model ${model} failed:`, err.message);
+        if (err.status === 403 || err.message.includes('credits') || err.message.includes('license')) {
+          break;
+        }
+      }
+    }
+    if (lastError) throw lastError;
+  }
+  throw new Error('Grok API key is not configured.');
+};
+
 const aiChatAssistant = async (userId, message, context = '') => {
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'grok-beta',
-      messages: [
-        { role: 'system', content: `You are CareerFlow AI, a helpful and expert career coach. Keep responses concise and practical. User Context: ${context}` },
-        { role: 'user', content: message }
-      ]
-    });
+    const responseContent = await callGrok([
+      { role: 'system', content: `You are CareerFlow AI, a helpful and expert career coach. Keep responses concise and practical. User Context: ${context}` },
+      { role: 'user', content: message }
+    ]);
 
     return {
-      message: completion.choices[0].message.content,
+      message: responseContent,
       timestamp: new Date()
     };
   } catch (error) {
-    console.error("Grok aiChatAssistant error, using fallback:", error.message);
-    return {
-      message: "I'm currently running in offline career coaching mode. Standard answers: To optimize your resume for ATS, ensure you parse keywords directly from the target job descriptions and place them into your skills or bullet items with quantifiable results.",
-      timestamp: new Date()
-    };
+    console.error("AI aiChatAssistant Grok error, falling back to other providers:", error.message);
+    try {
+      const responseContent = await callAI([
+        { role: 'system', content: `You are CareerFlow AI, a helpful and expert career coach. Keep responses concise and practical. User Context: ${context}` },
+        { role: 'user', content: message }
+      ]);
+
+      return {
+        message: responseContent,
+        timestamp: new Date()
+      };
+    } catch (fallbackError) {
+      console.error("AI aiChatAssistant fallback error, using offline mode:", fallbackError.message);
+      return {
+        message: "I'm currently running in offline career coaching mode. Standard answers: To optimize your resume for ATS, ensure you parse keywords directly from the target job descriptions and place them into your skills or bullet items with quantifiable results.",
+        timestamp: new Date()
+      };
+    }
   }
 };
 

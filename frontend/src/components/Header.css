@@ -1,3 +1,9 @@
+@media (min-width: 1025px) {
+  .header {
+    display: none !important;
+  }
+}
+
 .header {
   height: var(--dash-header-height);
   background-color: var(--dash-header-bg);

@@ -27,16 +27,17 @@ app.use(cors({
 app.use(express.json());
 
 // ==========================================
-// 🔐 AUTHENTICATION MODULE: SIGNUP API
 // ==========================================
-app.post('/api/auth/signup', async (req, res) => {
+// 🔐 AUTHENTICATION MODULE: SIGNUP & OTP APIs
+// ==========================================
+app.post('/api/auth/signup-otp', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { email } = req.body;
 
-    if (!name || !email || !password) {
+    if (!email) {
       return res.status(400).json({ 
         success: false, 
-        message: "All fields are mandatory." 
+        message: "Email is required." 
       });
     }
 
@@ -48,6 +49,54 @@ app.post('/api/auth/signup', async (req, res) => {
       });
     }
 
+    const authService = require('./modules/auth/auth.service');
+    await authService.sendOtp(email);
+
+    res.status(200).json({
+      success: true,
+      message: "OTP sent to your email successfully."
+    });
+  } catch (error) {
+    console.error("Signup OTP Error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to send OTP. Please try again."
+    });
+  }
+});
+
+app.post('/api/auth/signup', async (req, res) => {
+  try {
+    const { name, email, password, otp } = req.body;
+
+    if (!name || !email || !password || !otp) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "All fields including Name, Email, Password, and OTP are mandatory." 
+      });
+    }
+
+    const userExists = await prisma.user.findUnique({ where: { email } });
+    if (userExists) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "This email is already registered." 
+      });
+    }
+
+    const authService = require('./modules/auth/auth.service');
+    
+    // Verify OTP first
+    try {
+      await authService.verifyOtp(email, otp);
+    } catch (otpError) {
+      return res.status(400).json({
+        success: false,
+        message: otpError.message || "Invalid or expired OTP."
+      });
+    }
+
+    // Hash password and create user
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -65,10 +114,38 @@ app.post('/api/auth/signup', async (req, res) => {
       }
     });
 
+    // Auto-login after successful verification
+    const userRole = authService.getUserRole(newUser.email);
+    // Generate tokens manually using JWT secret or through authService
+    // Let's use authService helper login output format
+    const jwt = require('jsonwebtoken');
+    const env = require('./config/env');
+    const accessToken = jwt.sign({ id: newUser.id, role: userRole }, env.JWT_SECRET, {
+      expiresIn: env.JWT_EXPIRE || '30d'
+    });
+    const refreshToken = jwt.sign({ id: newUser.id, type: 'refresh' }, env.JWT_SECRET, {
+      expiresIn: '30d'
+    });
+
     res.status(201).json({ 
       success: true, 
-      message: "User registered successfully!", 
-      data: newUser 
+      message: "User registered and logged in successfully!", 
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: userRole
+      },
+      data: {
+        accessToken,
+        refreshToken,
+        user: {
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+          role: userRole
+        }
+      }
     });
 
   } catch (error) {
@@ -79,6 +156,7 @@ app.post('/api/auth/signup', async (req, res) => {
     });
   }
 });
+
 
 // ==========================================
 // 🔑 AUTHENTICATION MODULE: LOGIN API

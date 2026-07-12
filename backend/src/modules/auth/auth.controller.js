@@ -63,11 +63,34 @@ const googleLogin = async (req, res, next) => {
   }
 };
 
+const sendOtp = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const result = await authService.sendOtp(email);
+    res.status(200).json(new ApiResponse(200, result, 'OTP sent successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const verifyOtp = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+    const result = await authService.verifyOtp(email, otp);
+    res.status(200).json(new ApiResponse(200, result, 'OTP verified successfully.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   register,
   login,
   me,
   refresh,
   logout,
-  googleLogin
+  googleLogin,
+  sendOtp,
+  verifyOtp
 };
+
