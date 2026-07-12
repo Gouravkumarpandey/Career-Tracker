@@ -12,15 +12,10 @@ const Dashboard = () => {
 
   // --- Dynamic Dashboard Metrics & Stats State ---
   const [apiData, setApiData] = useState(null);
-  
-  // Interactive Tasks for Daily/Weekly Progress calculation
-  const [tasks] = useState([
-    { id: 1, text: 'Complete React Course Section 4', time: '10:00 AM', completed: true, points: 20 },
-    { id: 2, text: 'Update Resume with new project', time: '2:00 PM', completed: false, points: 30 },
-    { id: 3, text: 'Apply for Frontend Internships', time: '4:30 PM', completed: false, points: 25 },
-    { id: 4, text: 'Solve 2 Leetcode problems', time: '6:00 PM', completed: true, points: 15 },
-    { id: 5, text: 'Review feedback on PR', time: '7:30 PM', completed: false, points: 10 }
-  ]);
+  const [applicationsCount, setApplicationsCount] = useState(0);
+  const [interviewsCount, setInterviewsCount] = useState(0);
+  const [completedTopicsCount, setCompletedTopicsCount] = useState(0);
+  const [localTasks, setLocalTasks] = useState(null);
 
   // Calendar Month State matching July 2026
   const [currentYear, setCurrentYear] = useState(2026);
@@ -42,78 +37,24 @@ const Dashboard = () => {
           const res = await api.get('/api/activities', {
             headers: { Authorization: `Bearer ${token}` }
           });
-          setActivityData(res.data.data);
+          const data = res.data.data;
+          setActivityData(data);
+          setCurrentStreak(data.currentStreak || 0);
+          setLongestStreak(data.longestStreak || 0);
+
+          const history = {};
+          data.dailyActivities?.forEach(act => {
+            if (act.qualified) {
+              history[act.date] = 'active';
+            }
+          });
+          setStreakHistory(history);
         }
       } catch (err) {
         console.warn("Could not load activity log data", err);
       }
     };
     fetchActivities();
-  }, [userProfile]);
-
-  useEffect(() => {
-    if (!userProfile) return;
-
-    const streakKey = `streak_data_${userProfile.id || userProfile.email}`;
-    const savedData = localStorage.getItem(streakKey);
-    const now = new Date();
-    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    const currentTimestamp = now.getTime();
-
-    let streakData = {
-      currentStreak: 0,
-      longestStreak: 0,
-      lastActivityDate: null,
-      lastActivityTimestamp: null,
-      history: {}
-    };
-
-    if (savedData) {
-      try {
-        streakData = JSON.parse(savedData);
-      } catch (e) {
-        console.error("Failed to parse streak data", e);
-      }
-    }
-
-    // Check if 24 hours have passed since last activity (if lastActivityTimestamp exists)
-    if (streakData.lastActivityTimestamp) {
-      const msDiff = currentTimestamp - streakData.lastActivityTimestamp;
-      const hoursDiff = msDiff / (1000 * 60 * 60);
-
-      if (hoursDiff > 24) {
-        // End streak and start fresh
-        streakData.currentStreak = 0;
-      }
-    }
-
-    // Record today's visit/activity
-    if (streakData.lastActivityDate !== todayStr) {
-      // It's a new day! Increment the streak
-      streakData.currentStreak += 1;
-      if (streakData.currentStreak > streakData.longestStreak) {
-        streakData.longestStreak = streakData.currentStreak;
-      }
-      streakData.history[todayStr] = "active";
-    } else {
-      // Already visited today
-      if (streakData.currentStreak === 0) {
-        streakData.currentStreak = 1;
-      }
-      streakData.history[todayStr] = "active";
-    }
-
-    // Update timestamps
-    streakData.lastActivityDate = todayStr;
-    streakData.lastActivityTimestamp = currentTimestamp;
-
-    // Save back to localStorage
-    localStorage.setItem(streakKey, JSON.stringify(streakData));
-
-    // Update React states
-    setCurrentStreak(streakData.currentStreak);
-    setLongestStreak(streakData.longestStreak);
-    setStreakHistory(streakData.history || {});
   }, [userProfile]);
 
   // Load backend statistics if available
@@ -125,14 +66,54 @@ const Dashboard = () => {
           const res = await api.get('/api/analytics/dashboard', {
             headers: { Authorization: `Bearer ${token}` }
           });
-          setApiData(res.data);
+          setApiData(res.data.data);
         }
       } catch (err) {
         console.warn("Could not load backend analytics, using interactive simulation mode.");
       }
     };
+
+    const fetchJobApplications = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const res = await api.get('/api/jobs/applications', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const apps = res.data.data || [];
+          setApplicationsCount(apps.length);
+          const totalInterviews = apps.reduce((sum, app) => sum + (app.interviews?.length || 0), 0);
+          setInterviewsCount(totalInterviews);
+        }
+      } catch (err) {
+        console.warn("Could not load job applications count", err);
+      }
+    };
+
+    const loadLocalData = () => {
+      const savedTasks = localStorage.getItem('careerTrackerTasks');
+      if (savedTasks) {
+        try {
+          setLocalTasks(JSON.parse(savedTasks));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      const savedTopics = localStorage.getItem('lt_topics');
+      if (savedTopics) {
+        try {
+          const parsed = JSON.parse(savedTopics);
+          setCompletedTopicsCount(parsed.length);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
     fetchStats();
-  }, []);
+    fetchJobApplications();
+    loadLocalData();
+  }, [userProfile]);
 
   // --- Calculations for dynamic metrics ---
   // 1. Goal Completion %
@@ -141,17 +122,61 @@ const Dashboard = () => {
   const goalCompletionPercentage = Math.round((completedGoalsCount / totalGoalsCount) * 100);
 
   // 2. Daily & Weekly Progress
-  const totalDailyPoints = tasks.reduce((sum, t) => sum + t.points, 0);
-  const completedDailyPoints = tasks.filter(t => t.completed).reduce((sum, t) => sum + t.points, 0);
-  const dailyProgressPercent = Math.round((completedDailyPoints / totalDailyPoints) * 100) || 0;
-  
-  // Weekly progress is impacted by daily success
-  const weeklyProgressPercent = Math.round(60 + (dailyProgressPercent * 0.2));
+  const mockTasks = [
+    { id: 1, text: 'Complete React Course Section 4', time: '10:00 AM', completed: true, points: 20 },
+    { id: 2, text: 'Update Resume with new project', time: '2:00 PM', completed: false, points: 30 },
+    { id: 3, text: 'Apply for Frontend Internships', time: '4:30 PM', completed: false, points: 25 },
+    { id: 4, text: 'Solve 2 Leetcode problems', time: '6:00 PM', completed: true, points: 15 },
+    { id: 5, text: 'Review feedback on PR', time: '7:30 PM', completed: false, points: 10 }
+  ];
 
-  // 3. Productivity Score
-  const baseProductivity = Math.round((completedDailyPoints / totalDailyPoints) * 80);
-  const streakBonus = Math.min(20, currentStreak * 2);
-  const productivityScore = Math.min(100, baseProductivity + streakBonus + 10);
+  let dailyProgressPercent = 0;
+  let weeklyProgressPercent = 60;
+  let productivityScore = 40;
+
+  const hasLocalTasks = localTasks && (
+    (localTasks.todo && localTasks.todo.length > 0) || 
+    (localTasks.inProgress && localTasks.inProgress.length > 0) || 
+    (localTasks.done && localTasks.done.length > 0)
+  );
+
+  if (hasLocalTasks) {
+    const todoCount = localTasks.todo?.length || 0;
+    const inProgressCount = localTasks.inProgress?.length || 0;
+    const doneCount = localTasks.done?.length || 0;
+    const totalCount = todoCount + inProgressCount + doneCount;
+    
+    dailyProgressPercent = Math.round((doneCount / totalCount) * 100);
+    weeklyProgressPercent = Math.round(60 + (dailyProgressPercent * 0.2));
+    
+    const baseProductivity = Math.round((doneCount / totalCount) * 80);
+    const streakBonus = Math.min(20, currentStreak * 2);
+    productivityScore = Math.min(100, baseProductivity + streakBonus + 10);
+  } else {
+    const totalDailyPoints = mockTasks.reduce((sum, t) => sum + t.points, 0);
+    const completedDailyPoints = mockTasks.filter(t => t.completed).reduce((sum, t) => sum + t.points, 0);
+    dailyProgressPercent = Math.round((completedDailyPoints / totalDailyPoints) * 100) || 0;
+    weeklyProgressPercent = Math.round(60 + (dailyProgressPercent * 0.2));
+    
+    const baseProductivity = Math.round((completedDailyPoints / totalDailyPoints) * 80);
+    const streakBonus = Math.min(20, currentStreak * 2);
+    productivityScore = Math.min(100, baseProductivity + streakBonus + 10);
+  }
+
+  // Safety checks to prevent NaN
+  if (isNaN(productivityScore)) {
+    productivityScore = 40;
+  }
+  if (isNaN(dailyProgressPercent)) {
+    dailyProgressPercent = 0;
+  }
+  if (isNaN(weeklyProgressPercent)) {
+    weeklyProgressPercent = 60;
+  }
+
+  // 3. Time Invested
+  const certsCount = apiData?.certificationStats?.activeCertifications ?? 0;
+  const timeInvested = (completedTopicsCount * 4) + (certsCount * 10) + 12;
 
   // 4. Career Readiness Score
   const careerReadinessScore = apiData?.careerReadinessScore ?? 78.5;
@@ -175,26 +200,7 @@ const Dashboard = () => {
     }
   };
 
-  // Toggle calendar days for fun interactive streak editing
-  const toggleDayStreak = (dayStr) => {
-    setStreakHistory(prev => {
-      const currentStatus = prev[dayStr];
-      let nextStatus;
-      if (currentStatus === 'completed') {
-        nextStatus = 'missed';
-      } else if (currentStatus === 'missed') {
-        nextStatus = 'active';
-      } else if (currentStatus === 'active') {
-        nextStatus = undefined;
-      } else {
-        nextStatus = 'completed';
-      }
-      return {
-        ...prev,
-        [dayStr]: nextStatus
-      };
-    });
-  };
+
 
   // Generate calendar days
   const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
@@ -247,20 +253,18 @@ const Dashboard = () => {
         dayClass += " active-dev";
         content = (
           <div className="status-badge dev">
-            <span>&lt;/&gt;</span>
+            <span>🔥</span>
           </div>
         );
       }
 
       cells.push(
-        <button 
+        <div 
           key={dateStr} 
-          className={dayClass} 
-          onClick={() => toggleDayStreak(dateStr)}
-          title="Click to toggle streak log"
+          className={dayClass}
         >
           {content}
-        </button>
+        </div>
       );
     }
 
@@ -377,7 +381,7 @@ const Dashboard = () => {
     <div className="overview-grid">
       <div className="overview-header" style={{ gridColumn: 'span 12' }}>
         <h1>Career Dashboard</h1>
-        <p>Welcome back, John! Track your readiness, performance statistics, and daily streak progress.</p>
+        <p>Welcome back, {userProfile?.name || 'User'}! Track your readiness, performance statistics, and daily streak progress.</p>
       </div>
 
       {/* 4 Stat Summary Cards */}
@@ -535,24 +539,24 @@ const Dashboard = () => {
           <h2 className="dash-title">Monthly Analytics Report</h2>
           <div className="analytics-metrics-grid">
             <div className="analytics-item">
-              <span className="analytics-num">18</span>
+              <span className="analytics-num">{applicationsCount}</span>
               <span className="analytics-label">Applications Sent</span>
-              <div className="analytics-mini-bar"><div className="fill" style={{ width: '70%', background: 'var(--dash-primary)' }}></div></div>
+              <div className="analytics-mini-bar"><div className="fill" style={{ width: `${Math.min(100, (applicationsCount / 20) * 100)}%`, background: 'var(--dash-primary)' }}></div></div>
             </div>
             <div className="analytics-item">
-              <span className="analytics-num">4</span>
+              <span className="analytics-num">{interviewsCount}</span>
               <span className="analytics-label">Interviews Arranged</span>
-              <div className="analytics-mini-bar"><div className="fill" style={{ width: '40%', background: 'var(--dash-accent)' }}></div></div>
+              <div className="analytics-mini-bar"><div className="fill" style={{ width: `${Math.min(100, (interviewsCount / 5) * 100)}%`, background: 'var(--dash-accent)' }}></div></div>
             </div>
             <div className="analytics-item">
-              <span className="analytics-num">2</span>
+              <span className="analytics-num">{apiData?.certificationStats?.activeCertifications ?? 0}</span>
               <span className="analytics-label">Certificates Earned</span>
-              <div className="analytics-mini-bar"><div className="fill" style={{ width: '60%', background: 'var(--dash-success)' }}></div></div>
+              <div className="analytics-mini-bar"><div className="fill" style={{ width: `${Math.min(100, ((apiData?.certificationStats?.activeCertifications || 0) / 3) * 100)}%`, background: 'var(--dash-success)' }}></div></div>
             </div>
             <div className="analytics-item">
-              <span className="analytics-num">32h</span>
+              <span className="analytics-num">{timeInvested}h</span>
               <span className="analytics-label">Time Invested</span>
-              <div className="analytics-mini-bar"><div className="fill" style={{ width: '85%', background: 'var(--dash-warning)' }}></div></div>
+              <div className="analytics-mini-bar"><div className="fill" style={{ width: `${Math.min(100, (timeInvested / 40) * 100)}%`, background: 'var(--dash-warning)' }}></div></div>
             </div>
           </div>
         </div>
@@ -566,7 +570,7 @@ const Dashboard = () => {
         <div className="dash-card streak-calendar-card">
           <div className="streak-stats-header">
             <div className="streak-stat-box">
-              <span className="icon-wrap hourglass">⏳</span>
+              <span className="icon-wrap flame">🔥</span>
               <div className="text-wrap">
                 <span className="label">Current Visit Streak</span>
                 <span className="value">{currentStreak} days</span>

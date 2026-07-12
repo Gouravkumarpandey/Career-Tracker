@@ -517,7 +517,7 @@
 }
 
 .streak-stat-box .icon-wrap {
-  font-size: 26px;
+  font-size: 32px;
   background: rgba(255, 255, 255, 0.05);
   width: 48px;
   height: 48px;
@@ -681,10 +681,9 @@
 }
 
 .status-badge.dev {
-  background: #1e3a8a; /* Deep blue circle */
-  border: 1px solid #3b82f6;
-  color: #60a5fa;
-  font-size: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 20px;
 }
 
 /* Custom ticks and crosses */

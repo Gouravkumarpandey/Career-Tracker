@@ -19,6 +19,7 @@ const LearningTracker = () => {
   const [notes, setNotes] = useState([]);
   const [noteTitle, setNoteTitle] = useState('');
   const [noteContent, setNoteContent] = useState('');
+  const [isCreatingNote, setIsCreatingNote] = useState(false);
 
   // 3. Bookmarks States
   const [bookmarks, setBookmarks] = useState([]);
@@ -32,7 +33,14 @@ const LearningTracker = () => {
   // 5. Revision Reminders States
   const [reminders, setReminders] = useState([]);
   const [remTopic, setRemTopic] = useState('');
-  const [remTime, setRemTime] = useState('');
+  const getTodayDateString = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+  const [remDate, setRemDate] = useState(getTodayDateString());
+  const [remHour, setRemHour] = useState('09');
+  const [remMinute, setRemMinute] = useState('00');
+  const [remAmPm, setRemAmPm] = useState('AM');
 
   // Load state from localStorage on init
   useEffect(() => {
@@ -109,10 +117,35 @@ const LearningTracker = () => {
     setSearchResults(mockCourses);
   };
 
+  const formatIndianTime = (timeStr) => {
+    try {
+      const date = new Date(timeStr);
+      return date.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (e) {
+      return timeStr;
+    }
+  };
+
   // 2. Notes handlers
+  const getWordCount = (str) => {
+    if (!str) return 0;
+    return str.trim().split(/\s+/).filter(Boolean).length;
+  };
+
   const handleAddNote = (e) => {
     e.preventDefault();
     if (!noteTitle.trim() || !noteContent.trim()) return;
+    if (getWordCount(noteContent) > 500) {
+      alert("Note content cannot exceed 500 words.");
+      return;
+    }
     const newNote = {
       id: Date.now(),
       title: noteTitle,
@@ -122,6 +155,7 @@ const LearningTracker = () => {
     saveNotesToStore([newNote, ...notes]);
     setNoteTitle('');
     setNoteContent('');
+    setIsCreatingNote(false);
   };
 
   const handleDeleteNote = (id) => {
@@ -213,14 +247,31 @@ const LearningTracker = () => {
 
   const handleAddReminder = async (e) => {
     e.preventDefault();
-    if (!remTopic.trim() || !remTime) return;
+    if (!remTopic.trim() || !remDate || !remHour || !remMinute || !remAmPm) return;
 
     try {
+      let hour24 = parseInt(remHour);
+      if (remAmPm === 'PM' && hour24 !== 12) {
+        hour24 += 12;
+      } else if (remAmPm === 'AM' && hour24 === 12) {
+        hour24 = 0;
+      }
+
+      const dateParts = remDate.split('-');
+      const scheduledDate = new Date(
+        parseInt(dateParts[0]),
+        parseInt(dateParts[1]) - 1,
+        parseInt(dateParts[2]),
+        hour24,
+        parseInt(remMinute),
+        0
+      );
+
       const token = localStorage.getItem('token');
       await api.post('/api/calendar-events', {
         title: `Revision: ${remTopic}`,
         type: 'reminder',
-        eventDate: new Date(remTime),
+        eventDate: scheduledDate,
         sendEmail: true
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -228,7 +279,10 @@ const LearningTracker = () => {
       
       fetchReminders();
       setRemTopic('');
-      setRemTime('');
+      setRemDate(getTodayDateString());
+      setRemHour('09');
+      setRemMinute('00');
+      setRemAmPm('AM');
     } catch (err) {
       console.error("Failed to schedule revision reminder email", err);
       alert("Failed to schedule reminder alarm.");
@@ -321,50 +375,130 @@ const LearningTracker = () => {
           {/* 2. Notes Section */}
           {activeTab === 'notes' && (
             <div className="lt-panel-card">
-              <h2>Study Notes</h2>
-              <form onSubmit={handleAddNote} className="lt-form">
-                <input 
-                  type="text" 
-                  value={noteTitle}
-                  onChange={(e) => setNoteTitle(e.target.value)}
-                  placeholder="Note Title (e.g. React Hooks)"
-                  className="lt-input"
-                  required
-                />
-                <textarea 
-                  value={noteContent}
-                  onChange={(e) => setNoteContent(e.target.value)}
-                  placeholder="Type your notes here..."
-                  className="lt-textarea"
-                  rows="4"
-                  required
-                />
-                <button type="submit" className="lt-submit-btn"><FiPlus /> Save Note</button>
-              </form>
+              {!isCreatingNote ? (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+                    <h2 style={{ margin: 0 }}>Study Notes</h2>
+                    <button 
+                      className="lt-submit-btn" 
+                      onClick={() => setIsCreatingNote(true)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                      <FiPlus /> Add Note
+                    </button>
+                  </div>
 
-              <div className="lt-notes-grid">
-                {notes.length === 0 ? (
-                  <p className="lt-empty-msg">No notes saved yet.</p>
-                ) : (
-                  notes.map(note => (
-                    <div key={note.id} className="lt-note-card">
-                      <div className="lt-note-header">
-                        <h3>{note.title}</h3>
-                        <span className="lt-note-date">{note.date}</span>
-                      </div>
-                      <p>{note.content}</p>
-                      <div className="lt-note-actions">
-                        <button className="lt-action-btn" onClick={() => handleDownloadNote(note)} title="Download Note">
-                          <FiDownload /> Download
-                        </button>
-                        <button className="lt-action-btn delete" onClick={() => handleDeleteNote(note.id)} title="Delete Note">
-                          <FiTrash2 /> Delete
-                        </button>
+                  <div className="lt-notes-grid">
+                    {notes.length === 0 ? (
+                      <p className="lt-empty-msg">No notes saved yet.</p>
+                    ) : (
+                      notes.map(note => (
+                        <div key={note.id} className="lt-note-card">
+                          <div className="lt-note-header">
+                            <h3>{note.title}</h3>
+                            <span className="lt-note-date">{note.date}</span>
+                          </div>
+                          <p style={{ whiteSpace: 'pre-wrap' }}>{note.content}</p>
+                          <div className="lt-note-actions">
+                            <button className="lt-action-btn" onClick={() => handleDownloadNote(note)} title="Download Note">
+                              <FiDownload /> Download
+                            </button>
+                            <button className="lt-action-btn delete" onClick={() => handleDeleteNote(note.id)} title="Delete Note">
+                              <FiTrash2 /> Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+                    <h2 style={{ margin: 0 }}>Create New Note</h2>
+                    <button 
+                      onClick={() => {
+                        setIsCreatingNote(false);
+                        setNoteTitle('');
+                        setNoteContent('');
+                      }}
+                      style={{
+                        background: 'transparent',
+                        border: '1.5px solid #cbd5e1',
+                        color: '#64748b',
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        fontWeight: '600',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleAddNote} className="lt-form">
+                    <input 
+                      type="text" 
+                      value={noteTitle}
+                      onChange={(e) => setNoteTitle(e.target.value)}
+                      placeholder="Note Title (e.g. React Hooks)"
+                      className="lt-input"
+                      required
+                      style={{ padding: '12px 16px', fontSize: '15px' }}
+                    />
+                    <div style={{ position: 'relative', width: '100%' }}>
+                      <textarea 
+                        value={noteContent}
+                        onChange={(e) => {
+                          setNoteContent(e.target.value);
+                          // Auto expand height slightly, but maintain min-height
+                          e.target.style.height = 'auto';
+                          e.target.style.height = `${Math.max(280, e.target.scrollHeight)}px`;
+                        }}
+                        placeholder="Type your notes here... (Support up to 500 words)"
+                        className="lt-textarea"
+                        required
+                        style={{ 
+                          minHeight: '280px', 
+                          resize: 'none', 
+                          overflowY: 'auto',
+                          lineHeight: '1.6',
+                          padding: '16px'
+                        }}
+                      />
+                      <div style={{
+                        textAlign: 'right',
+                        fontSize: '12px',
+                        color: getWordCount(noteContent) > 500 ? '#ef4444' : '#6b7280',
+                        marginTop: '6px',
+                        fontWeight: getWordCount(noteContent) > 500 ? 'bold' : 'normal'
+                      }}>
+                        {getWordCount(noteContent)} / 500 words
                       </div>
                     </div>
-                  ))
-                )}
-              </div>
+                    
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '12px', flexWrap: 'wrap' }}>
+                      <button 
+                        type="submit" 
+                        className="lt-submit-btn" 
+                        disabled={getWordCount(noteContent) > 500}
+                        style={{ 
+                          flex: 1, 
+                          padding: '12px', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          gap: '8px',
+                          opacity: getWordCount(noteContent) > 500 ? 0.5 : 1, 
+                          cursor: getWordCount(noteContent) > 500 ? 'not-allowed' : 'pointer' 
+                        }}
+                      >
+                        <FiPlus /> Save Note
+                      </button>
+                    </div>
+                  </form>
+                </>
+              )}
             </div>
           )}
 
@@ -465,12 +599,42 @@ const LearningTracker = () => {
                   required
                 />
                 <input 
-                  type="datetime-local" 
-                  value={remTime}
-                  onChange={(e) => setRemTime(e.target.value)}
+                  type="date" 
+                  value={remDate}
+                  onChange={(e) => setRemDate(e.target.value)}
                   className="lt-input"
                   required
+                  style={{ minWidth: '150px' }}
                 />
+                <select 
+                  value={remHour} 
+                  onChange={(e) => setRemHour(e.target.value)}
+                  className="lt-input"
+                  style={{ minWidth: '70px', padding: '10px' }}
+                >
+                  {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map(h => (
+                    <option key={h} value={h}>{h}</option>
+                  ))}
+                </select>
+                <select 
+                  value={remMinute} 
+                  onChange={(e) => setRemMinute(e.target.value)}
+                  className="lt-input"
+                  style={{ minWidth: '70px', padding: '10px' }}
+                >
+                  {Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0')).map(m => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+                <select 
+                  value={remAmPm} 
+                  onChange={(e) => setRemAmPm(e.target.value)}
+                  className="lt-input"
+                  style={{ minWidth: '70px', padding: '10px' }}
+                >
+                  <option value="AM">AM</option>
+                  <option value="PM">PM</option>
+                </select>
                 <button type="submit" className="lt-submit-btn"><FiBell /> Set Alarm</button>
               </form>
 
@@ -483,7 +647,7 @@ const LearningTracker = () => {
                       <div className="lt-rem-info">
                         <FiClock />
                         <strong>{rem.topic}</strong>
-                        <span>scheduled at: {new Date(rem.time).toLocaleString()}</span>
+                        <span>scheduled at: {formatIndianTime(rem.time)}</span>
                       </div>
                       <button className="lt-delete-btn" onClick={() => handleDeleteReminder(rem.id)}>
                         <FiTrash2 />

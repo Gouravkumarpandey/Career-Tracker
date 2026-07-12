@@ -16,6 +16,8 @@ const Signup = () => {
   });
   const [step, setStep] = useState('form'); // 'form' or 'otp'
   const [otp, setOtp] = useState('');
+  const [otpVal, setOtpVal] = useState(new Array(6).fill(''));
+  const inputRefs = React.useRef([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -24,6 +26,49 @@ const Signup = () => {
     const { name, value, type, checked } = e.target;
     setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
     if (error) setError('');
+  };
+
+  const handleOtpChange = (element, index) => {
+    const value = element.value.replace(/\D/g, '');
+    const newOtpVal = [...otpVal];
+    
+    if (!value) {
+      newOtpVal[index] = '';
+      setOtpVal(newOtpVal);
+      setOtp(newOtpVal.join(''));
+      return;
+    }
+
+    newOtpVal[index] = value[value.length - 1];
+    setOtpVal(newOtpVal);
+    setOtp(newOtpVal.join(''));
+
+    if (index < 5) {
+      inputRefs.current[index + 1].focus();
+    }
+  };
+
+  const handleOtpKeyDown = (e, index) => {
+    if (e.key === 'Backspace') {
+      if (!otpVal[index] && index > 0) {
+        inputRefs.current[index - 1].focus();
+        const newOtpVal = [...otpVal];
+        newOtpVal[index - 1] = '';
+        setOtpVal(newOtpVal);
+        setOtp(newOtpVal.join(''));
+      }
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pastedData.length === 6) {
+      const newOtpVal = pastedData.split('');
+      setOtpVal(newOtpVal);
+      setOtp(pastedData);
+      inputRefs.current[5].focus();
+    }
   };
 
   // ─── Step 1: Request OTP ───────────────────────────────────────────────────
@@ -232,17 +277,25 @@ const Signup = () => {
                 {error && <div className="teal-error">{error}</div>}
 
                 <div className="purple-field">
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                     <FiShield size={14} /> Verification Code
                   </label>
-                  <input
-                    type="text"
-                    placeholder="Enter 6-digit OTP"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    required
-                    style={{ letterSpacing: '4px', textAlign: 'center', fontSize: '1.2rem', fontWeight: 'bold' }}
-                  />
+                  <div className="otp-inputs-wrapper">
+                    {otpVal.map((data, index) => (
+                      <input
+                        key={index}
+                        type="text"
+                        maxLength="1"
+                        ref={(el) => (inputRefs.current[index] = el)}
+                        value={data}
+                        onChange={(e) => handleOtpChange(e.target, index)}
+                        onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                        onPaste={handleOtpPaste}
+                        className="otp-digit-input"
+                        required
+                      />
+                    ))}
+                  </div>
                 </div>
 
                 <button type="submit" className="purple-submit-btn" disabled={loading || otp.length !== 6}>

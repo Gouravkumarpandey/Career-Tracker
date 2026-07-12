@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   FiLayout, FiCalendar, FiClock, FiCheckSquare, 
   FiPlus, FiPlay, FiPause, FiRotateCcw, FiMoreHorizontal,
-  FiTarget, FiFileText, FiEdit3
+  FiTarget, FiFileText, FiEdit3, FiTrash2
 } from 'react-icons/fi';
 import './Planner.css';
 import api from '../config/api';
@@ -113,9 +113,17 @@ const Planner = () => {
     setAddingTaskCol(null);
   };
 
+  const handleDeleteTask = (taskId, col) => {
+    setTasks(prev => ({
+      ...prev,
+      [col]: prev[col].filter(t => t.id !== taskId)
+    }));
+  };
+
   const moveTask = (taskId, fromCol, toCol) => {
     setTasks(prev => {
       const task = prev[fromCol].find(t => t.id === taskId);
+      if (!task) return prev;
       return {
         ...prev,
         [fromCol]: prev[fromCol].filter(t => t.id !== taskId),
@@ -194,7 +202,24 @@ const Planner = () => {
             {task.desc && <div className="card-desc">{task.desc}</div>}
             <div className="card-meta">
               <span className={`card-tag ${task.tag}`}>{task.type}</span>
-              <FiMoreHorizontal />
+              <button 
+                onClick={() => handleDeleteTask(task.id, colKey)}
+                style={{ 
+                  background: 'transparent', 
+                  border: 'none', 
+                  color: '#ef4444', 
+                  cursor: 'pointer', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  padding: '4px',
+                  borderRadius: '4px',
+                  transition: 'background 0.2s' 
+                }}
+                title="Delete Task"
+                className="kanban-card-delete-btn"
+              >
+                <FiTrash2 size={13} />
+              </button>
             </div>
           </div>
         ))}
@@ -329,20 +354,20 @@ const Planner = () => {
 
   const renderHabits = () => (
     <div className="habit-tracker">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FiCheckSquare /> Daily Habit Tracker</h2>
-        <div style={{ display: 'flex', gap: '8px' }}>
+      <div className="habit-header-row">
+        <h2 className="habit-title"><FiCheckSquare /> Daily Habit Tracker</h2>
+        <div className="habit-add-form">
           <input 
             type="text" 
             placeholder="New habit..." 
             value={newHabitName}
             onChange={(e) => setNewHabitName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAddHabit()}
-            style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--dash-border)', background: 'var(--dash-bg)', color: 'var(--dash-text-main)' }}
+            className="habit-input"
           />
           <button 
             onClick={handleAddHabit}
-            style={{ padding: '8px 12px', borderRadius: '8px', border: 'none', background: 'var(--dash-primary)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+            className="habit-add-btn"
           >
             <FiPlus /> Add
           </button>
@@ -387,6 +412,12 @@ const Planner = () => {
   const handleAddCalendarItem = async (e) => {
     e.preventDefault();
     if (!newCalendarItem.text.trim()) return;
+
+    const selectedEvents = calendarEventsData[selectedDate] || [];
+    if (selectedEvents.length >= 7) {
+      alert("You can only add up to 7 events for a single day.");
+      return;
+    }
     
     try {
       const token = localStorage.getItem('token');
@@ -452,21 +483,40 @@ const Planner = () => {
               const isToday = date === 12; // mock today is July 12
               const isSelected = selectedDate === date;
               const hasEvents = calendarEventsData[date] && calendarEventsData[date].length > 0;
+              
+              const dayOfWeekIndex = i % 7;
+              const pastelColors = [
+                { bg: '#eff6ff', border: '#bfdbfe', text: '#1e40af' }, // Sun - Light Blue
+                { bg: '#faf5ff', border: '#e9d5ff', text: '#6b21a8' }, // Mon - Light Purple
+                { bg: '#ecfdf5', border: '#a7f3d0', text: '#065f46' }, // Tue - Light Emerald
+                { bg: '#fff7ed', border: '#fed7aa', text: '#9a3412' }, // Wed - Light Amber
+                { bg: '#fff1f2', border: '#fecdd3', text: '#9d174d' }, // Thu - Light Rose
+                { bg: '#ecfeff', border: '#a5f3fc', text: '#075985' }, // Fri - Light Cyan
+                { bg: '#eef2ff', border: '#c7d2fe', text: '#3730a3' }  // Sat - Light Indigo
+              ];
+
+              const colorConfig = date > 0 && date <= 31 
+                ? pastelColors[dayOfWeekIndex] 
+                : { bg: '#f8fafc', border: '#e2e8f0', text: '#cbd5e1' };
+
               return (
                 <div 
                   key={i} 
                   className={`cal-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`} 
                   style={{ 
-                    opacity: date <= 0 || date > 31 ? 0.3 : 1, 
+                    opacity: date <= 0 || date > 31 ? 0.35 : 1, 
                     cursor: date > 0 && date <= 31 ? 'pointer' : 'default',
-                    border: isSelected ? '2px solid var(--dash-primary)' : '1px solid var(--dash-border)',
+                    background: colorConfig.bg,
+                    border: isSelected ? '2px solid #2563eb' : `1px solid ${colorConfig.border}`,
                     position: 'relative'
                   }}
                   onClick={() => date > 0 && date <= 31 && setSelectedDate(date)}
                 >
-                  <div className="cal-date">{date > 0 && date <= 31 ? date : ''}</div>
+                  <div className="cal-date" style={{ color: colorConfig.text }}>
+                    {date > 0 && date <= 31 ? date : ''}
+                  </div>
                   {hasEvents && (
-                    <div className="cal-dot" style={{ position: 'absolute', bottom: '4px', left: '50%', transform: 'translateX(-50%)', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--dash-primary)' }}></div>
+                    <div className="cal-dot" style={{ position: 'absolute', bottom: '4px', left: '50%', transform: 'translateX(-50%)', width: '6px', height: '6px', borderRadius: '50%', background: '#2563eb' }}></div>
                   )}
                 </div>
               );
@@ -475,12 +525,12 @@ const Planner = () => {
         </div>
 
         {/* Right Details Panel */}
-        <div className="calendar-details-panel" style={{ background: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div className="details-header" style={{ borderBottom: '1px solid var(--dash-border)', paddingBottom: '12px' }}>
+        <div className="calendar-details-panel">
+          <div className="details-header">
             <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>Events on July {selectedDate}</h3>
           </div>
 
-          <div className="details-items-list" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div className="details-items-list">
             {selectedEvents.length === 0 ? (
               <p style={{ color: 'var(--dash-text-muted)', fontSize: '14px', fontStyle: 'italic', margin: 0 }}>No deadlines, tasks, or reminders for this day.</p>
             ) : (
@@ -504,7 +554,7 @@ const Planner = () => {
                 }
 
                 return (
-                  <div key={idx} className="cal-event-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--dash-bg)', padding: '12px', borderRadius: '8px', border: '1px solid var(--dash-border)' }}>
+                  <div key={idx} className="cal-event-row">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
                       <span style={{ fontSize: '18px', cursor: 'pointer' }} onClick={() => handleToggleCalendarItem(item.id, item.completed)}>
                         {item.completed ? '✅' : icon}
@@ -530,32 +580,34 @@ const Planner = () => {
             )}
           </div>
 
-          <form onSubmit={handleAddCalendarItem} style={{ borderTop: '1px solid var(--dash-border)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 600 }}>Add Event / Goal / Task</span>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <form onSubmit={handleAddCalendarItem} className="cal-add-event-form">
+            <span className="cal-form-label">Add Event / Goal / Task (Max 7)</span>
+            
+            <input 
+              type="text"
+              placeholder="Event title..."
+              value={newCalendarItem.text}
+              onChange={e => setNewCalendarItem({ ...newCalendarItem, text: e.target.value })}
+              style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--dash-border)', background: 'var(--dash-bg)', color: 'var(--dash-text-main)', fontSize: '13px', width: '100%' }}
+            />
+
+            <div className="cal-form-row-grid">
               <select 
                 value={newCalendarItem.type} 
                 onChange={e => setNewCalendarItem({ ...newCalendarItem, type: e.target.value })}
-                style={{ padding: '8px', borderRadius: '8px', border: '1px solid var(--dash-border)', background: 'var(--dash-bg)', color: 'var(--dash-text-main)', fontSize: '13px' }}
+                style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--dash-border)', background: 'var(--dash-bg)', color: 'var(--dash-text-main)', fontSize: '13px', width: '100%' }}
               >
                 <option value="task">Daily Task</option>
                 <option value="goal">Goal Deadline</option>
                 <option value="planner">Planner Event</option>
                 <option value="reminder">Reminder</option>
               </select>
-              <input 
-                type="text"
-                placeholder="Title..."
-                value={newCalendarItem.text}
-                onChange={e => setNewCalendarItem({ ...newCalendarItem, text: e.target.value })}
-                style={{ flex: 1, minWidth: '120px', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--dash-border)', background: 'var(--dash-bg)', color: 'var(--dash-text-main)', fontSize: '13px' }}
-              />
-              {/* Custom 12-hour time picker */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--dash-bg)', border: '1px solid var(--dash-border)', borderRadius: '8px', padding: '4px 8px' }}>
+
+              <div className="cal-time-picker-row">
                 <select
                   value={selectedHour}
                   onChange={e => setSelectedHour(e.target.value)}
-                  style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--dash-text-main)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: '4px 2px' }}
+                  className="cal-time-select"
                 >
                   {['01','02','03','04','05','06','07','08','09','10','11','12'].map(h => (
                     <option key={h} value={h}>{h}</option>
@@ -565,28 +617,23 @@ const Planner = () => {
                 <select
                   value={selectedMinute}
                   onChange={e => setSelectedMinute(e.target.value)}
-                  style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--dash-text-main)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: '4px 2px' }}
+                  className="cal-time-select"
                 >
                   {['00','05','10','15','20','25','30','35','40','45','50','55'].map(m => (
                     <option key={m} value={m}>{m}</option>
                   ))}
                 </select>
-                <div style={{ display: 'flex', gap: '2px', marginLeft: '6px' }}>
+                
+                <div style={{ display: 'flex', gap: '2px', marginLeft: 'auto' }}>
                   {['AM','PM'].map(period => (
                     <button
                       key={period}
                       type="button"
                       onClick={() => setSelectedAmPm(period)}
+                      className="cal-period-btn"
                       style={{
-                        padding: '3px 8px',
-                        borderRadius: '6px',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontSize: '11px',
-                        fontWeight: 700,
                         background: selectedAmPm === period ? 'var(--dash-primary)' : 'transparent',
-                        color: selectedAmPm === period ? 'white' : 'var(--dash-text-muted)',
-                        transition: 'all 0.2s'
+                        color: selectedAmPm === period ? 'white' : 'var(--dash-text-muted)'
                       }}
                     >
                       {period}
@@ -594,13 +641,14 @@ const Planner = () => {
                   ))}
                 </div>
               </div>
-              <button 
-                type="submit"
-                style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: 'var(--dash-primary)', color: 'white', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}
-              >
-                Add
-              </button>
             </div>
+
+            <button 
+              type="submit"
+              className="cal-add-submit-btn"
+            >
+              Add Event
+            </button>
           </form>
         </div>
       </div>
@@ -609,9 +657,9 @@ const Planner = () => {
 
   return (
     <div className="planner-container">
-      <div className="planner-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
-        <h1 className="page-heading" style={{ margin: 0 }}>Goals</h1>
-        <div className="planner-tabs" style={{ margin: 0 }}>
+      <div className="planner-header">
+        <h1 className="page-heading" style={{ margin: 0 }}>Career Planner</h1>
+        <div className="planner-tabs">
           <button className={`planner-tab ${activeTab === 'board' ? 'active' : ''}`} onClick={() => setActiveTab('board')}>
             <FiLayout /> Task Board
           </button>
@@ -625,6 +673,7 @@ const Planner = () => {
             <FiCheckSquare /> Habits
           </button>
         </div>
+        <div className="planner-header-spacer" />
       </div>
 
       <div className="planner-content">

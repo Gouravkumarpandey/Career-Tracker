@@ -180,40 +180,38 @@ const AIFeatures = () => {
 
   return (
     <div className="ai-dashboard-container">
-      {/* Simple Page Heading */}
-      <h1 className="page-heading">AI Features</h1>
-
-      {/* Grid Dashboard */}
-      <div className="ai-grid-layout">
-        {/* Left Tabs Menu */}
-        <div className="ai-tabs-sidebar">
-          <button className={`tab-link ${activeTab === 'resume-review' ? 'active' : ''}`} onClick={() => setActiveTab('resume-review')}>
-            <FiFileText /> AI Resume Review
+      <div className="ai-header-row">
+        <h1 className="page-heading" style={{ margin: 0 }}>AI Features</h1>
+        <div className="ai-tabs">
+          <button className={`ai-tab-btn ${activeTab === 'resume-review' ? 'active' : ''}`} onClick={() => setActiveTab('resume-review')}>
+            <FiFileText /> Resume Review
           </button>
-          <button className={`tab-link ${activeTab === 'career-rec' ? 'active' : ''}`} onClick={() => { setActiveTab('career-rec'); if(!careerRecs) fetchCareerRecs(); }}>
-            <FiTrendingUp /> AI Career Recommendations
+          <button className={`ai-tab-btn ${activeTab === 'career-rec' ? 'active' : ''}`} onClick={() => { setActiveTab('career-rec'); if(!careerRecs) fetchCareerRecs(); }}>
+            <FiTrendingUp /> Recommendations
           </button>
-          <button className={`tab-link ${activeTab === 'skill-gap' ? 'active' : ''}`} onClick={() => setActiveTab('skill-gap')}>
-            <FiAlertTriangle /> AI Skill Gap Analysis
+          <button className={`ai-tab-btn ${activeTab === 'skill-gap' ? 'active' : ''}`} onClick={() => setActiveTab('skill-gap')}>
+            <FiAlertTriangle /> Skill Gap
           </button>
-          <button className={`tab-link ${activeTab === 'interview-qs' ? 'active' : ''}`} onClick={() => setActiveTab('interview-qs')}>
-            <FiBookOpen /> AI Interview Questions
+          <button className={`ai-tab-btn ${activeTab === 'interview-qs' ? 'active' : ''}`} onClick={() => setActiveTab('interview-qs')}>
+            <FiBookOpen /> Interview Questions
           </button>
-          <button className={`tab-link ${activeTab === 'roadmap' ? 'active' : ''}`} onClick={() => setActiveTab('roadmap')}>
-            <FiMap /> AI Roadmap Generator
+          <button className={`ai-tab-btn ${activeTab === 'roadmap' ? 'active' : ''}`} onClick={() => setActiveTab('roadmap')}>
+            <FiMap /> Roadmap
           </button>
-          <button className={`tab-link ${activeTab === 'cover-letter' ? 'active' : ''}`} onClick={() => setActiveTab('cover-letter')}>
-            <FiFilePlus /> AI Cover Letter Generator
+          <button className={`ai-tab-btn ${activeTab === 'cover-letter' ? 'active' : ''}`} onClick={() => setActiveTab('cover-letter')}>
+            <FiFilePlus /> Cover Letter
           </button>
-          <button className="tab-link" onClick={() => navigate('/dashboard/resume-builder')}>
-            <FiEdit3 /> AI Resume Builder
+          <button className="ai-tab-btn" onClick={() => navigate('/dashboard/resume-builder')}>
+            <FiEdit3 /> Resume Builder
           </button>
-          <button className={`tab-link ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => setActiveTab('chat')}>
-            <FiMessageSquare /> Career Chat Assistant
+          <button className={`ai-tab-btn ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => setActiveTab('chat')}>
+            <FiMessageSquare /> Chat Coach
           </button>
         </div>
+        <div className="ai-header-spacer" />
+      </div>
 
-        {/* Right Content Panels */}
+      <div className="ai-content-layout">
         <div className="ai-content-panel">
           {error && <div className="ai-panel-error">{error}</div>}
 

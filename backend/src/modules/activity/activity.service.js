@@ -144,7 +144,7 @@ const logActivity = async (userId, type) => {
       where: { id: daily.id },
       data: { 
         score: newScore,
-        qualified: newScore >= 5
+        qualified: newScore >= 1
       }
     });
   } else {
@@ -153,7 +153,7 @@ const logActivity = async (userId, type) => {
         userId,
         date: todayStr,
         score: points,
-        qualified: points >= 5
+        qualified: points >= 1
       }
     });
   }

@@ -7,8 +7,17 @@
 
 .planner-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.planner-header .page-heading {
+  flex: 1;
+  text-align: left;
+}
+
+.planner-header-spacer {
+  flex: 1;
 }
 
 .planner-title h1 {
@@ -70,50 +79,59 @@
 .kanban-column {
   flex: 1;
   min-width: 300px;
-  background: var(--dash-surface);
-  border-radius: 12px;
+  background: #ffffff;
+  border-radius: 0px;
   border: 1px solid var(--dash-border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
 }
 
 .column-header {
   padding: 16px 20px;
-  border-bottom: 1px solid var(--dash-border);
+  border-bottom: 1.5px solid #cbd5e1;
   font-weight: 700;
   color: var(--dash-text-main);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(0,0,0,0.02);
+  background: #f8fafc;
 }
 
 .column-count {
-  background: var(--dash-bg);
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  color: var(--dash-text-muted);
+  background: #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
 }
 
 .column-body {
-  padding: 16px;
+  padding: 24px 20px 24px 44px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   overflow-y: auto;
   flex: 1;
+  background-color: #ffffff;
+  background-image: 
+    linear-gradient(to right, rgba(239, 68, 68, 0.4) 1.5px, transparent 1.5px),
+    linear-gradient(#e2e8f0 1.5px, transparent 1.5px);
+  background-size: 100% 100%, 100% 32px;
+  background-position: 32px 0, 0 0;
+  background-repeat: no-repeat, repeat;
 }
 
 .kanban-card {
-  background: var(--dash-bg);
-  border: 1px solid var(--dash-border);
-  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 0px;
   padding: 16px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
   cursor: grab;
-  transition: transform 0.1s, box-shadow 0.1s;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .kanban-card:active {
@@ -122,13 +140,13 @@
 }
 
 .kanban-card:hover {
-  border-color: var(--dash-primary);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border-color: #3b82f6;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
 
 .card-title {
-  font-weight: 600;
-  color: var(--dash-text-main);
+  font-weight: 700;
+  color: #1e293b;
   margin-bottom: 8px;
   font-size: 15px;
 }
@@ -351,14 +369,13 @@
 }
 .cal-header-day { text-align: center; font-weight: 600; color: var(--dash-text-muted); padding-bottom: 12px; }
 .cal-day {
-  aspect-ratio: 1; background: var(--dash-bg); border: 1px solid var(--dash-border); border-radius: 8px;
+  aspect-ratio: 1; border-radius: 0px;
   padding: 8px; display: flex; flex-direction: column; transition: border-color 0.2s; cursor: pointer;
 }
-.cal-day.selected { border-color: var(--dash-primary); background: rgba(37, 99, 235, 0.05); }
+.cal-day.selected { border-color: var(--dash-primary); }
 .cal-day:hover { border-color: var(--dash-primary); }
-.cal-date { font-weight: 600; color: var(--dash-text-main); font-size: 14px; margin-bottom: 4px; }
-.cal-day.today { background: rgba(37, 99, 235, 0.05); border-color: var(--dash-primary); }
-.cal-day.today .cal-date { color: var(--dash-primary); }
+.cal-date { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+.cal-day.today { border-color: var(--dash-primary); outline: 2px solid rgba(37, 99, 235, 0.2); }
 .cal-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--dash-primary); margin-top: auto; }
 
 /* Notion-Style Notes Editor */
@@ -439,6 +456,7 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  background: var(--dash-surface);
 }
 
 .note-empty-state {
@@ -450,7 +468,7 @@
 }
 
 .notion-title-input {
-  font-size: 40px;
+  font-size: 32px;
   font-weight: 800;
   border: none;
   outline: none;
@@ -485,8 +503,11 @@
 @media (max-width: 768px) {
   .planner-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 16px;
+  }
+  .planner-header-spacer {
+    display: none;
   }
   .planner-tabs {
     width: 100%;
@@ -494,6 +515,7 @@
     flex-wrap: nowrap;
     gap: 6px;
     padding: 6px;
+    justify-content: center;
   }
   .planner-tab {
     padding: 8px 14px;
@@ -581,6 +603,238 @@
   .habit-day {
     width: 32px;
     height: 32px;
+  }
+}
+
+/* Calendar Details and Form Redesign */
+.calendar-details-panel {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 0px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+.details-header {
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 12px;
+}
+
+.details-items-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 280px;
+}
+
+.cal-event-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  padding: 12px 16px;
+  border-radius: 0px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.15s ease;
+}
+
+.cal-event-row:hover {
+  border-color: #3b82f6;
+  background: #f1f5f9;
+}
+
+.cal-add-event-form {
+  border-top: 2px solid #e2e8f0;
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cal-form-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.cal-add-event-form input[type="text"] {
+  padding: 10px 14px;
+  border-radius: 0px !important;
+  border: 1px solid #cbd5e1 !important;
+  background: #ffffff !important;
+  color: #1e293b !important;
+  font-size: 13px;
+  width: 100%;
+  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.cal-add-event-form input[type="text"]:focus {
+  border-color: #3b82f6 !important;
+  outline: none;
+}
+
+.cal-form-row-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 12px;
+}
+
+.cal-form-row-grid select {
+  padding: 10px;
+  border-radius: 0px !important;
+  border: 1px solid #cbd5e1 !important;
+  background: #ffffff !important;
+  color: #1e293b !important;
+  font-size: 13px;
+  width: 100%;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.cal-time-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 0px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+}
+
+.cal-time-select {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.cal-period-btn {
+  padding: 4px 10px;
+  border-radius: 0px;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  background: transparent;
+  color: #475569;
+  transition: all 0.15s ease;
+}
+
+.cal-period-btn:hover {
+  background: #f1f5f9;
+}
+
+.cal-add-submit-btn {
+  padding: 12px 16px;
+  border-radius: 0px !important;
+  border: none;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: background 0.15s ease;
+  width: 100%;
+}
+
+.cal-add-submit-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Responsive Habit Tracker Header styling */
+.habit-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.habit-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--dash-text-main);
+}
+
+.habit-add-form {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.habit-input {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--dash-border);
+  background: var(--dash-bg);
+  color: var(--dash-text-main);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.habit-input:focus {
+  border-color: var(--dash-primary);
+}
+
+.habit-add-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  background: var(--dash-primary);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  transition: background 0.15s ease;
+}
+
+.habit-add-btn:hover {
+  background: #1d4ed8;
+}
+
+@media (max-width: 600px) {
+  .habit-header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .habit-title {
+    justify-content: center;
+    font-size: 18px;
+  }
+  
+  .habit-add-form {
+    width: 100%;
+  }
+  
+  .habit-input {
+    flex: 1;
   }
 }
 

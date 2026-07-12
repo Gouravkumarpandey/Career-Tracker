@@ -2939,3 +2939,37 @@ button {
     font-size: 12px !important;
   }
 }
+
+/* 6-Digit OTP Inputs */
+.otp-inputs-wrapper {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 16px 0 24px;
+  width: 100%;
+}
+
+.otp-digit-input {
+  width: 46px;
+  height: 48px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  background: #f8fafc;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  font-family: 'Inter', sans-serif;
+}
+
+.otp-digit-input:focus {
+  border-color: #293681;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(41, 54, 129, 0.08);
+}
+
+.otp-digit-input::selection {
+  background: transparent;
+}

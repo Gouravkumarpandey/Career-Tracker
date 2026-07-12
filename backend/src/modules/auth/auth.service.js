@@ -213,21 +213,47 @@ const sendOtp = async (email) => {
   const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes expiration
 
   activeOtps.set(email.toLowerCase(), { otp, expiresAt });
+  console.log(`[OTP DEBUG] Generated OTP for ${email}: ${otp}`);
 
-  const emailSubject = 'Your Verification OTP Code';
+  const emailSubject = 'Verify your email address - Careerflow.ai';
   const emailBody = `Hello,
 
-Your One-Time Password (OTP) for verification is: ${otp}
+Your One-Time Password (OTP) for email verification is: ${otp}
 
-This OTP is valid for 5 minutes. Please do not share this code with anyone.
+This code is valid for 5 minutes. Please do not share it with anyone.
 
 Best regards,
-CareerFlow Team`;
+The CareerFlow Team`;
 
-  const emailHtml = `<p>Hello,</p>
-<p>Your One-Time Password (OTP) for verification is: <strong style="font-size: 1.2em; letter-spacing: 2px;">${otp}</strong></p>
-<p>This OTP is valid for <strong>5 minutes</strong>. Please do not share this code with anyone.</p>
-<p>Best regards,<br/><strong>CareerFlow Team</strong></p>`;
+  const emailHtml = `
+    <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc; padding: 40px 20px; min-height: 100%;">
+      <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); border: 1px solid #e2e8f0; overflow: hidden; border-collapse: separate;">
+        <tr>
+          <td style="background: linear-gradient(135deg, #293681 0%, #02605f 100%); padding: 32px; text-align: center;">
+            <a href="#" style="color: #ffffff; font-size: 22px; font-weight: 800; text-decoration: none; letter-spacing: -0.5px; display: inline-block;">
+              <span style="background-color: rgba(255, 255, 255, 0.15); padding: 4px 10px; border-radius: 6px; margin-right: 8px; font-family: sans-serif;">C</span>Careerflow.ai
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 40px 32px; text-align: center;">
+            <h2 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 12px 0; letter-spacing: -0.5px;">Verify your email address</h2>
+            <p style="font-size: 14.5px; color: #475569; line-height: 1.6; margin: 0 0 24px 0;">To complete your signup and secure your account, please enter the verification code below on the signup page:</p>
+            <div style="background-color: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 18px; margin: 28px auto; max-width: 240px; text-align: center;">
+              <span style="font-size: 32px; font-weight: 800; color: #293681; letter-spacing: 6px; font-family: monospace;">${otp}</span>
+            </div>
+            <p style="font-size: 13px; color: #94a3b8; line-height: 1.5; margin: 0;">This code is valid for <strong>5 minutes</strong>. If you did not request this, you can safely ignore this email.</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 24px 32px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #64748b;">
+            <p style="margin: 0 0 8px 0;">Questions? Contact us at <a href="mailto:support@careerflow.ai" style="color: #02605f; text-decoration: none; font-weight: 600;">support@careerflow.ai</a></p>
+            <p style="margin: 0;">&copy; 2026 Careerflow.ai. All rights reserved.</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+  `;
 
   await sendMail(email, emailSubject, emailBody, emailHtml);
   return { success: true, message: 'OTP sent successfully.' };
