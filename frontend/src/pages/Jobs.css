@@ -599,3 +599,72 @@
   font-size: 0.75rem !important;
   border-radius: 4px !important;
 }
+
+@media (max-width: 768px) {
+  .jobs-container {
+    padding: 16px;
+  }
+
+  .jobs-title {
+    font-size: 1.5rem;
+  }
+
+  .jobs-tabs {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .jobs-tab {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    flex-grow: 1;
+    text-align: center;
+  }
+
+  .search-bar-container {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .search-btn {
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .jobs-split-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .jobs-list-side {
+    max-height: 400px;
+  }
+
+  .job-detail-side {
+    position: static;
+    max-height: unset;
+    padding: 16px;
+  }
+
+  .ai-recommendation-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .ai-recommendation-info {
+    max-width: 100%;
+  }
+
+  .ai-rec-btn {
+    width: 100%;
+  }
+
+  .tracker-board {
+    grid-template-columns: repeat(4, 280px);
+    overflow-x: auto;
+    padding-bottom: 12px;
+  }
+}

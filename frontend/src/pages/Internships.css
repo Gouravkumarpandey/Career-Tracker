@@ -374,3 +374,57 @@
   font-size: 0.75rem !important;
   border-radius: 4px !important;
 }
+
+@media (max-width: 768px) {
+  .internships-container {
+    padding: 16px;
+  }
+
+  .internships-title {
+    font-size: 1.5rem;
+  }
+
+  .internships-tabs {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .internships-tab {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    flex-grow: 1;
+    text-align: center;
+  }
+
+  .internship-search-container {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .internship-search-btn {
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .internships-split-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .internships-list-side {
+    max-height: 400px;
+  }
+
+  .internship-detail-side {
+    position: static;
+    max-height: unset;
+    padding: 16px;
+  }
+
+  .tracker-board {
+    grid-template-columns: repeat(4, 280px);
+    overflow-x: auto;
+    padding-bottom: 12px;
+  }
+}
