@@ -133,21 +133,92 @@ button {
 
 .nav-links {
   display: flex;
-  gap: 28px;
+  gap: 32px;
   align-items: center;
 }
 
 .nav-links a {
   font-weight: 500;
-  font-size: 15px;
+  font-size: 14px;
   color: white;
   display: flex;
   align-items: center;
   gap: 4px;
+  white-space: nowrap;
 }
 
 .nav-links a:hover {
   color: var(--primary-color);
+}
+
+/* Navbar Dropdowns styling */
+.nav-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.nav-dropdown-trigger {
+  font-weight: 500;
+  font-size: 14px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.nav-dropdown-trigger:hover {
+  color: var(--primary-color);
+}
+
+.nav-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffffff;
+  min-width: 180px;
+  box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  border-radius: 8px;
+  padding: 8px 0;
+  margin-top: 12px;
+  border: 1px solid var(--border-color);
+}
+
+/* Arrow indicator for dropdown menu */
+.nav-dropdown-menu::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px;
+  height: 12px;
+  background-color: #ffffff;
+  border-left: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+}
+
+.nav-dropdown-menu a {
+  color: #1e293b !important;
+  padding: 10px 20px;
+  text-decoration: none;
+  display: block;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.nav-dropdown-menu a:hover {
+  background-color: #f1f5f9;
+  color: var(--primary-color) !important;
+}
+
+.nav-dropdown:hover .nav-dropdown-menu {
+  display: block;
 }
 
 .nav-actions {

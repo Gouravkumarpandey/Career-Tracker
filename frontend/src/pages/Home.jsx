@@ -104,32 +104,32 @@ const Home = () => {
       </section>
 
       {/* Trusted Companies Section */}
-      <section className="trusted-companies">
+      <section className="trusted-companies" style={{ overflow: 'hidden', width: '100%' }}>
         <div className="container">
           <h2 className="reveal">Trusted by job seekers who've landed at top companies</h2>
           <p className="subtitle reveal">Our users have secured positions at industry-leading companies such as</p>
-          <div className="logos-container">
-            <div className="logos-grid">
-              {/* Original Logos */}
-              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bloomberg_logo.svg/512px-Bloomberg_logo.svg.png" alt="Bloomberg" className="company-logo" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" alt="Microsoft" className="company-logo" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Adobe_Systems_logo_and_wordmark.svg/512px-Adobe_Systems_logo_and_wordmark.svg.png" alt="Adobe" className="company-logo" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" className="company-logo" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg" alt="Meta" className="company-logo" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Netflix" className="company-logo" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" className="company-logo" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" className="company-logo" />
-              
-              {/* Duplicated for seamless marquee effect */}
-              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bloomberg_logo.svg/512px-Bloomberg_logo.svg.png" alt="Bloomberg" className="company-logo" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" alt="Microsoft" className="company-logo" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Adobe_Systems_logo_and_wordmark.svg/512px-Adobe_Systems_logo_and_wordmark.svg.png" alt="Adobe" className="company-logo" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" className="company-logo" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg" alt="Meta" className="company-logo" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Netflix" className="company-logo" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" className="company-logo" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" className="company-logo" />
-            </div>
+        </div>
+        <div className="logos-container" style={{ width: '100vw', maxWidth: '100%', margin: '0 auto', overflow: 'hidden' }}>
+          <div className="logos-grid">
+            {/* Original Logos */}
+            <img src="https://logos-world.net/wp-content/uploads/2022/01/Bloomberg-Logo-700x394.png" alt="Bloomberg" className="company-logo" style={{ height: '58px' }} />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" alt="Microsoft" className="company-logo" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Adobe_Corporate_logo.svg/3840px-Adobe_Corporate_logo.svg.png" alt="Adobe" className="company-logo" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" className="company-logo" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg" alt="Meta" className="company-logo" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Netflix" className="company-logo" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" className="company-logo" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" className="company-logo" />
+            
+            {/* Duplicated for seamless marquee effect */}
+            <img src="https://logos-world.net/wp-content/uploads/2022/01/Bloomberg-Logo-700x394.png" alt="Bloomberg" className="company-logo" style={{ height: '58px' }} />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" alt="Microsoft" className="company-logo" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Adobe_Corporate_logo.svg/3840px-Adobe_Corporate_logo.svg.png" alt="Adobe" className="company-logo" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" className="company-logo" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg" alt="Meta" className="company-logo" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Netflix" className="company-logo" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" className="company-logo" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" className="company-logo" />
           </div>
         </div>
       </section>

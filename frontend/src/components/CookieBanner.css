@@ -22,15 +22,17 @@
   }
 }
 
+/* Compact layout default (for mobile and tablet) */
 .cookie-banner-card {
   background-color: #ffffff;
-  padding: 20px 40px;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  padding: 20px 24px;
+  box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.1);
   border-top: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 40px;
+  gap: 20px;
+  box-sizing: border-box;
 }
 
 .cookie-banner-text {
@@ -64,12 +66,13 @@
 .cookie-btn {
   font-size: 14px;
   font-weight: 600;
-  padding: 10px 24px;
+  padding: 10px 20px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: 105px;
   text-align: center;
+  border: none;
 }
 
 .btn-preferences {
@@ -107,6 +110,26 @@
   border-color: #1d4ed8;
 }
 
+/* Desktop and Laptop screens: Apply the large height and spacing matching the red line */
+@media (min-width: 901px) {
+  .cookie-banner-card {
+    padding: 45px 60px;
+    min-height: 140px;
+    gap: 50px;
+  }
+
+  .cookie-banner-text {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .cookie-btn {
+    font-size: 15px;
+    padding: 12px 30px;
+    min-width: 120px;
+  }
+}
+
 /* Modal Overlay Styling */
 .cookie-modal-overlay {
   position: fixed;
@@ -114,7 +137,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(15, 23, 42, 0.6); /* Modern slate backdrop */
+  background-color: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -304,8 +327,9 @@
   .cookie-banner-card {
     flex-direction: column;
     align-items: stretch;
-    gap: 16px;
-    padding: 20px;
+    gap: 20px;
+    padding: 30px 24px;
+    min-height: auto;
   }
   
   .cookie-banner-actions {
