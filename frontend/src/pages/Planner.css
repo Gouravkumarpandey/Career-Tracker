@@ -361,6 +361,25 @@
 }
 .habit-day.completed { background: #10b981; border-color: #10b981; color: white; }
 
+.habit-delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--dash-text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 12px;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.habit-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
 /* Calendar Styles */
 .calendar-grid {
   display: grid; 
@@ -457,6 +476,48 @@
   display: flex;
   flex-direction: column;
   background: var(--dash-surface);
+}
+
+.note-editor-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.btn-save-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1.5px solid var(--dash-primary);
+  background: transparent;
+  color: var(--dash-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.btn-save-note:hover {
+  background: var(--dash-primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-save-note.saved {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: white;
+  animation: savedPulse 0.3s ease;
+}
+
+@keyframes savedPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
 }
 
 .note-empty-state {

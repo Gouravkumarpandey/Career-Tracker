@@ -28,6 +28,7 @@ const Planner = () => {
   // Notes State
   const [notes, setNotes] = useState(initialNotes);
   const [activeNoteId, setActiveNoteId] = useState(null);
+  const [noteSaved, setNoteSaved] = useState(false);
   const bodyRef = useRef(null);
 
   // Habits State
@@ -143,6 +144,12 @@ const Planner = () => {
     const newNote = { id: Date.now(), title: '', body: '' };
     setNotes(prev => [newNote, ...prev]);
     setActiveNoteId(newNote.id);
+  };
+
+  const saveNote = () => {
+    localStorage.setItem('careerTrackerNotes', JSON.stringify(notes));
+    setNoteSaved(true);
+    setTimeout(() => setNoteSaved(false), 2000);
   };
 
   // Timer State
@@ -285,6 +292,15 @@ const Planner = () => {
             >
               ← Back to Notes
             </button>
+            <div className="note-editor-toolbar">
+              <button
+                className={`btn-save-note ${noteSaved ? 'saved' : ''}`}
+                onClick={saveNote}
+                title="Save Note"
+              >
+                {noteSaved ? '✓ Saved!' : '💾 Save'}
+              </button>
+            </div>
             <input 
               className="notion-title-input" 
               placeholder="Untitled" 
@@ -352,6 +368,10 @@ const Planner = () => {
     }));
   };
 
+  const handleDeleteHabit = (habitId) => {
+    setHabits(prev => prev.filter(h => h.id !== habitId));
+  };
+
   const renderHabits = () => (
     <div className="habit-tracker">
       <div className="habit-header-row">
@@ -394,6 +414,13 @@ const Planner = () => {
               </div>
             ))}
           </div>
+          <button
+            className="habit-delete-btn"
+            onClick={() => handleDeleteHabit(habit.id)}
+            title="Delete habit"
+          >
+            <FiTrash2 size={14} />
+          </button>
         </div>
       ))}
     </div>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   FiFileText, FiTrendingUp, FiAlertTriangle, FiBookOpen, 
   FiMap, FiFilePlus, FiEdit3, FiMessageSquare, FiCpu, 
-  FiUpload, FiActivity, FiStar, FiCheckCircle, FiSend, FiZap
+  FiUpload, FiActivity, FiStar, FiCheckCircle, FiSend, FiZap, FiDownload
 } from 'react-icons/fi';
 import api from '../config/api';
 import './AIFeatures.css';
@@ -54,7 +54,8 @@ const AIFeatures = () => {
       const response = await api.post(endpoint, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      onSuccess(response.data);
+      // Backend wraps payload in { statusCode, data: <actual payload>, message, success }
+      onSuccess(response.data.data);
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || 'An error occurred. Please try again.');
@@ -63,10 +64,21 @@ const AIFeatures = () => {
     }
   };
 
+  // Download text content as a .txt file
+  const downloadAsText = (content, filename) => {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // 1. Resume text analysis
   const handleAnalyzeText = () => {
     handleRAGRequest('/api/ai/resume/analyze-text', { text: resumeText }, (data) => {
-      setReviewResult(data.data);
+      setReviewResult(data);
     });
   };
 
@@ -116,24 +128,33 @@ const AIFeatures = () => {
 
   // 3. Skill Gap
   const handleSkillGap = () => {
-    // Call Grok endpoint or skill gap logic
-    setLoading(true);
-    setError('');
-    const token = localStorage.getItem('token');
-    api.get(`/api/ai/skill-gap?targetType=job&targetId=1`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).then(res => {
-      setSkillGapResult(res.data.data);
-    }).catch(err => {
-      // Offline simulation fallback for target input if gap endpoint needs specific targetId
-      setSkillGapResult({
-        missingSkillsDetected: ['System Design', 'CI/CD (Jenkins/GitHub Actions)', 'Kubernetes'],
-        recommendedResources: [
-          { name: 'Docker & Kubernetes: Complete Guide', platform: 'Udemy' },
-          { name: 'System Design Interview Fundamentals', platform: 'Educative' }
-        ]
-      });
-    }).finally(() => setLoading(false));
+    if (!targetJob.trim()) return;
+    handleRAGRequest('/api/ai/chat', {
+      message: `Perform a skill gap analysis for someone targeting the role of "${targetJob}". 
+List the top missing skills they likely need, and for each missing skill suggest a specific learning resource (course name and platform). 
+Return ONLY a valid JSON object with this exact structure:
+{
+  "missingSkillsDetected": ["Skill 1", "Skill 2", "Skill 3", "Skill 4", "Skill 5"],
+  "recommendedResources": [
+    { "name": "Course or Resource Name", "platform": "Platform Name" }
+  ],
+  "summary": "A short 1-2 sentence personalized recommendation"
+}`,
+      context: 'Skill gap analysis for career development'
+    }, (data) => {
+      try {
+        // The AI chat returns { message: "..." }, we parse the JSON from that message
+        let raw = data.message || '';
+        // Strip markdown code fences if present
+        raw = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+        const parsed = JSON.parse(raw);
+        setSkillGapResult(parsed);
+      } catch (e) {
+        // If parsing fails, show a friendly error
+        setError('Received an unexpected response format. Please try again.');
+        console.error('Skill gap parse error:', e, data.message);
+      }
+    });
   };
 
   // 4. Interview Questions generator
@@ -310,18 +331,27 @@ const AIFeatures = () => {
                 <div className="skill-gap-results">
                   <h3>Detected Skill Gaps</h3>
                   <div className="gap-tags">
-                    {skillGapResult.missingSkillsDetected.map((skill, idx) => (
+                    {(skillGapResult.missingSkillsDetected || skillGapResult.missingSkills || []).map((skill, idx) => (
                       <span key={idx} className="gap-tag">{skill}</span>
                     ))}
                   </div>
-                  <h3 style={{ marginTop: '20px' }}>Recommended Resources</h3>
-                  <div className="resources-list">
-                    {skillGapResult.recommendedResources.map((res, idx) => (
-                      <div key={idx} className="resource-item">
-                        <strong>{res.name}</strong> • <span>{res.platform}</span>
+                  {skillGapResult.summary && (
+                    <p style={{ marginTop: '16px', color: 'var(--ai-text-muted)', fontSize: '14px', lineHeight: 1.6 }}>
+                      {skillGapResult.summary}
+                    </p>
+                  )}
+                  {(skillGapResult.recommendedResources || []).length > 0 && (
+                    <>
+                      <h3 style={{ marginTop: '20px' }}>Recommended Resources</h3>
+                      <div className="resources-list">
+                        {skillGapResult.recommendedResources.map((res, idx) => (
+                          <div key={idx} className="resource-item">
+                            <strong>{res.name}</strong> • <span>{res.platform}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -343,7 +373,18 @@ const AIFeatures = () => {
                 {loading ? 'Generating...' : 'Generate Questions'}
               </button>
               {interviewQs && (
-                <pre className="pre-formatted-text">{interviewQs}</pre>
+                <div className="interview-qs-result">
+                  <div className="interview-qs-toolbar">
+                    <button
+                      className="btn-download"
+                      onClick={() => downloadAsText(interviewQs, `interview-questions-${interviewRole.replace(/\s+/g,'-')}.txt`)}
+                      title="Download as text file"
+                    >
+                      <FiDownload /> Download Questions
+                    </button>
+                  </div>
+                  <pre className="pre-formatted-text">{interviewQs}</pre>
+                </div>
               )}
             </div>
           )}

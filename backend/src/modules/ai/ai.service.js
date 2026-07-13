@@ -152,27 +152,130 @@ const _callGrokAPI = async (systemPrompt, userPrompt) => {
 };
 
 const generateResume = async (userId, data) => {
-  const { targetRole, experience, skills, education } = data;
-  const systemPrompt = `You are an expert resume writer and ATS optimizer.
-Your task is to generate a highly professional, ATS-friendly resume in Markdown format based on the user's provided details.
-Do NOT use tables, columns, or complex formatting. Use standard headings (e.g., # Experience, ## Job Title, etc.) and bullet points.
-Include the following sections if information is provided: Professional Summary, Core Competencies (Skills), Professional Experience, and Education.
-Write compelling, action-oriented bullet points that highlight impact and results. If metrics are missing, use placeholders like [Metric] or [Percentage].
-Return ONLY the raw Markdown text of the resume. Do not include any conversational filler.`;
+  const { personal, target, jobs, eduList, skills, certs, projects } = data;
 
-  const userPrompt = `Generate an ATS-friendly resume for the target role: ${targetRole}
+  // ── System Prompt: Expert ATS Resume Writer ────────────────────────
+  const systemPrompt = `Act as an expert resume writer specializing in Applicant Tracking Systems (ATS).
 
-Experience:
-${experience}
+Your task is to write a highly ATS-optimized, professional resume based on the user's career history and target job description.
 
-Skills:
-${skills}
+Follow these STRICT formatting and structural rules for maximum ATS parsed accuracy:
 
-Education:
-${education}`;
+1. STRUCTURE: Use a traditional, single-column layout. Use ONLY these standard section headings (in UPPERCASE):
+   - PROFESSIONAL SUMMARY
+   - SKILLS
+   - WORK EXPERIENCE
+   - EDUCATION
+   - CERTIFICATIONS (only if provided)
+   - PROJECTS (only if provided)
+
+2. FORMATTING RULES (CRITICAL):
+   - Do NOT use any text boxes, tables, graphics, icons, or complex formatting
+   - Use UPPERCASE for section headings only
+   - Place "-------" (7 dashes) on the line immediately after each section heading
+   - Use plain "- " bullet points for all lists
+   - Use " | " to separate job title, company, location, and date on one line
+   - No markdown symbols: no #, **, *, >, ~, [], or backticks
+   - Return ONLY the resume text — no commentary, no explanations
+
+3. CONTACT HEADER FORMAT:
+   Full Name (in UPPERCASE)
+   Email: [email] | Phone: [phone] | Location: [location] | LinkedIn: [linkedin] | GitHub: [github]
+
+4. CONTENT STRATEGY:
+   - Tailor ALL content directly to the target job description
+   - Seamlessly integrate high-value keywords, exact hard skills, and technical phrases from the job posting
+   - Mirror the language and terminology used in the job description
+   - Prioritize skills and experiences that match the job requirements
+
+5. PROFESSIONAL SUMMARY:
+   - Write 2–3 powerful sentences tailored to the exact target role
+   - Lead with years of experience, core strengths, and a value proposition
+   - Include 2–3 keywords from the job description naturally
+
+6. SKILLS SECTION:
+   - Extract and prioritize skills directly from the job description
+   - List technical skills, tools, and frameworks as a comma-separated single paragraph
+   - Include both hard skills and relevant soft skills
+
+7. WORK EXPERIENCE BULLETS:
+   - Write in REVERSE-CHRONOLOGICAL order (most recent first)
+   - Start EVERY bullet point with a strong action verb
+   - Focus on quantifiable achievements and results, not just duties
+   - Use numbers, percentages, and impact metrics wherever possible
+   - Use placeholders like [X%], [N users], [$Xamount] if exact numbers are not given
+   - Write 3–5 bullets per position
+   - Strong action verbs to use: Led, Built, Architected, Engineered, Optimized, Delivered, Designed, Implemented, Developed, Reduced, Increased, Improved, Launched, Managed, Streamlined, Automated, Spearheaded, Collaborated, Integrated
+
+8. EDUCATION:
+   - Format: Degree | Institution | Graduation Year
+   - Add GPA only if it is 3.5+ / 8.0+ out of 10
+
+9. OUTPUT: Return ONLY the plain-text resume. No extra text before or after.`;
+
+  // ── Build user career history from all wizard fields ─────────────
+  const contactLine = [
+    personal?.email && `Email: ${personal.email}`,
+    personal?.phone && `Phone: ${personal.phone}`,
+    personal?.location && `Location: ${personal.location}`,
+    personal?.linkedin && `LinkedIn: ${personal.linkedin}`,
+    personal?.github && `GitHub: ${personal.github}`,
+  ].filter(Boolean).join(' | ');
+
+  const jobsText = (jobs || []).filter(j => j.title || j.company).map(j => {
+    const period = j.current ? `${j.startDate} - Present` : `${j.startDate} - ${j.endDate}`;
+    return `Job Title: ${j.title}\nCompany: ${j.company}\nLocation: ${j.location || 'N/A'}\nPeriod: ${period}\nResponsibilities & Achievements:\n${j.achievements || 'Not provided'}`;
+  }).join('\n\n---\n\n') || 'Not provided';
+
+  const eduText = (eduList || []).filter(e => e.degree || e.institution).map(e =>
+    `${e.degree} | ${e.institution} | ${e.year}${e.gpa ? ` | GPA: ${e.gpa}` : ''}`
+  ).join('\n') || 'Not provided';
+
+  const certsText = (certs || []).filter(c => c.name).map(c =>
+    `${c.name} | ${c.issuer} | ${c.year}`
+  ).join('\n') || 'None';
+
+  const projectsText = (projects || []).filter(p => p.name).map(p =>
+    `Project: ${p.name}\nTechnologies: ${p.tech}\nDescription: ${p.description}`
+  ).join('\n\n') || 'None';
+
+  const userPrompt = `TARGET JOB TITLE: ${target?.role || 'Not specified'}
+
+TARGET JOB DESCRIPTION:
+${target?.jobDescription || 'Not provided — use general ATS best practices for the target role.'}
+
+CANDIDATE INFORMATION:
+Name: ${personal?.name || '[Your Name]'}
+${contactLine}
+
+${target?.summary ? `EXISTING SUMMARY (improve and tailor this):\n${target.summary}` : ''}
+
+WORK EXPERIENCE:
+${jobsText}
+
+EDUCATION:
+${eduText}
+
+TECHNICAL SKILLS:
+${skills?.technical || 'Not provided'}
+
+SOFT SKILLS:
+${skills?.soft || 'Not provided'}
+
+LANGUAGES:
+${skills?.languages || 'Not provided'}
+
+CERTIFICATIONS:
+${certsText}
+
+PROJECTS:
+${projectsText}
+
+Now generate the complete ATS-optimized resume following all formatting rules exactly.`;
 
   return await _callGrokAPI(systemPrompt, userPrompt);
 };
+
 
 const getSkillGapAnalysis = async (userId, targetType, targetId) => {
   const userSkills = await prisma.skill.findMany({
@@ -518,6 +621,7 @@ const aiChatAssistant = async (userId, message, context = '') => {
 module.exports = {
   analyzeResume,
   analyzeResumeTextDirect,
+  generateResume,
   getSkillGapAnalysis,
   getCareerRecommendations,
   getLearningRecommendations,
