@@ -32,7 +32,7 @@ app.use(express.json());
 // ==========================================
 app.post('/api/auth/signup-otp', async (req, res) => {
   try {
-    const { email } = req.body;
+    let { email } = req.body;
 
     if (!email) {
       return res.status(400).json({ 
@@ -40,6 +40,8 @@ app.post('/api/auth/signup-otp', async (req, res) => {
         message: "Email is required." 
       });
     }
+
+    email = email.toLowerCase().trim();
 
     const userExists = await prisma.user.findUnique({ where: { email } });
     if (userExists) {
@@ -67,7 +69,7 @@ app.post('/api/auth/signup-otp', async (req, res) => {
 
 app.post('/api/auth/signup', async (req, res) => {
   try {
-    const { name, email, password, otp } = req.body;
+    let { name, email, password, otp } = req.body;
 
     if (!name || !email || !password || !otp) {
       return res.status(400).json({ 
@@ -75,6 +77,8 @@ app.post('/api/auth/signup', async (req, res) => {
         message: "All fields including Name, Email, Password, and OTP are mandatory." 
       });
     }
+
+    email = email.toLowerCase().trim();
 
     const userExists = await prisma.user.findUnique({ where: { email } });
     if (userExists) {
@@ -163,7 +167,7 @@ app.post('/api/auth/signup', async (req, res) => {
 // ==========================================
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ 
@@ -171,6 +175,8 @@ app.post('/api/auth/login', async (req, res) => {
         message: "Email aur Password dono chahiye." 
       });
     }
+    
+    email = email.toLowerCase().trim();
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
