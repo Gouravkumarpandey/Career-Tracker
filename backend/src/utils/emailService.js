@@ -10,7 +10,8 @@ const transporter = nodemailer.createTransport({
 });
 
 /**
- * Send an email using the configured SMTP transporter.
+ * Send an email using Gmail SMTP.
+ * Requires EMAIL_USER and EMAIL_PASS (Gmail App Password) in .env
  * @param {string} to - Recipient email address
  * @param {string} subject - Subject line
  * @param {string} text - Plain text body
@@ -26,10 +27,10 @@ const sendMail = async (to, subject, text, html) => {
       text,
       html: html || text
     });
-    console.log(`[EmailService] Email successfully sent to ${to}. Message ID: ${info.messageId}`);
+    console.log(`[EmailService] ✅ Email sent to ${to}. Message ID: ${info.messageId}`);
     return info;
   } catch (error) {
-    console.error(`[EmailService] Failed to send email to ${to}:`, error);
+    console.error(`[EmailService] ❌ Failed to send email to ${to}:`, error.message);
     throw error;
   }
 };
